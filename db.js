@@ -1,19 +1,16 @@
 const mongoose = require("mongoose");
 
-
 const connectDB = async () => {
 
     try {
 
         await mongoose.connect(
-            "YOUR_MONGODB_CONNECTION_STRING"
+            process.env.MONGO_URI
         );
-
 
         console.log(
             "CashNova Database Connected"
         );
-
 
     } catch(error){
 
@@ -27,6 +24,5 @@ const connectDB = async () => {
     }
 
 };
-
 
 module.exports = connectDB;
