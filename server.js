@@ -18,7 +18,7 @@ connectDB();
 
 
 // Routes
-const userRoutes = require("./routes/userRoutes");
+const userRoutes = require("./userRoutes");
 
 app.use("/api/users", userRoutes);
 
