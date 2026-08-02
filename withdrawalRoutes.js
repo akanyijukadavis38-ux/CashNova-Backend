@@ -31,8 +31,23 @@ message:"User not found"
 
 
 
+
 const amount =
 Number(req.body.amount);
+
+
+
+if(amount < 5000){
+
+return res.status(400).json({
+
+message:"Minimum withdrawal is UGX 5,000"
+
+});
+
+}
+
+
 
 
 
@@ -48,7 +63,42 @@ message:"Insufficient wallet balance"
 
 
 
-// 14% WITHDRAWAL FEE
+
+
+// CHECK FIRST DEPOSIT
+
+if(user.firstDepositCompleted !== true){
+
+return res.status(400).json({
+
+message:"Complete first deposit before withdrawal"
+
+});
+
+}
+
+
+
+
+// CHECK PRODUCT PURCHASE
+
+if(
+!user.purchasedProducts ||
+user.purchasedProducts.length === 0
+){
+
+return res.status(400).json({
+
+message:"Purchase a product before withdrawal"
+
+});
+
+}
+
+
+
+
+// CALCULATE FEE
 
 const fee =
 amount * 14 / 100;
@@ -59,12 +109,15 @@ amount - fee;
 
 
 
+
+
 // DEDUCT WALLET IMMEDIATELY
 
 user.walletBalance =
 Number(user.walletBalance || 0)
 -
 amount;
+
 
 
 
@@ -95,13 +148,14 @@ date:new Date()
 
 
 
+
 await withdrawal.save();
 
 
 
 
 
-// WITHDRAWAL RECORD
+// SAVE WITHDRAWAL HISTORY
 
 if(!user.withdrawalRecords){
 
@@ -131,7 +185,7 @@ date:new Date()
 
 
 
-// TRANSACTION HISTORY
+// SAVE TRANSACTION HISTORY
 
 if(!user.transactionHistory){
 
@@ -200,8 +254,10 @@ message:error.message
 
 
 
+
+
 // =====================================
-// GET ALL WITHDRAWALS
+// GET ALL WITHDRAWALS (ADMIN)
 // =====================================
 
 router.get("/", async function(req,res){
@@ -231,6 +287,13 @@ message:error.message
 }
 
 });
+
+
+
+
+
+
+
 // =====================================
 // APPROVE WITHDRAWAL
 // =====================================
@@ -258,10 +321,10 @@ message:"Withdrawal not found"
 
 
 
-withdrawal.status = "Approved";
 
-withdrawal.approvedDate = new Date();
+withdrawal.status="Approved";
 
+withdrawal.approvedDate=new Date();
 
 
 await withdrawal.save();
@@ -281,7 +344,7 @@ if(user){
 
 
 
-// UPDATE WITHDRAWAL RECORD
+// UPDATE SAME WITHDRAWAL RECORD
 
 if(user.withdrawalRecords){
 
@@ -290,12 +353,14 @@ user.withdrawalRecords.forEach(function(record){
 
 
 if(
-String(record.withdrawalId) === String(withdrawal._id)
+String(record.withdrawalId)
+===
+String(withdrawal._id)
 ){
 
-record.status = "Approved";
+record.status="Approved";
 
-record.approvedDate = new Date();
+record.approvedDate=new Date();
 
 }
 
@@ -309,7 +374,7 @@ record.approvedDate = new Date();
 
 
 
-// UPDATE TRANSACTION HISTORY
+// UPDATE SAME TRANSACTION RECORD
 
 if(user.transactionHistory){
 
@@ -318,12 +383,14 @@ user.transactionHistory.forEach(function(record){
 
 
 if(
-String(record.withdrawalId) === String(withdrawal._id)
+String(record.withdrawalId)
+===
+String(withdrawal._id)
 ){
 
-record.status = "Approved";
+record.status="Approved";
 
-record.approvedDate = new Date();
+record.approvedDate=new Date();
 
 }
 
@@ -356,6 +423,7 @@ withdrawal:withdrawal
 
 
 
+
 }catch(error){
 
 
@@ -367,7 +435,6 @@ message:error.message
 
 
 }
-
 
 });
 
@@ -417,14 +484,12 @@ if(user){
 
 
 
-// RETURN MONEY TO WALLET
+// RETURN MONEY
 
 user.walletBalance =
 Number(user.walletBalance || 0)
 +
 Number(withdrawal.amount || 0);
-
-
 
 
 
@@ -439,12 +504,14 @@ user.withdrawalRecords.forEach(function(record){
 
 
 if(
-String(record.withdrawalId) === String(withdrawal._id)
+String(record.withdrawalId)
+===
+String(withdrawal._id)
 ){
 
-record.status = "Rejected";
+record.status="Rejected";
 
-record.rejectedDate = new Date();
+record.rejectedDate=new Date();
 
 }
 
@@ -468,12 +535,14 @@ user.transactionHistory.forEach(function(record){
 
 
 if(
-String(record.withdrawalId) === String(withdrawal._id)
+String(record.withdrawalId)
+===
+String(withdrawal._id)
 ){
 
-record.status = "Rejected";
+record.status="Rejected";
 
-record.rejectedDate = new Date();
+record.rejectedDate=new Date();
 
 }
 
@@ -496,9 +565,9 @@ await user.save();
 
 
 
-withdrawal.status = "Rejected";
+withdrawal.status="Rejected";
 
-withdrawal.rejectedDate = new Date();
+withdrawal.rejectedDate=new Date();
 
 
 await withdrawal.save();
@@ -517,6 +586,7 @@ withdrawal:withdrawal
 
 
 
+
 }catch(error){
 
 
@@ -528,7 +598,6 @@ message:error.message
 
 
 }
-
 
 });
 

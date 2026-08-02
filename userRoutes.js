@@ -1,35 +1,38 @@
 const express = require("express");
 const router = express.Router();
+
 const User = require("./User");
 const Deposit = require("./Deposit");
 
 
-// CREATE UNIQUE ACCOUNT NUMBER
+
+// CREATE ACCOUNT NUMBER
 
 function createAccountNumber(){
 
-    return "CN" + Math.floor(
-        100000 + Math.random() * 900000
-    );
+return "CN" + Math.floor(
+100000 + Math.random() * 900000
+);
 
 }
 
 
-// CREATE UNIQUE REFERRAL CODE
+
+// CREATE REFERRAL CODE
 
 function createReferralCode(){
 
-    return "CN" + Math.floor(
-        100000 + Math.random() * 900000
-    );
+return "CN" + Math.floor(
+100000 + Math.random() * 900000
+);
 
 }
 
 
 
-// ===============================
+// =================================
 // REGISTER USER
-// ===============================
+// =================================
 
 router.post("/register", async function(req,res){
 
@@ -51,7 +54,7 @@ referredBy
 
 // CHECK EXISTING USER
 
-let existingUser =
+const existingUser =
 await User.findOne({
 
 $or:[
@@ -72,8 +75,7 @@ if(existingUser){
 
 return res.status(400).json({
 
-message:
-"Account already exists"
+message:"Account already exists"
 
 });
 
@@ -81,10 +83,10 @@ message:
 
 
 
-// CREATE REGISTRATION RECORD
 
-let registrationRecord = {
+// REGISTRATION BONUS RECORD
 
+const registrationRecord = {
 
 type:"Registration Bonus",
 
@@ -99,13 +101,16 @@ date:new Date().toLocaleString()
 
 
 
+
 // CREATE USER
 
-let newUser = new User({
+const newUser = new User({
+
 
 
 accountNumber:
 createAccountNumber(),
+
 
 
 fullName:fullName,
@@ -134,6 +139,9 @@ referredBy || "",
 
 
 
+
+// BONUS APPEARS IN WALLET BUT LOCKED
+
 walletBalance:5000,
 
 
@@ -146,7 +154,9 @@ registrationBonusStatus:"Locked",
 registrationBonusUnlocked:false,
 
 
+
 firstDepositCompleted:false,
+
 
 
 
@@ -177,10 +187,10 @@ await newUser.save();
 
 
 
+
 res.json({
 
-message:
-"Registration successful",
+message:"Registration successful",
 
 user:newUser
 
@@ -201,7 +211,6 @@ message:error.message
 }
 
 
-
 });
 
 
@@ -209,18 +218,18 @@ message:error.message
 
 
 
-// ===============================
-// LOGIN USER
-// ===============================
 
+
+// =================================
+// LOGIN USER
+// =================================
 
 router.post("/login", async function(req,res){
-
 
 try{
 
 
-let user =
+const user =
 await User.findOne({
 
 username:req.body.username,
@@ -235,8 +244,7 @@ if(!user){
 
 return res.status(400).json({
 
-message:
-"Invalid login details"
+message:"Invalid login details"
 
 });
 
@@ -246,8 +254,7 @@ message:
 
 res.json({
 
-message:
-"Login successful",
+message:"Login successful",
 
 user:user
 
@@ -270,16 +277,25 @@ message:error.message
 
 });
 
-// ===============================
-// GET USER DATA BY ID
-// ===============================
+
+
+
+
+
+
+
+// =================================
+// GET USER BY ID
+// =================================
 
 router.get("/:id", async function(req,res){
 
 try{
 
 
-const user = await User.findById(req.params.id);
+const user =
+await User.findById(req.params.id);
+
 
 
 if(!user){
@@ -307,22 +323,21 @@ message:error.message
 
 });
 
-
 }
 
 
 });
-
-// ===============================
+// =================================
 // PURCHASE PRODUCT
-// ===============================
+// =================================
 
 router.post("/purchase/:id", async function(req,res){
 
 try{
 
 
-const user = await User.findById(req.params.id);
+const user =
+await User.findById(req.params.id);
 
 
 
@@ -337,8 +352,6 @@ message:"User not found"
 }
 
 
-
-// Get product details from frontend
 
 const {
 
@@ -357,10 +370,13 @@ endDate
 
 
 
-// CHECK WALLET BALANCE
+// CHECK WALLET
 
-if(Number(user.walletBalance) < Number(price)){
-
+if(
+Number(user.walletBalance || 0)
+<
+Number(price)
+){
 
 return res.status(400).json({
 
@@ -368,35 +384,45 @@ message:"Insufficient wallet balance"
 
 });
 
-
 }
 
 
 
-// CREATE PURCHASE RECORD
 
-let purchasedProduct = {
+// CREATE PRODUCT RECORD
+
+const purchasedProduct = {
 
 
 id:Date.now(),
 
+
 name:name,
+
 
 price:Number(price),
 
+
 dailyIncome:Number(dailyIncome),
+
 
 startDate:startDate,
 
+
 endDate:endDate,
+
 
 totalEarned:0,
 
+
 status:"Active",
+
 
 purchaseDate:new Date()
 
+
 };
+
 
 
 
@@ -404,9 +430,11 @@ purchaseDate:new Date()
 // DEDUCT WALLET
 
 user.walletBalance =
-Number(user.walletBalance)
+Number(user.walletBalance || 0)
 -
 Number(price);
+
+
 
 
 
@@ -419,7 +447,8 @@ purchasedProduct
 
 
 
-// ADD TRANSACTION RECORD
+
+// TRANSACTION RECORD
 
 user.transactionHistory.push({
 
@@ -438,9 +467,9 @@ date:new Date().toLocaleString()
 
 
 
-// SAVE TO MONGODB
 
 await user.save();
+
 
 
 
@@ -469,9 +498,18 @@ message:error.message
 
 
 });
-// ===============================
-// UPDATE DAILY INVESTMENT INCOME
-// ===============================
+
+
+
+
+
+
+
+
+
+// =================================
+// DAILY INVESTMENT INCOME
+// =================================
 
 router.post("/daily-income/:id", async function(req,res){
 
@@ -495,11 +533,12 @@ message:"User not found"
 
 
 
-let updated = false;
+let updated=false;
 
 
+let now=new Date();
 
-let now = new Date();
+
 
 
 
@@ -515,6 +554,7 @@ return;
 
 
 
+
 let lastIncome =
 product.lastIncomeDate
 ?
@@ -524,15 +564,22 @@ new Date(product.purchaseDate);
 
 
 
+
+
 let hoursPassed =
-(now - lastIncome) /
+(now - lastIncome)
+/
 (1000 * 60 * 60);
+
+
 
 
 
 if(hoursPassed >= 24){
 
 
+
+// ADD TO WALLET
 
 user.walletBalance =
 Number(user.walletBalance || 0)
@@ -541,6 +588,20 @@ Number(product.dailyIncome);
 
 
 
+
+// ADD TO CUMULATIVE INCOME
+
+user.cumulativeIncome =
+Number(user.cumulativeIncome || 0)
++
+Number(product.dailyIncome);
+
+
+
+
+
+// UPDATE PRODUCT
+
 product.totalEarned =
 Number(product.totalEarned || 0)
 +
@@ -548,16 +609,20 @@ Number(product.dailyIncome);
 
 
 
-product.lastIncomeDate =
-now;
+product.lastIncomeDate = now;
 
 
+
+
+
+// INCOME RECORD
 
 user.incomeRecords.push({
 
-type: product.name + " Daily Income",
+type:
+product.name + " Daily Income",
 
-amount: product.dailyIncome,
+amount:Number(product.dailyIncome),
 
 status:"Completed",
 
@@ -567,7 +632,30 @@ date:now.toLocaleString()
 
 
 
-updated = true;
+
+
+// TRANSACTION RECORD
+
+user.transactionHistory.push({
+
+type:"Daily Income",
+
+amount:Number(product.dailyIncome),
+
+product:product.name,
+
+status:"Completed",
+
+date:now.toLocaleString()
+
+});
+
+
+
+
+
+updated=true;
+
 
 
 }
@@ -575,6 +663,9 @@ updated = true;
 
 
 });
+
+
+
 
 
 
@@ -586,6 +677,7 @@ await user.save();
 
 
 
+
 res.json({
 
 message:"Income checked successfully",
@@ -593,6 +685,7 @@ message:"Income checked successfully",
 user:user
 
 });
+
 
 
 
@@ -610,9 +703,9 @@ message:error.message
 
 
 });
-// ===============================
+// =================================
 // CREATE DEPOSIT REQUEST
-// ===============================
+// =================================
 
 router.post("/deposit", async function(req,res){
 
@@ -620,35 +713,56 @@ try{
 
 
 const {
+
 userId,
+
 username,
+
 amount,
+
 method,
+
 mobileMoneyTransactionId
 
-} = req.body;
+
+}=req.body;
+
 
 
 
 const deposit = new Deposit({
 
+
 userId:userId,
+
 
 username:username,
 
+
 amount:Number(amount),
+
 
 method:method,
 
+
 mobileMoneyTransactionId:mobileMoneyTransactionId,
 
-status:"Pending"
+
+status:"Pending",
+
+
+date:new Date()
+
 
 });
 
 
 
+
+
 await deposit.save();
+
+
 
 
 
@@ -681,9 +795,12 @@ message:error.message
 
 
 
-// ===============================
-// ADMIN GET PENDING DEPOSITS
-// ===============================
+
+
+
+// =================================
+// ADMIN GET DEPOSITS
+// =================================
 
 router.get("/admin/deposits", async function(req,res){
 
@@ -712,6 +829,7 @@ message:error.message
 
 }
 
+
 });
 
 
@@ -719,9 +837,12 @@ message:error.message
 
 
 
-// ===============================
+
+
+
+// =================================
 // ADMIN APPROVE DEPOSIT
-// ===============================
+// =================================
 
 router.put("/admin/deposit/approve/:id", async function(req,res){
 
@@ -745,8 +866,11 @@ message:"Deposit not found"
 
 
 
+
 const user =
 await User.findById(deposit.userId);
+
+
 
 
 
@@ -763,12 +887,17 @@ message:"User not found"
 
 
 
-// CREDIT WALLET
+
+// ADD DEPOSIT TO WALLET
 
 user.walletBalance =
 Number(user.walletBalance || 0)
 +
 Number(deposit.amount);
+
+
+
+
 
 
 
@@ -782,17 +911,129 @@ Number(deposit.amount);
 
 
 
+
+
+
+
+// FIRST DEPOSIT APPROVAL
+
+if(user.firstDepositCompleted !== true){
+
+
+
+user.firstDepositCompleted = true;
+
+
+
+
+// UNLOCK BONUS
+
+if(user.registrationBonusUnlocked !== true){
+
+
+
+user.registrationBonusUnlocked = true;
+
+
+
+user.registrationBonusStatus =
+"Unlocked";
+
+
+
+
+
+// ADD BONUS TO CUMULATIVE INCOME
+
+user.cumulativeIncome =
+Number(user.cumulativeIncome || 0)
++
+Number(user.registrationBonus || 5000);
+
+
+
+
+
+
+user.incomeRecords.push({
+
+type:"Registration Bonus",
+
+amount:Number(user.registrationBonus || 5000),
+
+status:"Completed",
+
+date:new Date().toLocaleString()
+
+});
+
+
+
+
+
+user.transactionHistory.push({
+
+type:"Registration Bonus",
+
+amount:Number(user.registrationBonus || 5000),
+
+status:"Completed",
+
+date:new Date().toLocaleString()
+
+});
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+// DEPOSIT RECORD
+
+user.depositRecords.push({
+
+amount:Number(deposit.amount),
+
+status:"Credited",
+
+date:new Date().toLocaleString()
+
+});
+
+
+
+
+
+
 // UPDATE DEPOSIT STATUS
 
-deposit.status = "Credited";
+deposit.status="Credited";
 
-deposit.approvedDate = new Date();
+
+deposit.approvedDate=new Date();
+
+
+
+
 
 
 
 await user.save();
 
+
 await deposit.save();
+
+
+
 
 
 
@@ -806,6 +1047,7 @@ user:user,
 deposit:deposit
 
 });
+
 
 
 
@@ -823,4 +1065,8 @@ message:error.message
 
 
 });
+// =================================
+// EXPORT ROUTER
+// =================================
+
 module.exports = router;
