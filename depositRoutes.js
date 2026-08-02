@@ -110,13 +110,8 @@ message:"Deposit not found"
 }
 
 
-
 const user =
-await User.findOne({
-
-username:deposit.username
-
-});
+await User.findById(deposit.userId);
 
 
 
