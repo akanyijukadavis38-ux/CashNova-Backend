@@ -160,12 +160,7 @@ firstDepositCompleted:false,
 
 
 
-incomeRecords:[
-
-registrationRecord
-
-],
-
+incomeRecords:[],
 
 
 transactionHistory:[
