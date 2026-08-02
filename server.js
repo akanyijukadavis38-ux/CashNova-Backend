@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./db");
-
+const depositRoutes = require("./depositRoutes");
 const app = express();
 
 
@@ -21,7 +21,7 @@ connectDB();
 const userRoutes = require("./userRoutes");
 
 app.use("/api/users", userRoutes);
-
+app.use("/api/deposits", depositRoutes);
 
 // Test route
 app.get("/", function(req, res){
