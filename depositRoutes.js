@@ -12,18 +12,19 @@ try{
 
 const deposit = new Deposit({
 
-username:req.body.username,
+userId: req.body.userId,
 
-amount:req.body.amount,
+username: req.body.username,
 
-method:req.body.method,
+amount: req.body.amount,
 
-mobileMoneyTransactionId:
-req.body.mobileMoneyTransactionId,
+method: req.body.method,
 
-status:"Pending",
+mobileMoneyTransactionId: req.body.mobileMoneyTransactionId,
 
-date:new Date()
+status: "Pending",
+
+date: new Date()
 
 });
 
