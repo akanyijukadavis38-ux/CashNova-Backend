@@ -1061,7 +1061,26 @@ message:error.message
 
 });
 // =================================
-// EXPORT ROUTER
+// ADMIN GET ALL USERS
 // =================================
+
+router.get("/", async function(req,res){
+
+try{
+
+const users = await User.find();
+
+res.json(users);
+
+}
+catch(error){
+
+res.status(500).json({
+message:error.message
+});
+
+}
+
+});
 
 module.exports = router;
