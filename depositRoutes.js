@@ -124,29 +124,80 @@ message:"User not found"
 });
 
 }
+if(!user.incomeRecords){
+    user.incomeRecords = [];
+}
 
+if(!user.transactionHistory){
+    user.transactionHistory = [];
+}
 
+if(!user.depositRecords){
+    user.depositRecords = [];
+}
 
 
 // CREDIT WALLET
-
 user.walletBalance =
-Number(user.walletBalance || 0)
-+
+Number(user.walletBalance || 0) +
 Number(deposit.amount);
 
-
-
-// TOTAL DEPOSIT
-
+// UPDATE TOTAL DEPOSITS
 user.totalDeposits =
-Number(user.totalDeposits || 0)
-+
+Number(user.totalDeposits || 0) +
 Number(deposit.amount);
 
+// FIRST DEPOSIT
+if(user.firstDepositCompleted !== true){
 
+    user.firstDepositCompleted = true;
+    user.accountActivated = true;
 
-deposit.status="Credited";
+    // UNLOCK REGISTRATION BONUS
+    if(user.registrationBonusUnlocked !== true){
+
+        user.registrationBonusUnlocked = true;
+        user.registrationBonusStatus = "Unlocked";
+
+        user.cumulativeIncome =
+        Number(user.cumulativeIncome || 0) +
+        Number(user.registrationBonus || 5000);
+
+        user.incomeRecords.push({
+            type:"Registration Bonus",
+            amount:Number(user.registrationBonus || 5000),
+            status:"Completed",
+            date:new Date().toLocaleString()
+        });
+
+        user.transactionHistory.push({
+            type:"Registration Bonus",
+            amount:Number(user.registrationBonus || 5000),
+            status:"Completed",
+            date:new Date().toLocaleString()
+        });
+    }
+}
+
+// SAVE DEPOSIT RECORD
+user.depositRecords.push({
+    amount:Number(deposit.amount),
+    status:"Credited",
+    date:new Date().toLocaleString()
+});
+
+// SAVE TRANSACTION
+user.transactionHistory.push({
+    type:"Deposit",
+    amount:Number(deposit.amount),
+    status:"Credited",
+    date:new Date().toLocaleString()
+});
+
+// UPDATE DEPOSIT STATUS
+deposit.status = "Credited";
+deposit.approvedDate = new Date();
+
 
 
 
