@@ -1,0 +1,559 @@
+/* =================================
+   CASHNOVA ADMIN MANAGEMENT
+   PREMIUM COMPACT DESIGN
+================================= */
+
+
+.admin-page{
+
+    min-height:100vh;
+
+    background:#f5f7fb;
+
+}
+
+
+
+/* HEADER */
+
+.admin-header{
+
+    background:linear-gradient(135deg,#071a4d,#1565c0);
+
+    padding:16px 18px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    color:white;
+
+}
+
+
+
+.admin-brand h1{
+
+    font-size:18px;
+
+    margin:0;
+
+}
+
+
+.admin-brand p{
+
+    font-size:12px;
+
+    opacity:.8;
+
+}
+
+
+
+.admin-profile i{
+
+    font-size:22px;
+
+}
+
+
+
+/* MAIN AREA */
+
+.admin-section{
+
+    padding:14px;
+
+}
+
+
+
+.admin-section h2{
+
+    font-size:16px;
+
+    color:#123;
+
+    margin-bottom:12px;
+
+}
+
+
+
+
+/* ALL MANAGEMENT CARDS */
+
+.deposit-card,
+.withdraw-card,
+.user-card,
+.record-card{
+
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:13px;
+
+    margin-bottom:12px;
+
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
+
+
+}
+
+
+
+
+/* CARD TITLE */
+
+.deposit-card h3,
+.withdraw-card h3,
+.user-card h3,
+.record-card h3{
+
+
+    font-size:14px;
+
+    color:#1255a5;
+
+    margin-bottom:8px;
+
+
+}
+
+
+
+/* TEXT */
+
+.deposit-card p,
+.withdraw-card p,
+.user-card p,
+.record-card p{
+
+
+    font-size:12px;
+
+    color:#555;
+
+    margin:5px 0;
+
+
+}
+
+
+
+
+/* MONEY VALUES */
+
+.deposit-card b,
+.withdraw-card b,
+.record-card b{
+
+
+    color:#111;
+
+    font-size:13px;
+
+
+}
+
+
+
+/* STATUS */
+
+.pending,
+.user-status{
+
+
+    display:inline-block;
+
+    font-size:11px;
+
+    padding:4px 10px;
+
+    border-radius:20px;
+
+    background:#fff2c2;
+
+    color:#8a6200;
+
+    margin-top:8px;
+
+
+}
+
+
+
+/* BUTTON AREA */
+
+.admin-actions{
+
+
+    display:flex;
+
+    gap:8px;
+
+    margin-top:12px;
+
+
+}
+
+
+.admin-actions button{
+
+
+    flex:1;
+
+    border:none;
+
+    padding:8px;
+
+    border-radius:7px;
+
+    font-size:12px;
+
+    color:white;
+
+}
+
+
+
+.approve-btn{
+
+    background:#00a86b;
+
+}
+
+
+.reject-btn{
+
+    background:#dc3545;
+
+}
+
+
+
+
+/* USERS SECTION */
+
+#usersContainer,
+#activeUsersContainer,
+#financialContainer,
+#announcementContainer{
+
+
+    width:100%;
+
+
+}
+
+
+
+/* ANNOUNCEMENTS */
+
+.announcement-create{
+
+
+    background:white;
+
+    padding:12px;
+
+    border-radius:12px;
+
+    margin-bottom:12px;
+
+
+}
+
+
+
+.announcement-create textarea{
+
+
+    width:100%;
+
+    height:80px;
+
+    border:1px solid #ddd;
+
+    border-radius:8px;
+
+    padding:8px;
+
+    font-size:12px;
+
+
+}
+
+
+
+.announcement-create button{
+
+
+    width:100%;
+
+    margin-top:8px;
+
+    padding:9px;
+
+    border:none;
+
+    border-radius:7px;
+
+    background:#1565c0;
+
+    color:white;
+
+    font-size:12px;
+
+
+}
+
+
+
+
+/* EMPTY */
+
+.empty-state{
+
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:25px;
+
+    text-align:center;
+
+    font-size:13px;
+
+    color:#777;
+
+
+}
+/* =================================
+   PREMIUM ADMIN SETTINGS DESIGN
+================================= */
+
+
+.settings-item{
+
+    background:white;
+
+    padding:15px;
+
+    border-radius:14px;
+
+    margin-bottom:15px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+
+}
+
+
+
+.settings-item h4{
+
+    font-size:14px;
+
+    color:#123d85;
+
+    margin-bottom:12px;
+
+}
+
+
+
+.settings-item input,
+.settings-item select{
+
+
+    width:100%;
+
+    padding:10px;
+
+    margin-bottom:10px;
+
+    border-radius:8px;
+
+    border:1px solid #d9dfeb;
+
+    font-size:12px;
+
+    outline:none;
+
+
+}
+
+
+
+.settings-item button{
+
+
+    width:100%;
+
+    padding:10px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#1565c0;
+
+    color:white;
+
+    font-size:12px;
+
+    cursor:pointer;
+
+
+}
+
+
+
+.settings-item button:active{
+
+    transform:scale(.98);
+
+}
+
+
+
+.settings-item hr{
+
+    border:none;
+
+    height:1px;
+
+    background:#eee;
+
+    margin:15px 0;
+
+}
+
+
+
+.settings-item p{
+
+    font-size:12px;
+
+    color:#666;
+
+    margin-top:8px;
+
+}
+
+
+
+/* SYSTEM STATUS */
+
+.settings-item .user-status{
+
+    background:#d3f9d8;
+
+    color:#087f23;
+
+}
+/* =================================
+   PREMIUM ANNOUNCEMENT DESIGN
+================================= */
+
+
+.announcement-create{
+
+    background:white;
+
+    padding:16px;
+
+    border-radius:14px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+
+    margin-bottom:15px;
+
+}
+
+
+
+.announcement-create textarea{
+
+    width:100%;
+
+    height:90px;
+
+    resize:none;
+
+    border:1px solid #dce3ef;
+
+    border-radius:10px;
+
+    padding:10px;
+
+    font-size:13px;
+
+    outline:none;
+
+}
+
+
+
+.announcement-create textarea:focus{
+
+    border-color:#1565c0;
+
+}
+
+
+
+.announcement-create button{
+
+    margin-top:10px;
+
+    width:100%;
+
+    padding:10px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#1565c0;
+
+    color:white;
+
+    font-size:13px;
+
+}
+
+
+
+
+#announcementContainer .record-card{
+
+
+    border-left:4px solid #1565c0;
+
+
+}
+
+
+
+#announcementContainer .record-card h3{
+
+    font-size:15px;
+
+}
+
+
+
+#announcementContainer .record-card p{
+
+    font-size:12px;
+
+    line-height:1.5;
+
+}

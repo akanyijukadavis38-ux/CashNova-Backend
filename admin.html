@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CashNova Admin Dashboard</title>
+
+<link rel="stylesheet" href="admin.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+
+<body>
+
+
+<div class="admin-page">
+
+
+
+<!-- HEADER -->
+
+<header class="admin-header">
+
+
+<div class="admin-brand">
+
+<h1>
+CashNova Admin
+</h1>
+
+<p>
+Control Center
+</p>
+
+</div>
+
+
+
+<div class="admin-profile">
+
+<i class="fa-solid fa-user-shield"></i>
+
+
+<div>
+
+<p>
+Administrator
+</p>
+
+
+<button id="logoutBtn">
+Logout
+</button>
+
+
+</div>
+
+
+</div>
+
+
+</header>
+
+
+
+
+
+<!-- DASHBOARD TITLE -->
+
+<section class="dashboard-title">
+
+<h2>
+Dashboard Overview
+</h2>
+
+</section>
+
+
+
+
+
+<!-- STATISTICS -->
+
+<div class="stats-grid">
+
+
+
+<div class="stat-card">
+
+<i class="fa-solid fa-users"></i>
+
+<p>
+Total Users
+</p>
+
+<h2 id="totalUsers">
+0
+</h2>
+
+</div>
+
+
+
+
+<div class="stat-card">
+
+<i class="fa-solid fa-user-check"></i>
+
+<p>
+Active Users
+</p>
+
+<h2 id="activeUsers">
+0
+</h2>
+
+</div>
+
+
+
+
+<div class="stat-card">
+
+<i class="fa-solid fa-wallet"></i>
+
+<p>
+Total Deposits
+</p>
+
+<h2 id="totalDeposits">
+UGX 0
+</h2>
+
+</div>
+
+
+
+
+<div class="stat-card">
+
+<i class="fa-solid fa-money-bill-transfer"></i>
+
+<p>
+Total Withdrawals
+</p>
+
+<h2 id="totalWithdrawals">
+UGX 0
+</h2>
+
+</div>
+
+
+
+
+<div class="stat-card">
+
+<i class="fa-solid fa-chart-line"></i>
+
+<p>
+Total Investments
+</p>
+
+<h2 id="totalInvestments">
+UGX 0
+</h2>
+
+</div>
+
+
+
+
+<div class="stat-card">
+
+<i class="fa-solid fa-coins"></i>
+
+<p>
+Total Income Paid
+</p>
+
+<h2 id="totalIncomePaid">
+UGX 0
+</h2>
+
+</div>
+
+
+</div>
+
+
+
+
+<!-- =================================
+     ANALYTICS OVERVIEW
+================================= -->
+
+
+<section class="admin-section">
+
+
+<h2>
+Analytics Overview
+</h2>
+
+
+
+<div class="analytics-grid">
+
+
+
+<div class="analytics-card">
+
+<i class="fa-solid fa-chart-line"></i>
+
+
+<div>
+
+<p>
+Platform Growth
+</p>
+
+
+<h3>
+Stable
+</h3>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="analytics-card">
+
+<i class="fa-solid fa-money-bill-trend-up"></i>
+
+
+<div>
+
+<p>
+Money Flow
+</p>
+
+
+<h3>
+UGX 0
+</h3>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="analytics-card">
+
+<i class="fa-solid fa-users-viewfinder"></i>
+
+
+<div>
+
+<p>
+User Activity
+</p>
+
+
+<h3>
+0 Users
+</h3>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+</section>
+<!-- =================================
+     MANAGEMENT SECTION
+================================= -->
+
+
+<section class="admin-section">
+
+
+<h2>
+Management
+</h2>
+
+
+
+<div class="admin-menu-grid">
+
+
+
+<a href="admin-management.html?section=deposit"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-arrow-down"></i>
+
+
+<div>
+
+<h3>
+Pending Deposits
+</h3>
+
+
+<span id="pendingDeposits">
+(0)
+</span>
+
+
+</div>
+
+
+</a>
+
+
+
+
+
+<a href="admin-management.html?section=withdrawal"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-arrow-up"></i>
+
+
+<div>
+
+<h3>
+Pending Withdrawals
+</h3>
+
+
+<span id="pendingWithdrawals">
+(0)
+</span>
+
+
+</div>
+
+
+</a>
+
+
+
+
+
+<a href="admin-management.html?section=users"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-users"></i>
+
+
+<div>
+
+<h3>
+All Users
+</h3>
+
+
+</div>
+
+
+</a>
+
+
+
+
+
+<a href="admin-management.html?section=active-users"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-user-check"></i>
+
+
+<div>
+
+<h3>
+Active Users
+</h3>
+
+
+</div>
+
+
+</a>
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+<!-- =================================
+     FINANCIAL RECORDS
+================================= -->
+
+
+<section class="admin-section">
+
+
+<h2>
+Financial Records
+</h2>
+
+
+
+<div class="admin-menu-grid">
+
+
+
+<a href="admin-management.html?section=deposit-records"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-file-invoice-dollar"></i>
+
+
+<div>
+
+<h3>
+Deposit Records
+</h3>
+
+
+</div>
+
+
+</a>
+
+
+
+
+
+<a href="admin-management.html?section=withdrawal-records"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-receipt"></i>
+
+
+<div>
+
+<h3>
+Withdrawal Records
+</h3>
+
+
+</div>
+
+
+</a>
+
+
+
+
+
+<a href="admin-management.html?section=income-records"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-coins"></i>
+
+
+<div>
+
+<h3>
+Income Records
+</h3>
+
+
+</div>
+
+
+</a>
+
+
+
+
+
+<a href="admin-management.html?section=referral-records"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-share-nodes"></i>
+
+
+<div>
+
+<h3>
+Referral Records
+</h3>
+
+
+</div>
+
+
+</a>
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+<!-- =================================
+     SYSTEM CONTROL
+================================= -->
+
+
+<section class="admin-section">
+
+
+<h2>
+System Control
+</h2>
+
+
+
+<div class="admin-menu-grid">
+
+
+
+<a href="admin-management.html?section=announcements"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-bullhorn"></i>
+
+
+<div>
+
+<h3>
+Announcements
+</h3>
+
+
+</div>
+
+
+</a>
+
+
+
+
+
+<a href="admin-management.html?section=settings"
+class="admin-menu-card">
+
+
+<i class="fa-solid fa-gear"></i>
+
+
+<div>
+
+<h3>
+Admin Settings
+</h3>
+
+
+</div>
+
+
+</a>
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+</div>
+
+
+
+
+<script src="admin.js"></script>
+
+
+</body>
+
+</html>

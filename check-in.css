@@ -1,0 +1,256 @@
+*{
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+
+body{
+
+    margin:0;
+
+    background:#f5f8ff;
+
+}
+
+
+
+.checkin-page{
+
+    padding:20px;
+
+}
+
+
+
+/* HEADER */
+
+.checkin-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:25px;
+
+}
+
+
+
+.checkin-header button{
+
+    width:45px;
+
+    height:45px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:white;
+
+    color:#0066ff;
+
+    font-size:25px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.12);
+
+}
+
+
+
+.checkin-header h1{
+
+    margin:0;
+
+    color:#0066ff;
+
+    font-size:26px;
+
+}
+
+
+
+.checkin-header p{
+
+    margin:5px 0;
+
+    color:#777;
+
+}
+
+
+
+
+/* CHECK-IN CARD */
+
+
+.checkin-card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:25px;
+
+    text-align:center;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+
+
+.checkin-card h2{
+
+    color:#333;
+
+}
+
+
+
+.reward-box{
+
+    background:#eef5ff;
+
+    padding:20px;
+
+    border-radius:20px;
+
+    margin:20px 0;
+
+}
+
+
+
+.reward-box h1{
+
+    color:#0066ff;
+
+    font-size:35px;
+
+    margin:0;
+
+}
+
+
+
+.reward-box p{
+
+    color:#777;
+
+}
+
+
+
+
+
+#checkInButton{
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:20px;
+
+    background:#0066ff;
+
+    color:white;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+}
+
+
+
+
+#checkMessage{
+
+    margin-top:15px;
+
+    font-weight:bold;
+
+}
+
+
+
+
+
+/* TOTAL BONUS */
+
+
+.bonus-card{
+
+    margin-top:20px;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:25px;
+
+    text-align:center;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+
+
+.bonus-card h3{
+
+    color:#555;
+
+}
+
+
+
+.bonus-card h2{
+
+    color:green;
+
+}
+
+
+
+
+
+/* RULES */
+
+
+.rules-card{
+
+    margin-top:20px;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:25px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+
+
+.rules-card h3{
+
+    color:#0066ff;
+
+}
+
+
+
+.rules-card p{
+
+    color:#555;
+
+    font-size:14px;
+
+}

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CashNova My Team</title>
+
+<link rel="stylesheet" href="my-team.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+
+<body>
+
+
+<div class="my-team-page">
+
+
+<!-- HEADER -->
+
+<header class="team-header">
+
+
+<button onclick="history.back()">
+
+<i class="fa-solid fa-arrow-left"></i>
+
+</button>
+
+
+
+<div>
+
+<h1>
+My Team Members
+</h1>
+
+<p>
+Manage your referral network
+</p>
+
+</div>
+
+
+</header>
+
+
+
+
+
+
+
+<!-- SUMMARY -->
+
+<section class="team-summary">
+
+
+<div class="summary-card">
+
+<i class="fa-solid fa-users"></i>
+
+<div>
+
+<p>Total Members</p>
+
+<h2 id="totalMembers">
+0
+</h2>
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="summary-card">
+
+<i class="fa-solid fa-wallet"></i>
+
+<div>
+<p>
+Total Team Deposits
+</p>
+
+<h2 id="teamDeposits">
+UGX 0
+</h2>
+
+</div>
+
+</div>
+
+<div class="summary-card">
+
+<i class="fa-solid fa-user-check"></i>
+
+<div>
+
+<p>Active Members</p>
+
+<h2 id="activeMembers">
+0
+</h2>
+
+</div>
+
+</div>
+
+
+
+<div class="summary-card">
+
+<i class="fa-solid fa-coins"></i>
+
+<div>
+
+<p>Referral Earnings</p>
+
+<h2 id="referralEarnings">
+UGX 0
+</h2>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- LEVEL FILTER -->
+
+<section class="level-filter">
+
+
+<h2>
+Team Levels
+</h2>
+
+
+
+<div class="level-buttons">
+
+
+<button class="active" id="levelOneButton">
+
+Level 1
+
+</button>
+
+
+
+<button id="levelTwoButton">
+
+Level 2
+
+</button>
+
+
+
+<button id="levelThreeButton">
+
+Level 3
+
+</button>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- MEMBERS LIST -->
+
+<section class="members-section">
+
+
+<h2>
+Members
+</h2>
+
+
+
+<div id="membersContainer">
+
+
+
+<div class="empty-state">
+
+
+<i class="fa-solid fa-user-group"></i>
+
+
+<p>
+No team members yet
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- MEMBER INFORMATION NOTE -->
+
+<section class="info-card">
+
+
+<h3>
+Privacy & Information
+</h3>
+
+
+<p>
+Member accounts will show only protected account details for privacy.
+</p>
+
+
+<p>
+Deposits and referral information will appear automatically after the deposit system is connected.
+</p>
+
+
+
+</section>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+<script src="my-team.js"></script>
+
+
+</body>
+
+</html>

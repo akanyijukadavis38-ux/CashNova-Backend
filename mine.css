@@ -1,0 +1,388 @@
+/* =================================
+   CASHNOVA PREMIUM MINE PAGE
+================================= */
+
+
+*{
+    box-sizing:border-box;
+}
+
+
+body{
+
+    margin:0;
+
+    font-family:Arial, sans-serif;
+
+    background:#f4f8ff;
+
+    color:#1c1c1c;
+
+}
+
+
+
+.mine-page{
+
+    width:100%;
+
+    max-width:450px;
+
+    margin:auto;
+
+    padding:15px;
+
+}
+
+
+
+/* USER HEADER */
+
+.user-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    background:white;
+
+    padding:15px;
+
+    border-radius:18px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,0.08);
+
+    margin-bottom:15px;
+
+}
+
+
+.user-icon{
+
+    width:50px;
+
+    height:50px;
+
+    border-radius:50%;
+
+    background:#1976ff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:25px;
+
+}
+
+
+
+.user-header h3{
+
+    margin:0;
+
+    font-size:16px;
+
+}
+
+
+.user-header p{
+
+    margin:5px 0 0;
+
+    color:#777;
+
+    font-size:13px;
+
+}
+
+
+
+/* MAIN BANNER */
+
+
+.wallet-banner{
+
+    background:linear-gradient(135deg,#0066ff,#00b7ff);
+
+    color:white;
+
+    padding:20px;
+
+    border-radius:20px;
+
+    margin-bottom:15px;
+
+    box-shadow:0 6px 20px rgba(0,100,255,0.25);
+
+}
+
+
+.wallet-banner h1{
+
+    font-size:20px;
+
+    margin:0 0 8px;
+
+}
+
+
+.wallet-banner p{
+
+    margin:0;
+
+    font-size:13px;
+
+}
+
+
+
+/* FINANCE GRID */
+
+
+.finance-grid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:12px;
+
+}
+
+
+
+.finance-card{
+
+    background:white;
+
+    padding:14px;
+
+    border-radius:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,0.08);
+
+}
+
+
+.finance-card .icon{
+
+    font-size:25px;
+
+}
+
+
+.finance-card h3{
+
+    margin:0;
+
+    font-size:13px;
+
+}
+
+
+.finance-card p{
+
+    margin:6px 0 0;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+}
+
+
+
+/* BONUS CARD */
+
+
+.bonus-card{
+
+    margin-top:12px;
+
+    border-left:4px solid #1976ff;
+
+}
+
+
+
+.bonus-card span{
+
+    display:block;
+
+    font-size:12px;
+
+    color:#1976ff;
+
+    margin-top:5px;
+
+}
+
+
+.bonus-card small{
+
+    display:block;
+
+    font-size:11px;
+
+    color:#777;
+
+    margin-top:5px;
+
+}
+
+
+
+/* SERVICE CARDS */
+
+
+.service-card{
+
+    background:white;
+
+    margin-top:10px;
+
+    padding:13px;
+
+    border-radius:16px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    box-shadow:0 3px 12px rgba(0,0,0,0.07);
+
+}
+
+
+.service-card span{
+
+    font-size:22px;
+
+}
+
+
+.service-card h3{
+
+    margin:0;
+
+    font-size:15px;
+
+}
+
+
+
+/* LOGOUT */
+
+
+.logout-card{
+
+    background:#fff;
+
+    margin-top:10px;
+
+    padding:13px;
+
+    border-radius:16px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    box-shadow:0 3px 12px rgba(0,0,0,0.07);
+
+}
+
+
+.logout-card span{
+
+    font-size:22px;
+
+}
+
+
+.logout-card h3{
+
+    margin:0;
+
+    font-size:15px;
+
+}
+
+
+
+/* MOBILE ADJUSTMENT */
+
+
+@media(max-width:360px){
+
+
+.finance-grid{
+
+    grid-template-columns:1fr;
+
+}
+
+
+}
+/* PREMIUM SERVICE MENU */
+
+
+.service-card{
+
+background:white;
+margin-top:12px;
+padding:14px;
+border-radius:18px;
+display:flex;
+align-items:center;
+gap:15px;
+box-shadow:0 5px 18px rgba(0,0,0,.07);
+
+}
+
+
+.service-icon{
+
+width:42px;
+height:42px;
+border-radius:14px;
+background:#eef5ff;
+display:flex;
+align-items:center;
+justify-content:center;
+color:#0066ff;
+font-size:18px;
+
+}
+
+
+.service-card h3{
+
+flex:1;
+font-size:15px;
+font-weight:600;
+
+}
+
+
+.arrow{
+
+color:#999;
+font-size:14px;
+
+}

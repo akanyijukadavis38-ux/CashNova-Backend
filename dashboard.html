@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CashNova Dashboard</title>
+
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+
+<body>
+
+
+<div class="dashboard-page">
+
+
+
+<!-- ==========================
+     HEADER
+========================== -->
+
+<header class="dashboard-header">
+<div class="brand-area">
+
+<img src="logo.png" class="cashnova-logo" alt="CashNova Logo">
+
+<p>
+Invest • Earn • Grow
+</p>
+
+</div>
+
+
+
+
+<div class="profile-icon" onclick="window.location.href='profile.html'">
+
+<i class="fa-solid fa-user"></i>
+
+</div>
+
+
+
+</header>
+
+
+
+
+
+
+
+
+<!-- ==========================
+     MAIN BANNER
+========================== -->
+
+<section class="cashnova-banner">
+<img src="banner.png" class="cashnova-banner-image" alt="CashNova Banner">
+
+
+</section>
+
+
+
+
+
+<!-- ==========================
+     ANNOUNCEMENT POPUP
+========================== -->
+
+
+<div class="announcement-overlay" id="announcementBox">
+
+
+<div class="announcement-popup">
+
+
+<h2>
+✨ CashNova Platform Officially Launched ✨
+</h2>
+
+<div id="announcementContent">
+</div>
+
+
+
+<div class="announcement-content">
+
+
+<p>
+
+🔻 Invite friends to invest and earn up to 20% investment commission.
+
+<br><br>
+
+
+🎁 Registration Bonus: UGX 5000
+
+<br>
+
+
+🔥 Daily Login Bonus: UGX 100
+
+<br>
+
+
+💰 Minimum Deposit: UGX 15000
+
+<br>
+
+
+💸 Minimum Withdrawal: UGX 5000
+
+<br>
+
+
+⚙️ Withdrawal Fee: 14%
+
+<br>
+
+
+🍀 24/7 Withdrawals
+
+<br>
+
+
+👥 Referral Commission: 20% - 3% - 1%
+
+<br><br>
+
+
+Purchase earnings are automatically settled into your account daily.
+
+</p>
+
+
+</div>
+
+
+
+<button id="closeAnnouncement">
+OK
+</button>
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ==========================
+     MOVING NOTIFICATION
+========================== -->
+<div class="notification-box">
+
+<div class="moving-text" id="rechargeNotification">
+
+Loading recent recharge...
+
+</div>
+
+</div>
+
+
+<!-- ==========================
+ PREMIUM QUICK ACTION BUTTONS
+========================== -->
+
+
+<div class="quick-actions">
+
+
+<div class="quick-button" id="rechargeButton">
+
+<i class="fa-solid fa-wallet"></i>
+
+<span>
+Recharge
+</span>
+
+</div>
+
+
+
+
+<div class="quick-button" id="withdrawButton">
+
+<i class="fa-solid fa-money-bill-transfer"></i>
+
+<span>
+Withdraw
+</span>
+
+</div>
+
+
+
+
+<div class="quick-button" id="checkinButton">
+
+<i class="fa-solid fa-calendar-check"></i>
+
+<span>
+Check-in
+</span>
+
+</div>
+
+
+
+
+<div class="quick-button" id="helpButton">
+
+<i class="fa-solid fa-headset"></i>
+
+<span>
+Help
+</span>
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ==========================
+     MAIN APP CONTENT AREA
+========================== -->
+
+
+<main id="pageContent">
+
+
+
+<!-- HOME CONTENT START -->
+
+
+<h2 class="products-title">
+
+Products
+
+</h2>
+
+
+
+<div class="products-container" id="productsContainer">
+
+
+</div>
+
+
+
+<!-- HOME CONTENT END -->
+
+
+
+</main>
+      
+
+
+<!-- VIP PRODUCTS WILL LOAD HERE USING dashboard.js -->
+
+
+
+
+<!-- ==========================
+     PURCHASE CONFIRMATION POPUP
+========================== -->
+
+
+<div class="purchase-overlay" id="purchaseBox">
+
+
+<div class="purchase-popup">
+
+
+<h2>
+Confirm Investment
+</h2>
+
+
+
+<p id="selectedProduct">
+
+</p>
+
+
+
+<div class="purchase-buttons">
+
+
+<button id="cancelPurchase">
+
+Cancel
+
+</button>
+
+
+
+<button id="confirmPurchase">
+
+Confirm
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<nav class="bottom-navigation">
+
+
+<div id="homeNav">
+
+<i class="fa-solid fa-house"></i>
+
+<small>Home</small>
+
+</div>
+
+
+
+<div id="productsNav">
+
+<i class="fa-solid fa-box-open"></i>
+
+<small>My Products</small>
+
+</div>
+
+
+
+<div id="teamNav">
+
+<i class="fa-solid fa-users"></i>
+
+<small>Team</small>
+
+</div>
+
+
+
+<div id="mineNav">
+
+<i class="fa-solid fa-user"></i>
+
+<small>Mine</small>
+
+</div>
+
+
+</nav>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  // =================================
+// CHECK MAINTENANCE MODE
+// =================================
+
+let maintenance =
+JSON.parse(
+localStorage.getItem("cashnovaMaintenance")
+) || {status:"active"};
+
+
+if(maintenance.status === "maintenance"){
+
+
+document.body.innerHTML = `
+
+<div style="
+text-align:center;
+padding:50px;
+font-family:Arial;
+">
+
+<h1>
+CashNova Maintenance
+</h1>
+
+
+<p>
+Our platform is currently under maintenance.
+</p>
+
+
+<p>
+Please try again later.
+</p>
+
+
+</div>
+
+`;
+
+
+return;
+
+
+}
+let currentUser =
+JSON.parse(
+localStorage.getItem("cashnovaUserData")
+);
+
+if(!currentUser){
+
+alert("User session missing");
+
+window.location.href = "login.html";
+
+return;
+
+}
+
+
+
+// =====================================
+// LIVE RECHARGE NOTIFICATION
+// =====================================
+
+let notificationBox =
+document.getElementById("rechargeNotification");
+
+
+let deposits =
+JSON.parse(
+localStorage.getItem("cashnovaDeposits")
+) || [];
+
+
+
+let creditedDeposits =
+deposits.filter(function(deposit){
+
+return deposit.status === "Credited";
+
+});
+
+
+
+if(notificationBox){
+
+
+if(creditedDeposits.length > 0){
+
+
+let messages = creditedDeposits.map(function(deposit){
+
+
+let user =
+deposit.username || "User";
+
+
+let masked =
+user.substring(0,3) + "***";
+
+
+
+return masked +
+" recharged UGX " +
+Number(deposit.amount).toLocaleString();
+
+
+
+});
+
+
+
+notificationBox.innerHTML =
+messages.join(" &nbsp;&nbsp; ⭐ &nbsp;&nbsp; ");
+
+
+
+}else{
+
+
+notificationBox.innerHTML =
+"No recent recharge";
+
+
+}
+
+
+}
+
+if(!currentUser){
+
+alert("User session missing");
+
+return;
+
+}
+
+// =====================================
+// CASHNOVA VIP PRODUCTS
+// =====================================
+
+const productsContainer = document.getElementById("productsContainer");
+
+
+const vipProducts = [
+
+    {name:"VIP 1", price:15000},
+    {name:"VIP 2", price:30000},
+    {name:"VIP 3", price:50000},
+    {name:"VIP 4", price:100000},
+    {name:"VIP 5", price:200000},
+    {name:"VIP 6", price:300000},
+    {name:"VIP 7", price:500000},
+    {name:"VIP 8", price:1000000}
+
+];
+
+
+
+if(productsContainer){
+
+    productsContainer.innerHTML = "";
+
+
+    vipProducts.forEach(function(product){
+
+
+        const card = document.createElement("div");
+
+        card.className = "product-card";
+
+
+        card.dataset.name = product.name;
+
+        card.dataset.price = product.price;
+
+
+card.innerHTML = `
+
+<h2>
+${product.name}
+</h2>
+
+<p>
+Investment:
+<br>
+<b>
+UGX ${product.price.toLocaleString()}
+</b>
+</p>
+
+<p>
+Daily Income:
+<br>
+<b>
+UGX ${(product.price * 0.15).toLocaleString()}
+</b>
+</p>
+
+<p class="term-days">
+Term: 150 Days
+</p>
+
+<button class="buy-button">
+Buy Now
+</button>
+
+`;
+
+productsContainer.appendChild(card);
+
+    });
+
+}
+        
+// =====================================
+// LOAD ADMIN ANNOUNCEMENTS
+// =====================================
+
+let announcementContent =
+document.getElementById("announcementContent");
+
+
+let announcements =
+JSON.parse(
+localStorage.getItem("cashnovaAnnouncements")
+) || [];
+
+
+if(announcementContent){
+
+
+if(announcements.length > 0){
+
+
+let latestAnnouncement =
+announcements[announcements.length - 1];
+
+
+announcementContent.innerHTML = `
+
+<h3>
+${latestAnnouncement.title || "CashNova Announcement"}
+</h3>
+
+
+<p>
+${latestAnnouncement.message}
+</p>
+
+
+<p>
+${latestAnnouncement.date}
+</p>
+
+`;
+
+
+}else{
+
+
+announcementContent.innerHTML = `
+
+<p>
+Welcome to CashNova
+</p>
+
+`;
+
+}
+
+
+}
+
+
+// =====================================
+// ANNOUNCEMENT OK BUTTON
+// =====================================
+
+const closeAnnouncement =
+document.getElementById("closeAnnouncement");
+
+
+const announcementBox =
+document.getElementById("announcementBox");
+
+
+
+if(closeAnnouncement && announcementBox){
+
+
+    closeAnnouncement.onclick = function(){
+
+
+        announcementBox.style.display = "none";
+
+
+    };
+
+
+}
+
+// =====================================
+// PURCHASE SYSTEM
+// =====================================
+
+
+let selectedInvestment = null;
+
+
+const purchaseBox =
+document.getElementById("purchaseBox");
+
+
+const selectedProduct =
+document.getElementById("selectedProduct");
+
+
+const cancelPurchase =
+document.getElementById("cancelPurchase");
+
+
+const confirmPurchase =
+document.getElementById("confirmPurchase");
+
+
+
+
+// BUY NOW BUTTON
+
+document.addEventListener("click", function(event){
+
+
+    if(event.target.classList.contains("buy-button")){
+
+
+        const card =
+        event.target.closest(".product-card");
+
+
+        const name =
+        card.dataset.name;
+
+
+        const price =
+        Number(card.dataset.price);
+
+
+
+    const startDate = new Date();
+
+const endDate = new Date();
+
+endDate.setDate(endDate.getDate() + 150);
+
+
+selectedInvestment = {
+
+id: Date.now(),
+
+name: name,
+
+price: price,
+
+dailyIncome: price * 0.15,
+
+totalDailyIncome: price * 0.15,
+
+purchaseDate: new Date().toISOString(),
+
+startDate: startDate.toISOString(),
+
+endDate: endDate.toISOString(),
+
+totalEarned: 0,
+
+status: "Active"
+
+};  
+
+
+
+
+        selectedProduct.innerHTML = `
+
+
+        <b>${name}</b>
+
+
+        <br><br>
+
+
+        Investment Amount:
+
+
+        <br>
+
+
+        UGX ${price.toLocaleString()}
+
+
+        <br><br>
+
+
+        Daily Income:
+
+
+        <br>
+
+
+        UGX ${(price * 0.15).toLocaleString()}
+
+
+        `;
+
+
+
+
+        purchaseBox.style.display = "flex";
+
+
+    }
+
+
+});
+
+
+
+
+
+
+// CANCEL PURCHASE
+
+if(cancelPurchase){
+
+
+cancelPurchase.onclick = function(){
+
+
+    purchaseBox.style.display = "none";
+
+
+    selectedInvestment = null;
+
+
+};
+
+
+}
+
+
+
+
+// =====================================
+// CONFIRM PURCHASE
+// CONNECT PRODUCT WITH USER ACCOUNT
+// =====================================
+
+
+if(confirmPurchase){
+
+
+confirmPurchase.onclick = function(){
+
+
+
+    if(!selectedInvestment){
+
+
+        alert("No product selected");
+
+
+        return;
+
+
+    }
+
+
+
+
+// Get current logged in user
+
+let user = JSON.parse(
+localStorage.getItem("cashnovaUserData")
+);
+
+
+if(!user){
+
+alert("Account not found");
+
+return;
+
+}
+    
+
+
+
+
+
+
+// =====================================
+// CHECK WALLET BALANCE
+// =====================================
+
+if(
+Number(user.walletBalance || 0) < 
+Number(selectedInvestment.price)
+){
+
+alert(
+"Insufficient balance to purchase this product."
+);
+
+return;
+
+}
+// CHECK WALLET BALANCE BEFORE PURCHASE
+
+if(
+Number(user.walletBalance || 0) < Number(selectedInvestment.price)
+){
+
+alert(
+"Insufficient balance to purchase this product."
+);
+
+return;
+
+}
+
+
+
+    // Make sure product storage exists
+
+    if(!user.purchasedProducts){
+
+
+        user.purchasedProducts = [];
+
+
+    }
+
+
+
+
+
+    // Add purchased product to user account
+
+    user.purchasedProducts.push(selectedInvestment);
+
+// =====================================
+// DEDUCT PRODUCT PRICE FROM WALLET
+// =====================================
+
+user.walletBalance =
+Number(user.walletBalance || 0)
+-
+Number(selectedInvestment.price);
+// =====================================
+// ADD PURCHASE HISTORY
+// =====================================
+
+if(!user.transactionHistory){
+
+    user.transactionHistory = [];
+
+}
+
+
+user.transactionHistory.push({
+
+    type:"Product Purchase",
+
+    product:selectedInvestment.name,
+
+    amount:selectedInvestment.price,
+
+    status:"Completed",
+
+    date:new Date().toLocaleString()
+
+});
+
+
+    
+
+
+    alert("Purchase successful");
+
+
+
+
+
+    purchaseBox.style.display = "none";
+
+
+
+
+
+    window.location.href = "my-products.html";
+
+
+
+};
+
+
+}
+
+
+
+  // =====================================
+// QUICK ACTION BUTTONS
+// =====================================
+
+
+const rechargeButton =
+document.getElementById("rechargeButton");
+
+
+const withdrawButton =
+document.getElementById("withdrawButton");
+
+
+const checkinButton =
+document.getElementById("checkinButton");
+
+
+const helpButton =
+document.getElementById("helpButton");
+
+
+
+
+if(rechargeButton){
+
+    rechargeButton.onclick = function(){
+
+        window.location.href = "deposit.html";
+
+    };
+
+}
+
+if(withdrawButton){
+
+    withdrawButton.onclick = function(){
+
+        window.location.href = "withdraw.html";
+
+    };
+
+}
+
+
+
+
+if(checkinButton){
+
+    checkinButton.onclick = function(){
+
+        window.location.href = "check-in.html";
+
+    };
+
+}
+
+
+
+
+
+if(helpButton){
+
+    helpButton.onclick = function(){
+
+        window.location.href = "support.html";
+
+    };
+
+}
+
+
+
+
+
+// =====================================
+// BOTTOM NAVIGATION
+// =====================================
+
+
+const homeNav =
+document.getElementById("homeNav");
+
+
+const productsNav =
+document.getElementById("productsNav");
+
+
+const teamNav =
+document.getElementById("teamNav");
+
+
+const mineNav =
+document.getElementById("mineNav");
+
+
+
+
+if(homeNav){
+
+    homeNav.onclick = function(){
+
+        window.location.href = "dashboard.html";
+
+    };
+
+}
+
+
+
+if(productsNav){
+
+    productsNav.onclick = function(){
+
+        window.location.href = "my-products.html";
+
+    };
+
+}
+
+
+
+
+
+if(teamNav){
+
+    teamNav.onclick = function(){
+
+        window.location.href = "team.html";
+
+    };
+
+}
+
+
+
+
+if(mineNav){
+
+    mineNav.onclick = function(){
+
+        window.location.href = "mine.html";
+
+    };
+
+}
+
+
+
+// END DOM CONTENT LOADED
+
+});
+</script>
+<script src="wallet.js"></script>
+<script src="income.js"></script>
+
+</body>
+
+</html>
+
+

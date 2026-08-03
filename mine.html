@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CashNova Mine</title>
+<link rel="stylesheet" href="mine.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+</head>
+
+
+<body>
+
+
+<div class="mine-page">
+
+<div class="user-header">
+
+<div class="user-icon">
+
+<i class="fa-solid fa-user"></i>
+
+</div>
+
+<div>
+
+<h3>
+CashNova User
+</h3>
+
+<p id="userPhone">
+Loading...
+</p>
+
+</div>
+
+</div>
+
+
+
+
+
+<!-- Main banner -->
+
+<div class="wallet-banner">
+
+<h1>
+CashNova Wallet Center
+</h1>
+
+<p>
+Manage your earnings and account safely
+</p>
+
+</div>
+
+
+
+
+
+<!-- Wallet cards -->
+
+<div class="finance-grid">
+
+
+<div class="finance-card">
+
+<div class="icon">
+💰
+</div>
+
+<div>
+
+<h3>
+Wallet Balance
+</h3>
+
+<p id="walletBalance">
+UGX 0
+</p>
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="finance-card">
+
+<div class="icon">
+📈
+</div>
+
+<div>
+
+<h3>
+Cumulative Income
+</h3>
+
+<p id="cumulativeIncome">
+UGX 0
+</p>
+
+</div>
+
+</div>
+<!-- Registration Bonus Card -->
+
+<div class="finance-card bonus-card">
+
+<div class="icon">
+🎁
+</div>
+
+<div>
+
+<h3>
+Registration Bonus
+</h3>
+
+<p id="registrationBonus">
+UGX 0
+</p>
+
+<span id="bonusStatus">
+Locked
+</span>
+<small>
+Make your first deposit and unlock your bonus
+</small>
+</div>
+
+</div>
+
+</div>
+
+<div class="service-card"
+onclick="window.location.href='history.html'">
+
+<div class="service-icon">
+<i class="fa-solid fa-clock-rotate-left"></i>
+</div>
+
+<h3>
+History
+</h3>
+
+<i class="fa-solid fa-chevron-right arrow"></i>
+
+</div>
+
+
+
+<div class="service-card"
+onclick="window.location.href='regulations.html'">
+
+<div class="service-icon">
+<i class="fa-solid fa-file-contract"></i>
+</div>
+
+<h3>
+Regulations
+</h3>
+
+<i class="fa-solid fa-chevron-right arrow"></i>
+
+</div>
+
+
+
+
+
+<div class="service-card"
+onclick="window.location.href='about.html'">
+
+<div class="service-icon">
+<i class="fa-solid fa-building"></i>
+</div>
+
+<h3>
+About Us
+</h3>
+
+<i class="fa-solid fa-chevron-right arrow"></i>
+
+</div>
+
+
+
+<di class="service-card"
+onclick="window.location.href='support.html'">
+
+<div class="service-card"
+onclick="window.location.href='about.html'">
+
+<div class="service-icon">
+<i class="fa-solid fa-building"></i>
+</div>
+
+<h3>
+About Us
+</h3>
+
+<i class="fa-solid fa-chevron-right arrow"></i>
+
+</div>
+
+
+
+
+
+<!-- Exit -->
+
+<div class="logout-card"
+onclick="logoutUser()">
+
+<span>
+🚪
+</span>
+
+<h3>
+Exit / Logout
+</h3>
+
+</div>
+<script>
+
+document.addEventListener("DOMContentLoaded", async function(){
+
+
+let userId =
+localStorage.getItem("cashnovaUserId");
+
+
+if(!userId){
+
+alert("Login session missing");
+
+return;
+
+}
+
+
+
+try{
+
+
+let response = await fetch(
+
+"https://cashnova-backend-89lg.onrender.com/api/users/" + userId
+
+);
+
+
+
+let user = await response.json();
+
+
+
+if(!response.ok){
+
+alert(user.message || "User not found");
+
+return;
+
+}
+
+
+
+
+
+// PHONE
+
+document.getElementById("userPhone").innerHTML =
+user.phone || "No phone";
+
+
+
+
+
+// WALLET BALANCE
+
+document.getElementById("walletBalance").innerHTML =
+"UGX " +
+Number(user.walletBalance || 0)
+.toLocaleString();
+
+
+
+
+
+// CUMULATIVE INCOME
+
+document.getElementById("cumulativeIncome").innerHTML =
+"UGX " +
+Number(user.cumulativeIncome || 0)
+.toLocaleString();
+
+
+
+
+
+// REGISTRATION BONUS
+
+document.getElementById("registrationBonus").innerHTML =
+"UGX " +
+Number(user.registrationBonus || 5000)
+.toLocaleString();
+
+
+
+
+
+// BONUS STATUS
+
+if(user.registrationBonusUnlocked === true){
+
+document.getElementById("bonusStatus").innerHTML =
+"Unlocked";
+
+
+}else{
+
+
+document.getElementById("bonusStatus").innerHTML =
+"Locked";
+
+
+}
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+alert("Server connection failed");
+
+
+}
+
+
+
+});
+
+
+</script>
+
+</script>
+
+
+
+<script src="wallet.js"></script>
+<script src="logout.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,196 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+
+body{
+
+    background:#f2f7ff;
+
+}
+
+
+.home-page{
+
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+
+}
+
+
+
+/* LOGO AREA */
+
+.top-logo{
+
+    text-align:center;
+    margin-bottom:25px;
+
+}
+
+
+.top-logo h1{
+
+    color:#0066ff;
+    font-size:35px;
+    font-weight:800;
+
+}
+
+
+.top-logo p{
+
+    color:#555;
+    font-size:18px;
+    margin-top:8px;
+
+}
+
+
+
+/* HERO CARD */
+
+.hero-card{
+
+    width:100%;
+    max-width:430px;
+    background:white;
+    padding:30px 20px;
+    border-radius:25px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.12);
+
+}
+
+
+
+.hero-card h2{
+
+    color:#0066ff;
+    font-size:28px;
+    margin-bottom:15px;
+
+}
+
+
+.hero-card p{
+
+    color:#555;
+    line-height:1.5;
+    margin-bottom:20px;
+
+}
+
+
+
+/* FEATURES */
+
+.features{
+
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin:25px 0;
+
+}
+
+
+.features div{
+
+    background:#eef5ff;
+    padding:15px 8px;
+    border-radius:15px;
+    flex:1;
+    font-size:22px;
+
+}
+
+
+.features span{
+
+    display:block;
+    font-size:13px;
+    margin-top:8px;
+    color:#333;
+
+}
+
+
+
+/* BUTTONS */
+
+button{
+
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:30px;
+    background:#0066ff;
+    color:white;
+    font-size:17px;
+    font-weight:bold;
+    margin-top:12px;
+    cursor:pointer;
+
+}
+
+
+button:hover{
+
+    transform:scale(1.03);
+
+}
+
+
+.login-btn{
+
+    background:#00a8ff;
+
+}
+
+
+
+/* FOOT TEXT */
+
+.bottom-text{
+
+    margin-top:25px;
+    color:#777;
+    font-size:14px;
+
+}
+
+
+
+/* MOBILE */
+
+@media(max-width:400px){
+
+.top-logo h1{
+
+    font-size:28px;
+
+}
+
+
+.hero-card h2{
+
+    font-size:24px;
+
+}
+
+
+.features{
+
+    flex-direction:column;
+
+}
+
+}

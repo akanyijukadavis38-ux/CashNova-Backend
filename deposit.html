@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CashNova Recharge</title>
+
+<link rel="stylesheet" href="deposit.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+
+<body>
+
+
+<div class="deposit-page">
+
+
+<!-- HEADER -->
+
+<header class="deposit-header">
+
+<button onclick="history.back()">
+
+<i class="fa-solid fa-arrow-left"></i>
+
+</button>
+
+
+<div>
+
+<h1>
+CashNova Recharge
+</h1>
+
+<p>
+Deposit funds into your wallet
+</p>
+
+</div>
+
+
+</header>
+
+
+
+
+
+<!-- AMOUNT SECTION -->
+
+<section class="amount-section">
+
+
+<h2>
+Select Amount
+</h2>
+
+
+<div class="amount-buttons">
+
+
+<button>15000</button>
+
+<button>30000</button>
+
+<button>50000</button>
+
+<button>100000</button>
+
+<button>200000</button>
+
+
+</div>
+
+
+
+<input 
+type="number"
+id="depositAmount"
+placeholder="Enter Amount">
+
+
+</section>
+
+
+
+
+
+
+
+<!-- PAYMENT METHOD -->
+
+<section class="payment-section">
+
+
+<h2>
+Select Payment Method
+</h2>
+
+
+<div class="payment-options">
+
+
+<button id="mtnButton" class="payment-btn">
+<img src="mtn.jpg" class="payment-logo" alt="MTN Mobile Money">
+
+
+<span>MTN Mobile Money</span>
+
+</button>
+
+
+
+<button id="airtelButton" class="payment-btn">
+<img src="airtel.jpg" class="payment-logo" alt="Airtel Money"
+
+
+<span>Airtel Money</span>
+
+
+</button>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+<!-- PAYMENT DETAILS -->
+
+<section class="payment-details" id="paymentDetails">
+
+
+<p>
+Select MTN or Airtel to view payment instructions
+</p>
+
+
+</section>
+
+
+
+
+
+
+
+
+<!-- TRANSACTION ID -->
+
+<section class="transaction-section">
+
+<h2>
+Mobile Money Transaction ID
+</h2>
+
+
+<input
+
+type="text"
+
+id="transactionId"
+
+placeholder="Enter Mobile Money Transaction ID">
+
+
+
+</section>
+
+
+
+
+
+
+
+<!-- CONFIRM BUTTON -->
+
+
+<button id="confirmPayment" class="confirm-button">
+
+Confirm Payment
+
+</button>
+
+
+
+
+
+
+
+
+
+<!-- RULES -->
+
+
+<section class="deposit-rules">
+
+
+<h2>
+Deposit Rules
+</h2>
+
+
+<p>
+1. Minimum deposit amount is UGX 15,000.
+</p>
+
+
+<p>
+2. Use the correct CashNova merchant code when making payment.
+</p>
+
+
+<p>
+3. Wrong merchant code payments may not be credited.
+</p>
+
+
+<p>
+4. Enter your correct Transaction ID after payment and confirm.
+</p>
+
+
+</section>
+
+
+
+<!-- SUCCESS POPUP -->
+
+<div class="success-overlay" id="successPopup">
+
+<div class="success-box">
+
+<div class="success-icon">
+
+<i class="fa-solid fa-check"></i>
+
+</div>
+
+
+<h2>
+Deposit Submitted
+</h2>
+
+
+<p id="successMessage">
+Your deposit request has been submitted successfully.
+</p>
+
+
+<button id="successOk">
+OK
+</button>
+
+
+</div>
+
+</div>
+
+
+
+</div>
+
+
+
+<script src="deposit.js"></script>
+
+
+</body>
+
+</html>

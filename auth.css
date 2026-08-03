@@ -1,0 +1,424 @@
+/* =====================================
+   CASHNOVA AUTH CSS
+   LOGIN + REGISTER
+===================================== */
+
+
+/* RESET */
+
+*{
+
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', Arial, sans-serif;
+
+}
+
+
+
+/* PAGE BACKGROUND */
+
+body{
+
+    min-height:100vh;
+
+    background:linear-gradient(135deg,#0066ff,#001b55);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:20px;
+
+}
+
+
+
+
+
+/* MAIN CONTAINER */
+
+.auth-container{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+}
+
+
+
+
+
+/* FORM CARD */
+
+.auth-box{
+
+    width:100%;
+
+    max-width:430px;
+
+    background:rgba(255,255,255,0.96);
+
+    padding:35px 28px;
+
+    border-radius:30px;
+
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+
+    animation:showBox .6s ease;
+
+}
+
+
+
+@keyframes showBox{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(40px);
+
+    }
+
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+
+
+
+
+/* LOGO SECTION */
+
+.logo-section{
+
+    text-align:center;
+
+    margin-bottom:25px;
+
+}
+
+
+
+.logo-section h1{
+
+    color:#0066ff;
+
+    font-size:32px;
+
+    font-weight:800;
+
+}
+
+
+
+.logo-section p{
+
+    color:#666;
+
+    margin-top:8px;
+
+    font-size:15px;
+
+}
+
+
+
+
+
+/* HEADINGS */
+
+.auth-box h2{
+
+    text-align:center;
+
+    color:#10213d;
+
+    font-size:26px;
+
+    margin-bottom:10px;
+
+}
+
+
+
+
+
+.description{
+
+    text-align:center;
+
+    color:#777;
+
+    font-size:14px;
+
+    margin-bottom:25px;
+
+}
+
+
+
+
+
+
+
+/* INPUT FIELDS */
+
+.input-field{
+
+    margin-bottom:18px;
+
+}
+
+
+
+.input-field label{
+
+    display:block;
+
+    color:#333;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    margin-bottom:8px;
+
+}
+
+
+
+.input-field input{
+
+    width:100%;
+
+    padding:15px 18px;
+
+    border-radius:16px;
+
+    border:1px solid #ddd;
+
+    outline:none;
+
+    background:#f7faff;
+
+    font-size:15px;
+
+    transition:.3s;
+
+}
+
+
+
+.input-field input:focus{
+
+    background:white;
+
+    border-color:#0066ff;
+
+    box-shadow:0 0 12px rgba(0,102,255,.15);
+
+}
+
+
+
+
+
+
+
+
+/* PHONE NUMBER AREA */
+
+.phone-area{
+
+    display:flex;
+
+    align-items:center;
+
+    border:1px solid #ddd;
+
+    border-radius:16px;
+
+    overflow:hidden;
+
+    background:#f7faff;
+
+}
+
+
+
+.phone-area span{
+
+    background:#0066ff;
+
+    color:white;
+
+    padding:15px;
+
+    font-weight:bold;
+
+}
+
+
+
+.phone-area input{
+
+    border:none;
+
+    background:transparent;
+
+}
+
+
+
+
+
+
+
+/* AGREEMENT */
+
+.agreement{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin:15px 0;
+
+}
+
+
+
+.agreement p{
+
+    font-size:13px;
+
+    color:#666;
+
+}
+
+
+
+
+
+
+
+
+/* MAIN BUTTON */
+
+.main-button{
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:30px;
+
+    background:linear-gradient(135deg,#0066ff,#003b99);
+
+    color:white;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+
+
+.main-button:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 10px 25px rgba(0,102,255,.35);
+
+}
+
+
+
+.main-button:active{
+
+    transform:scale(.97);
+
+}
+
+
+
+
+
+
+
+
+/* SWITCH LOGIN / REGISTER */
+
+.switch-page{
+
+    text-align:center;
+
+    margin-top:25px;
+
+    color:#666;
+
+}
+
+
+
+.switch-page a{
+
+    color:#0066ff;
+
+    font-weight:bold;
+
+    text-decoration:none;
+
+}
+
+
+
+
+
+
+
+
+/* MOBILE */
+
+@media(max-width:480px){
+
+
+.auth-box{
+
+    padding:28px 20px;
+
+}
+
+
+.logo-section h1{
+
+    font-size:28px;
+
+}
+
+
+}

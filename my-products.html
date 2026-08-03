@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CashNova My Products</title>
+
+<link rel="stylesheet" href="my-products.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="products-page">
+
+<!-- PREMIUM HEADER -->
+
+<header class="products-header">
+
+<button class="back-button"
+onclick="history.back()">
+
+<i class="fa-solid fa-arrow-left"></i>
+
+</button>
+
+<div>
+
+<h1>
+My Products
+</h1>
+
+<p>
+Track your active investments
+</p>
+
+</div>
+
+</header>
+
+
+
+
+
+<!-- PREMIUM BANNER -->
+
+<section class="products-banner">
+
+<div class="banner-left">
+
+<h2>
+Your Investment Portfolio
+</h2>
+
+<p>
+
+Monitor every VIP investment,
+daily income and remaining days
+in one place.
+
+</p>
+
+</div>
+<div class="banner-icon">
+
+<i class="fa-solid fa-chart-pie"></i>
+
+</div>
+
+
+</section>
+
+
+
+
+
+<!-- PRODUCT LIST -->
+
+<section
+class="my-products-container"
+id="myProductsContainer">
+
+</section>
+
+
+
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const container =
+document.getElementById("myProductsContainer");
+
+let currentUsername =
+localStorage.getItem("cashnovaCurrentUser");
+
+let users =
+JSON.parse(
+localStorage.getItem("cashnovaUsers")
+) || [];
+
+let currentUser =
+users.find(function(user){
+
+return user.username === currentUsername;
+
+});
+
+let myProducts =
+currentUser &&
+currentUser.purchasedProducts
+?
+currentUser.purchasedProducts
+:
+[];
+
+if(myProducts.length===0){
+
+container.innerHTML=`
+
+<div class="empty-products">
+<i class="fa-solid fa-box-open empty-icon"></i>
+
+
+<h2>
+
+No Active Products
+
+</h2>
+
+<p>
+
+Purchase a VIP investment
+to see it here.
+
+</p>
+
+</div>
+
+`;
+
+return;
+
+}
+
+myProducts.forEach(function(product){
+
+const card =
+document.createElement("div");
+
+card.className =
+"my-product-card";
+
+const startDate =
+new Date(product.startDate);
+
+const endDate =
+new Date(product.endDate);
+
+const today =
+new Date();
+
+const remainingDays =
+Math.max(
+0,
+Math.ceil(
+(endDate-today)/
+(1000*60*60*24)
+)
+);
+
+const totalEarned =
+product.totalEarned || 0;
+
+const status =
+remainingDays>0
+?
+"Active"
+:
+"Completed";
+
+card.innerHTML=`
+
+<div class="product-top">
+
+<div>
+
+<h2>
+
+${product.name}
+
+</h2>
+
+<p>
+
+VIP Investment Plan
+
+</p>
+
+</div>
+
+<span class="status-badge">
+
+${status}
+
+</span>
+
+</div>
+
+<div class="product-icon">
+
+<i class="fa-solid fa-gem"></i>
+
+</div>
+
+
+
+<div class="amount-box">
+
+<small>
+
+Investment Amount
+
+</small>
+
+<h3>
+
+UGX ${Number(product.price).toLocaleString()}
+
+</h3>
+
+</div>
+
+<div class="stats-grid">
+
+<div class="stat-box">
+
+<i class="fa-solid fa-coins"></i>
+
+<span>
+
+Daily Income
+
+</span>
+
+<b>
+
+UGX ${Number(product.dailyIncome).toLocaleString()}
+
+</b>
+
+</div>
+
+<div class="stat-box">
+
+<i class="fa-solid fa-chart-line"></i>
+
+<span>
+
+Total Earned
+
+</span>
+
+<b>
+
+UGX ${Number(totalEarned).toLocaleString()}
+
+</b>
+
+</div>
+
+</div>
+
+<div class="period-box">
+
+<p>
+
+Investment Period
+
+</p>
+
+<strong>
+
+${startDate.toLocaleDateString()}
+
+&nbsp;→&nbsp;
+
+${endDate.toLocaleDateString()}
+
+</strong>
+
+</div>
+
+<div class="remaining-box">
+
+<i class="fa-solid fa-hourglass-half"></i>
+
+Remaining Days
+
+<b>
+
+${remainingDays} Days
+
+</b>
+
+</div>
+
+`;
+
+container.appendChild(card);
+
+});
+
+});
+
+</script>
+
+</body>
+
+</html>

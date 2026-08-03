@@ -1,0 +1,509 @@
+/* =================================
+   CASHNOVA ADMIN PANEL PREMIUM CSS
+================================= */
+
+
+/* GLOBAL */
+
+*{
+    box-sizing:border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+
+body{
+
+    margin:0;
+    background:#f4f7fb;
+    color:#222;
+
+}
+
+
+
+/* =================================
+   ADMIN HEADER
+================================= */
+
+
+.admin-header{
+
+    background:linear-gradient(135deg,#005bea,#00c6fb);
+    color:white;
+    padding:20px;
+    border-radius:0 0 25px 25px;
+
+}
+
+
+.admin-header h1{
+
+    margin:0;
+    font-size:25px;
+
+}
+
+
+.admin-header p{
+
+    margin-top:5px;
+    opacity:.9;
+
+}
+
+/* =================================
+   ADMIN TABS
+================================= */
+
+.admin-tabs{
+
+display:flex;
+gap:10px;
+margin-bottom:20px;
+
+}
+
+
+.admin-tabs button{
+
+flex:1;
+padding:12px 10px;
+
+border:none;
+border-radius:10px;
+
+background:#eeeeee;
+
+color:#333;
+
+font-size:15px;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:0.3s;
+
+}
+
+
+
+.admin-tabs button.active{
+
+background:#0066ff;
+
+color:white;
+
+box-shadow:0 4px 10px rgba(0,102,255,0.3);
+
+}
+
+
+
+
+
+
+
+/* =================================
+   SECTIONS
+================================= */
+
+
+#depositSection,
+#withdrawalSection{
+
+    padding:15px;
+
+}
+
+
+
+
+/* =================================
+   CONTAINER SCROLL
+================================= */
+
+
+#depositContainer,
+#withdrawalContainer{
+
+
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+
+    max-height:75vh;
+    overflow-y:auto;
+
+    padding-bottom:20px;
+
+
+}
+
+
+
+
+
+/* =================================
+   DEPOSIT CARD
+================================= */
+
+
+.deposit-card,
+.withdraw-card{
+
+
+    background:white;
+    border-radius:18px;
+    padding:15px;
+
+    box-shadow:
+    0 5px 20px rgba(0,0,0,.08);
+
+    border-left:5px solid #0066ff;
+
+
+}
+
+
+
+
+
+.deposit-info h3,
+.withdraw-info h3{
+
+    margin:0 0 10px;
+    color:#0066ff;
+    font-size:18px;
+
+}
+
+
+
+.deposit-info p,
+.withdraw-info p{
+
+    margin:6px 0;
+    font-size:14px;
+
+}
+
+
+
+
+
+/* =================================
+   STATUS
+================================= */
+
+
+.pending{
+
+    display:inline-block;
+
+    background:#fff3cd;
+
+    color:#856404;
+
+    padding:5px 12px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    margin-top:8px;
+
+}
+
+
+
+
+/* =================================
+   ADMIN ACTION BUTTONS
+================================= */
+
+
+.admin-actions{
+
+
+    display:flex;
+
+    gap:10px;
+
+    margin-top:15px;
+
+
+}
+
+
+
+
+.admin-actions button{
+
+
+    flex:1;
+
+    border:none;
+
+    padding:10px;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+
+}
+
+
+
+
+
+.admin-actions .approve-btn{
+
+
+    background:#00b894;
+
+    color:white;
+
+
+}
+
+
+
+
+.admin-actions .reject-btn{
+
+
+    background:#ff4757;
+
+    color:white;
+
+
+}
+
+
+
+
+.admin-actions button:hover{
+
+    transform:scale(.96);
+
+    opacity:.85;
+
+}
+
+
+
+
+
+/* =================================
+   EMPTY MESSAGE
+================================= */
+
+
+.empty-history{
+
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:18px;
+
+    text-align:center;
+
+    color:#777;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.06);
+
+
+}
+
+
+
+/* =================================
+   MOBILE OPTIMIZATION
+================================= */
+
+
+@media(max-width:600px){
+
+
+.admin-header h1{
+
+    font-size:22px;
+
+}
+
+
+.deposit-card,
+.withdraw-card{
+
+    padding:13px;
+
+}
+
+
+
+.deposit-info p,
+.withdraw-info p{
+
+    font-size:13px;
+
+}
+
+
+
+.admin-actions button{
+
+    padding:9px;
+
+    font-size:13px;
+
+}
+
+
+
+}
+
+
+
+
+
+/* =================================
+   SCROLL BAR
+================================= */
+
+
+#depositContainer::-webkit-scrollbar,
+#withdrawalContainer::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+
+#depositContainer::-webkit-scrollbar-thumb,
+#withdrawalContainer::-webkit-scrollbar-thumb{
+
+    background:#0066ff;
+
+    border-radius:20px;
+
+}
+/* =================================
+   DEPOSIT & WITHDRAW CARDS
+================================= */
+
+.deposit-card,
+.withdraw-card{
+
+background:white;
+
+border-radius:12px;
+
+padding:15px;
+
+margin-bottom:12px;
+
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
+
+}
+
+
+.deposit-info h3,
+.withdraw-info h3{
+
+font-size:17px;
+
+margin-bottom:10px;
+
+}
+
+
+
+.deposit-info p,
+.withdraw-info p{
+
+margin:5px 0;
+
+font-size:14px;
+
+}
+
+
+
+.admin-actions{
+
+display:flex;
+
+gap:10px;
+
+margin-top:12px;
+
+}
+
+
+
+.admin-actions button{
+
+flex:1;
+
+padding:8px;
+
+border:none;
+
+border-radius:8px;
+
+font-size:14px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+}
+
+
+.approve-btn{
+
+background:#00a86b;
+
+color:white;
+
+}
+
+
+.reject-btn{
+
+background:#e53935;
+
+color:white;
+
+}
+
+
+.pending{
+
+display:inline-block;
+
+margin-top:8px;
+
+padding:4px 10px;
+
+border-radius:20px;
+
+background:#fff3cd;
+
+color:#856404;
+
+font-size:12px;
+
+}

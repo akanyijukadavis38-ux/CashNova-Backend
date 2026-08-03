@@ -1,0 +1,413 @@
+/* =================================
+   CASHNOVA PREMIUM MY TEAM CSS
+================================= */
+
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Arial,sans-serif;
+}
+
+
+body{
+
+    background:#f5f7fc;
+    color:#222;
+
+}
+
+
+
+.my-team-page{
+
+    min-height:100vh;
+    padding:15px;
+    padding-bottom:30px;
+
+}
+
+
+
+/* =====================
+HEADER
+===================== */
+
+
+.team-header{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+
+}
+
+
+
+.team-header button{
+
+    width:38px;
+    height:38px;
+    border:none;
+    border-radius:50%;
+    background:white;
+    color:#0066ff;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    font-size:16px;
+
+}
+
+
+
+.team-header h1{
+
+    font-size:23px;
+    color:#0066ff;
+    font-weight:800;
+
+}
+
+
+
+.team-header p{
+
+    font-size:13px;
+    color:#777;
+
+}
+
+
+
+
+
+/* =====================
+SUMMARY
+===================== */
+
+
+.team-summary{
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:18px;
+
+}
+
+
+
+.summary-card{
+
+    background:white;
+    border-radius:18px;
+    padding:15px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+
+}
+
+
+
+.summary-card i{
+
+    width:38px;
+    height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#eef5ff;
+    border-radius:12px;
+    color:#0066ff;
+    font-size:18px;
+
+}
+
+
+
+.summary-card p{
+
+    color:#777;
+    font-size:12px;
+
+}
+
+
+
+.summary-card h2{
+
+    color:#0066ff;
+    font-size:18px;
+    margin-top:4px;
+
+}
+
+
+
+
+
+/* =====================
+LEVEL FILTER
+===================== */
+
+
+.level-filter{
+
+    background:white;
+    padding:15px;
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    margin-bottom:18px;
+
+}
+
+
+
+.level-filter h2{
+
+    color:#0066ff;
+    font-size:19px;
+    margin-bottom:12px;
+
+}
+
+
+
+.level-buttons{
+
+    display:flex;
+    gap:10px;
+
+}
+
+
+
+.level-buttons button{
+
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:14px;
+    background:#eef5ff;
+    color:#0066ff;
+    font-weight:600;
+    font-size:13px;
+
+}
+
+
+
+.level-buttons button.active{
+
+    background:#0066ff;
+    color:white;
+
+}
+
+
+
+
+
+/* =====================
+MEMBERS
+===================== */
+
+
+.members-section{
+
+    background:white;
+    padding:15px;
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    margin-bottom:18px;
+
+}
+
+
+
+.members-section h2{
+
+    color:#0066ff;
+    font-size:19px;
+    margin-bottom:12px;
+
+}
+
+
+
+.member-card{
+
+    background:#f8faff;
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:10px;
+    border:1px solid #edf2ff;
+
+}
+
+
+
+.member-top{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+}
+
+
+
+.member-top h3{
+
+    font-size:16px;
+    color:#222;
+
+}
+
+
+
+.level-badge{
+
+    background:#0066ff;
+    color:white;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:12px;
+
+}
+
+
+
+
+
+.member-info{
+
+    margin-top:10px;
+
+}
+
+
+
+.member-info p{
+
+    font-size:13px;
+    color:#666;
+    margin:7px 0;
+
+}
+
+
+
+.deposit-badge{
+
+    color:#008c45;
+    font-weight:bold;
+
+}
+
+
+
+
+
+/* EMPTY STATE */
+
+
+.empty-state{
+
+    text-align:center;
+    padding:25px 10px;
+
+}
+
+
+
+.empty-state i{
+
+    font-size:35px;
+    color:#0066ff;
+    margin-bottom:10px;
+
+}
+
+
+
+.empty-state p{
+
+    color:#777;
+    font-size:14px;
+
+}
+
+
+
+
+
+/* =====================
+INFO CARD
+===================== */
+
+
+.info-card{
+
+    background:white;
+    padding:15px;
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+
+}
+
+
+
+.info-card h3{
+
+    color:#0066ff;
+    font-size:18px;
+    margin-bottom:10px;
+
+}
+
+
+
+.info-card p{
+
+    font-size:13px;
+    color:#666;
+    line-height:1.5;
+    margin-bottom:8px;
+
+}
+
+
+
+
+
+@media(max-width:450px){
+
+
+.my-team-page{
+
+    padding:12px;
+
+}
+
+
+
+.summary-card{
+
+    padding:12px;
+
+}
+
+
+
+.summary-card h2{
+
+    font-size:16px;
+
+}
+
+
+}

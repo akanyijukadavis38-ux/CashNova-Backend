@@ -1,0 +1,1140 @@
+/* =====================================
+   CASHNOVA PREMIUM DEPOSIT PAGE
+   PART 1
+   FOUNDATION + HEADER + AMOUNT SECTION
+===================================== */
+
+
+*{
+
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Arial,sans-serif;
+
+}
+
+
+
+body{
+
+    background:#f5f7fc;
+    color:#222;
+
+}
+
+
+
+
+
+.deposit-page{
+
+    min-height:100vh;
+
+    padding:18px;
+
+    padding-bottom:40px;
+
+}
+
+
+
+
+
+
+
+/* ==========================
+   HEADER
+========================== */
+
+
+.deposit-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:25px;
+
+}
+
+
+
+.deposit-header button{
+
+    width:42px;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:white;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.1);
+
+    cursor:pointer;
+
+}
+
+
+
+.deposit-header button i{
+
+    color:#0066ff;
+
+    font-size:18px;
+
+}
+
+
+
+.deposit-header h1{
+
+    font-size:25px;
+
+    font-weight:900;
+
+    color:#0066ff;
+
+}
+
+
+
+.deposit-header p{
+
+    font-size:13px;
+
+    color:#777;
+
+    margin-top:5px;
+
+}
+
+
+
+
+
+
+
+/* ==========================
+   COMMON SECTION CARDS
+========================== */
+
+
+.amount-section,
+.payment-section,
+.transaction-section,
+.deposit-rules{
+
+
+    background:white;
+
+    border-radius:25px;
+
+    padding:20px;
+
+    margin-bottom:20px;
+
+    box-shadow:
+
+    0 10px 25px rgba(0,0,0,.08);
+
+
+}
+
+
+
+.amount-section h2,
+.payment-section h2,
+.transaction-section h2,
+.deposit-rules h2{
+
+
+    font-size:19px;
+
+    font-weight:900;
+
+    color:#0066ff;
+
+    margin-bottom:18px;
+
+
+}
+
+
+
+
+
+
+
+/* ==========================
+   AMOUNT BUTTONS
+========================== */
+
+
+.amount-buttons{
+
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:10px;
+
+    margin-bottom:15px;
+
+
+}
+
+
+
+
+
+.amount-buttons button{
+
+
+    padding:13px 5px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:#eef4ff;
+
+    color:#0066ff;
+
+    font-size:14px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+
+}
+
+
+
+
+
+.amount-buttons button:hover{
+
+
+    background:#0066ff;
+
+    color:white;
+
+    transform:translateY(-3px);
+
+
+}
+
+
+
+
+
+.amount-buttons button:active{
+
+
+    transform:scale(.95);
+
+
+}
+
+
+
+
+
+
+
+/* ==========================
+   AMOUNT INPUT
+========================== */
+
+
+#depositAmount{
+
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    outline:none;
+
+    border-radius:18px;
+
+    background:#f5f7fc;
+
+    font-size:15px;
+
+    font-weight:600;
+
+
+}
+
+
+
+#depositAmount:focus{
+
+
+    background:white;
+
+    box-shadow:
+
+    0 0 0 2px #0066ff;
+
+
+}
+/* =====================================
+   CASHNOVA PREMIUM DEPOSIT PAGE
+   PART 2
+   PAYMENT SYSTEM + CONFIRM BUTTON
+===================================== */
+
+
+
+/* ==========================
+   PAYMENT OPTIONS
+========================== */
+
+
+.payment-options{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:15px;
+
+}
+
+
+
+
+
+.payment-btn{
+
+
+    height:120px;
+
+    border:none;
+
+    border-radius:22px;
+
+    background:#ffffff;
+
+    border:2px solid #eef3ff;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:10px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    box-shadow:
+
+    0 8px 20px rgba(0,0,0,.08);
+
+
+}
+
+
+
+
+
+.payment-btn img{
+
+
+    width:45px;
+
+    height:45px;
+
+    object-fit:contain;
+
+
+}
+
+
+
+
+
+.payment-btn span{
+
+
+    font-size:13px;
+
+    font-weight:800;
+
+    color:#333;
+
+    text-align:center;
+
+
+}
+
+
+
+
+
+.payment-btn:hover{
+
+
+    border-color:#0066ff;
+
+    transform:translateY(-3px);
+
+
+}
+
+
+
+
+
+/* SELECTED PAYMENT */
+
+
+.payment-btn.active{
+
+
+    background:
+
+    linear-gradient(135deg,#0066ff,#003080);
+
+    border-color:#0066ff;
+
+    box-shadow:
+
+    0 10px 25px rgba(0,102,255,.35);
+
+
+}
+
+
+
+.payment-btn.active span{
+
+
+    color:white;
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================
+   PAYMENT DETAILS CARD
+========================== */
+
+
+.payment-details{
+
+
+    margin-top:20px;
+
+    background:white;
+
+    border-radius:25px;
+
+    padding:20px;
+
+    box-shadow:
+
+    0 10px 25px rgba(0,0,0,.08);
+
+    border-left:5px solid #0066ff;
+
+
+}
+
+
+
+
+
+
+
+.payment-card{
+
+
+    text-align:center;
+
+    animation:paymentShow .4s ease;
+
+
+}
+
+
+
+@keyframes paymentShow{
+
+
+from{
+
+    opacity:0;
+
+    transform:translateY(15px);
+
+}
+
+
+to{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+}
+
+
+}
+
+
+
+
+
+
+
+.payment-card h3{
+
+
+    color:#0066ff;
+
+    font-size:22px;
+
+    margin-bottom:15px;
+
+
+}
+
+
+
+
+
+.payment-card p{
+
+
+    color:#666;
+
+    font-size:14px;
+
+    margin:8px 0;
+
+
+}
+
+
+
+
+
+.merchant-code{
+
+
+    width:80%;
+
+    margin:15px auto;
+
+    padding:18px;
+
+    border-radius:18px;
+
+    background:
+
+    linear-gradient(135deg,#0066ff,#003080);
+
+    color:white;
+
+    font-size:28px;
+
+    font-weight:900;
+
+    letter-spacing:3px;
+
+
+}
+
+
+
+
+
+.copy-button{
+
+
+    width:80%;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:30px;
+
+    background:#00a651;
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+
+}
+
+
+
+.copy-button:active{
+
+
+    transform:scale(.96);
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================
+   TRANSACTION INPUT
+========================== */
+
+
+#transactionId{
+
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    outline:none;
+
+    border-radius:18px;
+
+    background:#f5f7fc;
+
+    font-size:15px;
+
+    font-weight:600;
+
+
+}
+
+
+
+
+
+#transactionId:focus{
+
+
+    background:white;
+
+    box-shadow:
+
+    0 0 0 2px #0066ff;
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================
+   CONFIRM PAYMENT BUTTON
+========================== */
+
+
+.confirm-button{
+
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:35px;
+
+    background:
+
+    linear-gradient(135deg,#0066ff,#003080);
+
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+    margin:5px 0 25px;
+
+
+    box-shadow:
+
+    0 12px 25px rgba(0,102,255,.25);
+
+
+}
+
+
+
+.confirm-button:active{
+
+
+    transform:scale(.96);
+
+
+}
+/* =====================================
+   CASHNOVA PREMIUM DEPOSIT PAGE
+   PART 3
+   SUCCESS POPUP + RULES + RESPONSIVE
+===================================== */
+
+
+
+
+
+/* ==========================
+   SUCCESS POPUP
+========================== */
+
+
+.success-overlay{
+
+
+    position:fixed;
+
+    top:0;
+
+    left:0;
+
+    width:100%;
+
+    height:100%;
+
+
+    background:rgba(0,0,0,.45);
+
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+
+    z-index:9999;
+
+
+}
+
+
+
+
+
+
+
+.success-box{
+
+
+    width:85%;
+
+    max-width:360px;
+
+
+    background:white;
+
+
+    border-radius:28px;
+
+
+    padding:30px 20px;
+
+
+    text-align:center;
+
+
+    box-shadow:
+
+    0 20px 50px rgba(0,0,0,.25);
+
+
+    animation:popupShow .3s ease;
+
+
+}
+
+
+
+
+
+
+
+.success-icon{
+
+
+    width:80px;
+
+    height:80px;
+
+
+    border-radius:50%;
+
+
+    background:
+
+    linear-gradient(135deg,#00c853,#009624);
+
+
+    color:white;
+
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+
+    font-size:38px;
+
+
+    margin:auto;
+
+
+}
+
+
+
+
+
+
+
+.success-box h2{
+
+
+    color:#0066ff;
+
+
+    font-size:22px;
+
+
+    margin:18px 0 10px;
+
+
+}
+
+
+
+
+
+
+
+.success-box p{
+
+
+    color:#666;
+
+
+    font-size:14px;
+
+
+    line-height:1.5;
+
+
+}
+
+
+
+
+
+
+
+.success-status{
+
+
+    margin-top:15px;
+
+
+    background:#fff7e6;
+
+
+    color:#ff9800;
+
+
+    padding:12px;
+
+
+    border-radius:15px;
+
+
+    font-size:14px;
+
+
+    font-weight:bold;
+
+
+}
+
+
+
+
+
+
+
+#successOk{
+
+
+    margin-top:20px;
+
+
+    width:100%;
+
+
+    padding:14px;
+
+
+    border:none;
+
+
+    border-radius:25px;
+
+
+    background:#0066ff;
+
+
+    color:white;
+
+
+    font-size:16px;
+
+
+    font-weight:bold;
+
+
+    cursor:pointer;
+
+
+}
+
+
+
+#successOk:active{
+
+
+    transform:scale(.96);
+
+
+}
+
+
+
+
+
+
+
+@keyframes popupShow{
+
+
+from{
+
+
+    transform:scale(.8);
+
+    opacity:0;
+
+
+}
+
+
+to{
+
+
+    transform:scale(1);
+
+    opacity:1;
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================
+   DEPOSIT RULES
+========================== */
+
+
+.deposit-rules{
+
+
+    padding:18px;
+
+
+}
+
+
+
+.deposit-rules p{
+
+
+    font-size:13px;
+
+
+    line-height:1.7;
+
+
+    color:#555;
+
+
+    margin-bottom:8px;
+
+
+    font-weight:600;
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================
+   MOBILE RESPONSIVE
+========================== */
+
+
+@media(max-width:450px){
+
+
+
+.deposit-page{
+
+
+    padding:12px;
+
+
+}
+
+
+
+.payment-btn{
+
+
+    height:110px;
+
+
+}
+
+
+
+.payment-btn img{
+
+
+    width:38px;
+
+    height:38px;
+
+
+}
+
+
+
+.payment-btn span{
+
+
+    font-size:11px;
+
+
+}
+
+
+
+.amount-buttons{
+
+
+    grid-template-columns:repeat(3,1fr);
+
+
+}
+
+
+
+.success-box{
+
+
+    width:90%;
+
+
+}
+
+
+
+}
+.payment-logo{
+    width:45px;
+    height:45px;
+    object-fit:contain;
+    display:block;
+    margin:auto;
+}
+.payment-btn {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border-radius: 15px;
+    width: 100%;
+}
+
+.payment-logo {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+}

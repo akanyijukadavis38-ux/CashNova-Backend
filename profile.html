@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CashNova Profile</title>
+
+<link rel="stylesheet" href="profile.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+
+<body>
+
+
+<div class="profile-page">
+
+
+
+<header class="profile-header">
+
+<button id="backButton">
+<i class="fa-solid fa-arrow-left"></i>
+</button>
+
+
+<h1>
+My Profile
+</h1>
+
+</header>
+
+
+
+
+
+<section class="profile-card">
+
+
+<div class="profile-icon">
+
+<i class="fa-solid fa-user"></i>
+
+</div>
+
+
+
+<h2 id="profileName">
+User
+</h2>
+
+
+
+<div class="profile-info">
+
+
+<div class="info-box">
+
+<i class="fa-solid fa-phone"></i>
+
+<div>
+
+<p>
+Registered Number
+</p>
+
+<h3 id="profilePhone">
+Loading...
+</h3>
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="info-box">
+
+<i class="fa-solid fa-id-card"></i>
+
+<div>
+
+<p>
+Account ID
+</p>
+
+<h3 id="profileId">
+Loading...
+</h3>
+
+</div>
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+<section class="account-card">
+
+
+<h2>
+Account Security
+</h2>
+
+
+<div class="security-item">
+
+<i class="fa-solid fa-shield-halved"></i>
+
+<span>
+Secure CashNova Account
+</span>
+
+</div>
+
+
+<div class="security-item">
+
+<i class="fa-solid fa-clock"></i>
+
+<span>
+24/7 Platform Access
+</span>
+
+</div>
+
+
+</section>
+
+
+
+
+</div>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", async function(){
+
+
+let userId =
+localStorage.getItem("cashnovaUserId");
+
+
+if(!userId){
+
+alert("Login session missing");
+
+return;
+
+}
+
+
+
+try{
+
+
+let response = await fetch(
+
+"https://cashnova-backend-89lg.onrender.com/api/users/" + userId
+
+);
+
+
+
+let user = await response.json();
+
+
+
+if(!response.ok){
+
+alert(user.message || "User not found");
+
+return;
+
+}
+
+
+
+
+
+document.getElementById("profileName").innerHTML =
+user.fullName || user.username || "User";
+
+
+
+document.getElementById("profilePhone").innerHTML =
+user.phone || "No phone number";
+
+
+
+document.getElementById("profileId").innerHTML =
+user.accountNumber || "No Account Number";
+
+
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+alert("Server connection failed");
+
+
+}
+
+
+
+});
+
+
+
+
+
+document.getElementById("backButton").onclick = function(){
+
+
+if(document.referrer){
+
+history.back();
+
+
+}else{
+
+
+window.location.href="dashboard.html";
+
+
+}
+
+
+};
+
+
+</script>
+
+
+
+
+
+</body>
+
+</html>

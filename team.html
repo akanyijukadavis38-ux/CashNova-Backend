@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CashNova Team</title>
+
+<link rel="stylesheet" href="team.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+
+<body>
+
+
+<div class="team-page">
+
+
+<!-- HEADER -->
+
+<header class="team-header">
+
+<button onclick="history.back()">
+<i class="fa-solid fa-arrow-left"></i>
+</button>
+
+
+<div>
+<h1>CashNova Team</h1>
+<p>Invite • Build • Earn</p>
+</div>
+
+
+</header>
+
+
+
+
+
+
+
+<!-- REFERRAL CENTER -->
+
+<section class="referral-card">
+
+
+<h2>
+My Referral Center
+</h2>
+
+
+<p>
+Share your referral link and grow your team
+</p>
+
+
+
+<div class="referral-item">
+
+
+<span>
+Referral Code
+</span>
+
+
+<h3 id="referralCode">
+Loading...
+</h3>
+
+
+</div>
+
+
+
+
+
+<div class="referral-item">
+
+
+<span>
+Referral Link
+</span>
+
+
+<div class="link-box">
+
+
+<input 
+type="text"
+id="referralLink"
+readonly
+>
+
+
+<button id="copyReferral">
+
+<i class="fa-solid fa-copy"></i>
+
+</button>
+
+
+</div>
+
+
+
+<button id="shareReferral">
+
+<i class="fa-solid fa-share"></i>
+
+Share Referral Link
+
+</button>
+
+
+</div>
+
+<div class="referrer-card">
+
+<h3>
+Referred By
+</h3>
+
+<p id="referredBy">
+Loading...
+</p>
+
+</div>
+
+</section>
+
+
+
+
+
+
+
+
+<!-- TEAM SUMMARY -->
+
+<section class="summary-section">
+
+
+<div class="summary-card">
+
+<i class="fa-solid fa-users"></i>
+
+<p>Total Team</p>
+
+<h2 id="totalTeam">
+0
+</h2>
+
+
+</div>
+
+
+
+
+
+<div class="summary-card">
+
+
+<i class="fa-solid fa-wallet"></i>
+
+<p>Referral Earnings</p>
+
+
+<h2 id="referralIncome">
+
+UGX 0
+
+</h2>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+<!-- LEVEL TABLE -->
+
+<section class="level-section">
+
+
+<h2>
+Referral Levels
+</h2>
+
+
+
+<div class="level-table">
+
+
+
+<div class="table-head">
+
+<div>
+Level
+</div>
+
+
+<div>
+Commission
+</div>
+
+
+<div>
+Members
+</div>
+
+
+<div>
+Total Amount
+</div>
+
+
+</div>
+
+
+
+
+
+
+<div class="table-row">
+
+
+<div>
+Level 1
+</div>
+
+
+<div>
+20%
+</div>
+
+
+<div id="levelOneMembers">
+0
+</div>
+
+
+<div id="levelOneAmount">
+UGX 0
+</div>
+
+
+</div>
+
+
+
+
+
+
+<div class="table-row">
+
+
+<div>
+Level 2
+</div>
+
+
+<div>
+3%
+</div>
+
+
+<div id="levelTwoMembers">
+0
+</div>
+
+
+<div id="levelTwoAmount">
+UGX 0
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="table-row">
+
+
+<div>
+Level 3
+</div>
+
+
+<div>
+1%
+</div>
+
+
+<div id="levelThreeMembers">
+0
+</div>
+
+
+<div id="levelThreeAmount">
+UGX 0
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+<!-- MY TEAM BUTTON -->
+
+<section class="my-team-button-section">
+
+
+<button id="viewTeamButton">
+
+<i class="fa-solid fa-user-group"></i>
+
+My Team Members
+
+</button>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+<!-- RULES -->
+
+<section class="rules-card">
+
+
+<h2>
+Referral Rules
+</h2>
+
+
+<p>
+✓ Receive referral commission after the referred user has successfully deposited the minimum required deposit.
+</p>
+
+
+<p>
+✓ Commission depends on the deposited amount and referral level.
+</p>
+
+
+<p>
+✓ Level 1 earns 20%, Level 2 earns 3%, and Level 3 earns 1%.
+</p>
+
+
+<p>
+✓ Grow your team to increase your referral earnings.
+</p>
+
+
+<p>
+✓ Qualified referral commissions appear in your wallet and income history.
+</p>
+
+
+
+</section>
+
+
+
+
+
+</div>
+
+
+
+
+
+<script src="team.js"></script>
+
+
+</body>
+
+</html>

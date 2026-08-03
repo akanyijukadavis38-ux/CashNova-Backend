@@ -1,0 +1,597 @@
+/* =================================
+   CASHNOVA MY PRODUCTS PREMIUM CSS
+   CLEAN ICON VERSION
+================================= */
+
+
+/* RESET */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Arial,sans-serif;
+}
+
+
+body{
+
+    background:#f5f7fc;
+    color:#222;
+
+}
+
+
+/* PAGE */
+
+.products-page{
+
+    min-height:100vh;
+
+    padding:20px;
+
+    padding-bottom:80px;
+
+}
+
+
+
+/* ==========================
+HEADER
+========================== */
+
+
+.products-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:20px;
+
+}
+
+
+.back-button{
+
+    width:45px;
+
+    height:45px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:white;
+
+    color:#0066ff;
+
+    font-size:20px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.1);
+
+}
+
+
+.products-header h1{
+
+    color:#0066ff;
+
+    font-size:28px;
+
+    font-weight:800;
+
+}
+
+
+.products-header p{
+
+    color:#777;
+
+    font-size:14px;
+
+}
+
+
+
+/* ==========================
+PREMIUM BANNER
+========================== */
+
+
+.products-banner{
+
+    background:linear-gradient(135deg,#0066ff,#001f66);
+
+    color:white;
+
+    border-radius:25px;
+
+    padding:22px;
+
+    margin-bottom:25px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    box-shadow:0 15px 30px rgba(0,102,255,.25);
+
+}
+
+
+.banner-icon{
+
+    width:80px;
+
+    height:80px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.15);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:35px;
+
+}
+
+
+.banner-left h2{
+
+    font-size:22px;
+
+    margin-bottom:8px;
+
+}
+
+
+.banner-left p{
+
+    font-size:14px;
+
+    opacity:.9;
+
+}
+
+
+
+
+
+/* ==========================
+PRODUCT LIST
+========================== */
+
+
+.my-products-container{
+
+    display:grid;
+
+    grid-template-columns:1fr;
+
+    gap:20px;
+
+}
+
+
+
+/* ==========================
+PRODUCT CARD
+========================== */
+
+
+.my-product-card{
+
+    background:white;
+
+    border-radius:25px;
+
+    padding:20px;
+
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
+
+    animation:showProduct .4s ease;
+
+}
+
+
+
+@keyframes showProduct{
+
+from{
+
+opacity:0;
+
+transform:translateY(20px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
+}
+
+
+
+/* PRODUCT TOP */
+
+
+.product-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+
+
+.product-top h2{
+
+    color:#0066ff;
+
+    font-size:24px;
+
+}
+
+
+
+.product-top p{
+
+    color:#777;
+
+    font-size:13px;
+
+}
+
+
+
+/* STATUS */
+
+
+.status-badge{
+
+    padding:7px 15px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+}
+
+
+.status-running{
+
+    background:#dcffe8;
+
+    color:#008c45;
+
+}
+
+
+.status-completed{
+
+    background:#eee;
+
+    color:#555;
+
+}
+
+
+
+
+
+/* ==========================
+PRODUCT ICON
+========================== */
+
+
+.product-icon{
+
+    width:90px;
+
+    height:90px;
+
+    margin:20px auto;
+
+    border-radius:50%;
+
+    background:linear-gradient(135deg,#0066ff,#003080);
+
+    color:white;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:38px;
+
+}
+
+
+
+
+
+/* ==========================
+AMOUNT BOX
+========================== */
+
+
+.amount-box{
+
+    background:#f3f7ff;
+
+    border-radius:18px;
+
+    padding:15px;
+
+    text-align:center;
+
+}
+
+
+.amount-box span{
+
+    color:#777;
+
+    font-size:13px;
+
+}
+
+
+.amount-box h3{
+
+    color:#0066ff;
+
+    font-size:26px;
+
+    margin-top:8px;
+
+}
+
+
+
+
+
+/* ==========================
+INFORMATION GRID
+========================== */
+
+
+.stats-grid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:12px;
+
+    margin-top:15px;
+
+}
+
+
+
+.stat-box{
+
+    background:#fafafa;
+
+    border-radius:18px;
+
+    padding:15px;
+
+    text-align:center;
+
+}
+
+
+
+.stat-box i{
+
+    color:#0066ff;
+
+    font-size:22px;
+
+}
+
+
+.stat-box span{
+
+    display:block;
+
+    margin:8px 0;
+
+    color:#777;
+
+    font-size:13px;
+
+}
+
+
+.stat-box b{
+
+    color:#008c45;
+
+}
+
+
+
+
+
+/* ==========================
+DATE SECTION
+========================== */
+
+
+.period-box{
+
+    background:#f8f8f8;
+
+    border-radius:18px;
+
+    padding:15px;
+
+    margin-top:15px;
+
+    text-align:center;
+
+}
+
+
+.period-box p{
+
+    color:#777;
+
+    font-size:13px;
+
+    margin:5px;
+
+}
+
+
+
+
+
+/* ==========================
+REMAINING DAYS
+========================== */
+
+
+.remaining-box{
+
+    margin-top:15px;
+
+    padding:18px;
+
+    border-radius:20px;
+
+    text-align:center;
+
+    color:white;
+
+    background:linear-gradient(135deg,#0066ff,#002060);
+
+}
+
+
+.remaining-box b{
+
+    display:block;
+
+    font-size:24px;
+
+    margin-top:5px;
+
+}
+
+
+
+
+
+/* ==========================
+EMPTY STATE
+========================== */
+
+
+.empty-products{
+
+    background:white;
+
+    border-radius:25px;
+
+    padding:40px 20px;
+
+    text-align:center;
+
+    color:#777;
+
+}
+
+
+.empty-products i{
+
+    font-size:60px;
+
+    color:#0066ff;
+
+    margin-bottom:15px;
+
+}
+
+
+
+
+
+/* ==========================
+FUTURE PRODUCT SPACE
+========================== */
+
+
+.product-placeholder{
+
+    height:220px;
+
+    border:2px dashed #cbd8ff;
+
+    border-radius:25px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    color:#888;
+
+}
+
+
+
+
+
+/* MOBILE */
+
+@media(max-width:450px){
+
+
+.products-page{
+
+padding:15px;
+
+}
+
+
+.products-header h1{
+
+font-size:23px;
+
+}
+
+
+.product-top h2{
+
+font-size:21px;
+
+}
+
+
+}

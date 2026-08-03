@@ -1,0 +1,465 @@
+/* =================================
+   CASHNOVA PREMIUM TEAM PAGE CSS
+================================= */
+
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Arial,sans-serif;
+}
+
+
+body{
+
+    background:#f5f7fc;
+    color:#222;
+
+}
+
+
+
+.team-page{
+
+    width:100%;
+    min-height:100vh;
+    padding:16px;
+    padding-bottom:30px;
+
+}
+
+
+
+/* =====================
+HEADER
+===================== */
+
+
+.team-header{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+
+}
+
+
+.team-header button{
+
+    width:38px;
+    height:38px;
+    border:none;
+    border-radius:50%;
+    background:white;
+    color:#0066ff;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    font-size:16px;
+
+}
+
+
+
+.team-header h1{
+
+    font-size:24px;
+    color:#0066ff;
+    font-weight:800;
+
+}
+
+
+
+.team-header p{
+
+    font-size:13px;
+    color:#777;
+
+}
+
+
+
+
+
+/* =====================
+REFERRAL CARD
+===================== */
+
+
+.referral-card{
+
+    background:white;
+    border-radius:22px;
+    padding:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+    margin-bottom:18px;
+
+}
+
+
+
+.referral-card h2{
+
+    color:#0066ff;
+    font-size:20px;
+
+}
+
+
+
+.referral-card > p{
+
+    color:#777;
+    font-size:13px;
+    margin:6px 0 15px;
+
+}
+
+
+
+.referral-item{
+
+    background:#f7faff;
+    border-radius:15px;
+    padding:12px;
+    margin-bottom:12px;
+
+}
+
+
+
+.referral-item span{
+
+    color:#777;
+    font-size:12px;
+
+}
+
+
+
+.referral-item h3{
+
+    margin-top:5px;
+    color:#0066ff;
+
+}
+
+
+
+.link-box{
+
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+
+}
+
+
+
+.link-box input{
+
+    flex:1;
+    border:none;
+    background:white;
+    padding:10px;
+    border-radius:12px;
+    font-size:12px;
+
+}
+
+
+
+.link-box button{
+
+    width:42px;
+    border:none;
+    border-radius:12px;
+    background:#0066ff;
+    color:white;
+
+}
+
+
+
+#shareReferral{
+
+    width:100%;
+    margin-top:12px;
+    padding:11px;
+    border:none;
+    border-radius:14px;
+    background:#0066ff;
+    color:white;
+    font-weight:bold;
+    font-size:14px;
+
+}
+
+
+
+.referrer-card{
+
+    margin-top:12px;
+    padding:12px;
+    background:#f8f8f8;
+    border-radius:15px;
+
+}
+
+
+
+.referrer-card h3{
+
+    font-size:14px;
+
+}
+
+
+
+.referrer-card p{
+
+    color:#0066ff;
+    margin-top:5px;
+
+}
+
+
+
+
+
+/* =====================
+SUMMARY CARDS
+===================== */
+
+
+.summary-section{
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:18px;
+
+}
+
+
+
+.summary-card{
+
+    background:white;
+    padding:15px;
+    border-radius:18px;
+    text-align:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+
+}
+
+
+
+.summary-card i{
+
+    color:#0066ff;
+    font-size:22px;
+
+}
+
+
+
+.summary-card p{
+
+    color:#777;
+    font-size:13px;
+    margin:8px 0;
+
+}
+
+
+
+.summary-card h2{
+
+    color:#0066ff;
+    font-size:20px;
+
+}
+
+
+
+
+
+/* =====================
+LEVEL TABLE
+===================== */
+
+
+.level-section{
+
+    background:white;
+    padding:16px;
+    border-radius:22px;
+    box-shadow:0 8px 25px rgba(0,0,0,.07);
+    margin-bottom:18px;
+
+}
+
+
+
+.level-section h2{
+
+    color:#0066ff;
+    font-size:20px;
+    margin-bottom:12px;
+
+}
+
+
+
+.level-table{
+
+    width:100%;
+
+}
+
+
+
+.table-head,
+.table-row{
+
+    display:grid;
+    grid-template-columns:1fr .8fr .8fr 1.2fr;
+    align-items:center;
+    text-align:center;
+    padding:12px 5px;
+
+}
+
+
+
+.table-head{
+
+    background:#0066ff;
+    color:white;
+    border-radius:12px;
+    font-size:12px;
+
+}
+
+
+
+.table-row{
+
+    border-bottom:1px solid #eee;
+    font-size:13px;
+
+}
+
+
+
+.table-row:last-child{
+
+    border:none;
+
+}
+
+
+
+
+
+/* =====================
+MY TEAM BUTTON
+===================== */
+
+
+.my-team-button-section{
+
+    margin:15px 0;
+
+}
+
+
+
+#viewTeamButton{
+
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:16px;
+    background:#0066ff;
+    color:white;
+    font-size:15px;
+    font-weight:bold;
+
+}
+
+
+
+
+
+/* =====================
+RULES
+===================== */
+
+
+.rules-card{
+
+    background:white;
+    padding:16px;
+    border-radius:22px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+
+}
+
+
+
+.rules-card h2{
+
+    color:#0066ff;
+    font-size:20px;
+    margin-bottom:10px;
+
+}
+
+
+
+.rules-card p{
+
+    font-size:13px;
+    color:#555;
+    line-height:1.5;
+    margin-bottom:8px;
+
+}
+
+
+
+
+
+/* MOBILE */
+
+@media(max-width:450px){
+
+
+.team-page{
+
+    padding:12px;
+
+}
+
+
+
+.table-head,
+.table-row{
+
+    font-size:11px;
+
+}
+
+
+
+.summary-card h2{
+
+    font-size:17px;
+
+}
+
+
+}
