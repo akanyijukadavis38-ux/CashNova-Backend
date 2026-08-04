@@ -179,11 +179,32 @@ if(user.firstDepositCompleted !== true){
     }
 }
 
-// SAVE DEPOSIT RECORD
-user.depositRecords.push({
-    amount:Number(deposit.amount),
-    status:"Credited",
-    date:new Date().toLocaleString()
+// =====================================
+// GET DEPOSIT RECORDS
+// =====================================
+
+router.get("/deposit-records", async function(req,res){
+
+try{
+
+const deposits =
+await Deposit.find()
+.sort({date:-1});
+
+
+res.json(deposits);
+
+
+}catch(error){
+
+res.status(500).json({
+
+message:error.message
+
+});
+
+}
+
 });
 
 // SAVE TRANSACTION
