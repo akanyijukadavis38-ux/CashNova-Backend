@@ -22,7 +22,7 @@ let depositResponse = await fetch(
 );
 
 deposits = await depositResponse.json();
-
+console.log("ADMIN DEPOSITS:", deposits);
 
 
 let withdrawals = [];
@@ -192,14 +192,12 @@ totalWithdrawalsAmount.toLocaleString();
 // PENDING COUNTS
 // ===============================
 
-
 let pendingDeposits =
 deposits.filter(function(item){
 
-return item.status === "Pending";
+return String(item.status).toLowerCase().trim() === "pending";
 
 }).length;
-
 
 
 
@@ -207,9 +205,10 @@ return item.status === "Pending";
 let pendingWithdrawals =
 withdrawals.filter(function(item){
 
-return item.status === "Pending";
+return String(item.status).toLowerCase().trim() === "pending";
 
 }).length;
+
 
 
 
