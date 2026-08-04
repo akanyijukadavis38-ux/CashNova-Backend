@@ -2,37 +2,17 @@
    CASHNOVA ADVANCED HISTORY SYSTEM
 ================================= */
 
+document.addEventListener("DOMContentLoaded", async function(){
 
-document.addEventListener("DOMContentLoaded", function(){
 
 
 let container =
 document.getElementById("historyContainer");
 
+let userId =
+localStorage.getItem("cashnovaUserId");
 
-
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-) || [];
-
-
-
-let currentUser =
-localStorage.getItem("cashnovaCurrentUser");
-
-
-
-let user =
-users.find(function(item){
-
-return item.username === currentUser;
-
-});
-
-
-
-if(!user){
+if(!userId){
 
 container.innerHTML =
 "<p class='empty-history'>User not found</p>";
@@ -40,6 +20,39 @@ container.innerHTML =
 return;
 
 }
+
+let user;
+
+try{
+
+let response = await fetch(
+
+"https://cashnova-backend-89lg.onrender.com/api/users/" +
+userId
+
+);
+
+user = await response.json();
+
+}catch(error){
+
+container.innerHTML =
+"<p class='empty-history'>Failed to load history</p>";
+
+return;
+
+}
+
+if(!user || user.message){
+
+container.innerHTML =
+"<p class='empty-history'>User not found</p>";
+
+return;
+
+}
+
+
 let allRecords = [
 
 ...(user.incomeRecords || []),
