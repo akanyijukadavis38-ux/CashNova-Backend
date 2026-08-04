@@ -8,6 +8,14 @@
 document.addEventListener("DOMContentLoaded", function(){
 
 
+// ===============================
+// BACKEND URL
+// ===============================
+
+const API =
+"https://cashnova-backend-89lg.onrender.com";
+
+
 
 // ===============================
 // LOAD DATABASE
@@ -17,25 +25,34 @@ let deposits = [];
 
 async function loadDeposits() {
 
+
     container.innerHTML = `
     <div class="empty-state">
     Loading deposits...
     </div>
     `;
 
+
     try {
-let response = await fetch(
-"https://cashnova-backend-89lg.onrender.com/api/deposits"
-);
-        
+
+
+        let response = await fetch(
+        API + "/api/deposits"
+        );
+
 
         deposits = await response.json();
 
+
         displayDeposits();
+
+
 
     } catch (error) {
 
+
         console.log(error);
+
 
         container.innerHTML = `
         <div class="empty-state">
@@ -43,17 +60,18 @@ let response = await fetch(
         </div>
         `;
 
+
     }
+
 
 }
 
 
 
 
-let withdrawals =
-JSON.parse(
-localStorage.getItem("cashnovaWithdrawals")
-) || [];
+let withdrawals = [];
+
+
 
 
 
@@ -69,6 +87,8 @@ document.getElementById("managementTitle");
 
 let container =
 document.getElementById("managementContainer");
+
+
 
 
 
@@ -89,6 +109,7 @@ params.get("section");
 
 
 
+
 // ===============================
 // OPEN DEPOSIT MANAGEMENT
 // ===============================
@@ -104,23 +125,23 @@ title.innerHTML =
 
 
 
-
-
-
-
 // ===============================
 // LOAD PENDING DEPOSITS
 // ===============================
+
 
 function displayDeposits(){
 
 
 container.innerHTML = "";
 
+
 let pendingDeposits =
 deposits.filter(function(item){
 
+
 return item.status === "Pending";
+
 
 });
 
@@ -139,6 +160,7 @@ No pending deposits
 </div>
 
 `;
+
 
 return;
 
@@ -263,6 +285,7 @@ approveDeposit(deposit._id);
 
 card.querySelector(".reject-btn").onclick =
 function(){
+
 rejectDeposit(deposit._id);
 
 
@@ -281,38 +304,74 @@ container.appendChild(card);
 
 
 }
+
+
+
+
 loadDeposits();
+
+
+
+
+
 
 // ===============================
 // APPROVE DEPOSIT
 // ===============================
 
+
 async function approveDeposit(id){
 
-    try{
 
-        let response = await fetch(
-        "https://cashnova-backend-89lg.onrender.com/api/deposits/approve/" + id,
-        {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            }
-        });
+try{
 
-        let result = await response.json();
 
-        alert(result.message);
+let response = await fetch(
 
-        loadDeposits();
+API +
+"/api/deposits/approve/" +
+id,
 
-    }catch(error){
+{
 
-        console.log(error);
+method:"POST",
 
-        alert("Server connection failed");
+headers:{
 
-    }
+"Content-Type":"application/json"
+
+}
+
+}
+
+);
+
+
+
+let result =
+await response.json();
+
+
+
+alert(result.message);
+
+
+
+loadDeposits();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+alert("Server connection failed");
+
+
+}
+
 
 }
 
@@ -330,56 +389,65 @@ async function approveDeposit(id){
 // ===============================
 
 
-function rejectDeposit(id){
+async function rejectDeposit(id){
 
 
-let deposits =
-JSON.parse(
-localStorage.getItem("cashnovaDeposits")
-) || [];
+try{
 
 
+let response =
+await fetch(
 
-let deposit =
-deposits.find(function(item){
+API +
+"/api/deposits/reject/" +
+id,
 
-return item._id === id;
+{
 
-});
+method:"POST",
 
+headers:{
 
-
-if(!deposit){
-
-alert("Deposit not found");
-
-return;
+"Content-Type":"application/json"
 
 }
 
+}
 
-
-deposit.status =
-"Rejected";
-
-
-
-localStorage.setItem(
-"cashnovaDeposits",
-JSON.stringify(deposits)
 );
 
 
 
-alert("Deposit rejected");
+let result =
+await response.json();
 
 
-location.reload();
+
+alert(result.message);
+
+
+
+loadDeposits();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+alert("Server connection failed");
 
 
 }
-  
-// ===============================
+
+
+}
+
+
+}
+    // ===============================
 // OPEN WITHDRAWAL MANAGEMENT
 // ===============================
 
@@ -407,17 +475,33 @@ loadWithdrawals();
 // ===============================
 
 
-function loadWithdrawals(){
+async function loadWithdrawals(){
 
 
 container.innerHTML = "";
+
+
+try{
+
+
+let response =
+await fetch(
+API + "/api/withdrawals"
+);
+
+
+withdrawals =
+await response.json();
+
 
 
 
 let pendingWithdrawals =
 withdrawals.filter(function(item){
 
+
 return item.status === "Pending";
+
 
 });
 
@@ -474,7 +558,7 @@ Withdrawal Request
 <p>
 Withdrawal ID:
 <b>
-${withdrawal.id || ""}
+${withdrawal._id || ""}
 </b>
 </p>
 
@@ -564,7 +648,9 @@ Reject
 card.querySelector(".approve-btn").onclick =
 function(){
 
-approveWithdrawal(withdrawal.id);
+
+approveWithdrawal(withdrawal._id);
+
 
 };
 
@@ -574,7 +660,9 @@ approveWithdrawal(withdrawal.id);
 card.querySelector(".reject-btn").onclick =
 function(){
 
-rejectWithdrawal(withdrawal.id);
+
+rejectWithdrawal(withdrawal._id);
+
 
 };
 
@@ -588,6 +676,25 @@ container.appendChild(card);
 
 });
 
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load withdrawals
+
+</div>
+
+`;
+
+}
 
 
 }
@@ -604,104 +711,58 @@ container.appendChild(card);
 // ===============================
 
 
-function approveWithdrawal(id){
+async function approveWithdrawal(id){
 
 
-let withdrawals =
-JSON.parse(
-localStorage.getItem("cashnovaWithdrawals")
-) || [];
+try{
 
 
+let response =
+await fetch(
 
-let withdrawal =
-withdrawals.find(function(item){
+API +
+"/api/withdrawals/approve/" +
+id,
 
-return item.id === id;
+{
 
-});
+method:"POST",
 
+headers:{
 
-
-if(!withdrawal){
-
-alert("Withdrawal not found");
-
-return;
+"Content-Type":"application/json"
 
 }
 
-
-
-withdrawal.status =
-"Approved";
-
-
-
-withdrawal.approvedDate =
-new Date().toLocaleString();
-// =================================
-// UPDATE WITHDRAWAL HISTORY
-// =================================
-
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-) || [];
-
-
-let user =
-users.find(function(item){
-
-return item.username === withdrawal.username;
-
-});
-
-
-if(user && user.transactionHistory){
-
-user.transactionHistory.forEach(function(record){
-
-if(
-
-record.id === withdrawal.id ||
-
-(
-record.type === "Withdrawal" &&
-Number(record.amount) === Number(withdrawal.amount)
-)
-
-){
-
-record.status = "Approved";
-
-record.approvedDate =
-new Date().toLocaleString();
-
 }
 
-});
-
-}
-
-
-localStorage.setItem(
-"cashnovaUsers",
-JSON.stringify(users)
-);
-
-
-localStorage.setItem(
-"cashnovaWithdrawals",
-JSON.stringify(withdrawals)
 );
 
 
 
-alert("Withdrawal approved");
+let result =
+await response.json();
 
 
-location.reload();
+
+alert(result.message);
+
+
+
+loadWithdrawals();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+alert("Server connection failed");
+
+
+}
 
 
 }
@@ -718,216 +779,109 @@ location.reload();
 // ===============================
 
 
-function rejectWithdrawal(id){
-
-
-let withdrawals =
-JSON.parse(
-localStorage.getItem("cashnovaWithdrawals")
-) || [];
-
-
-
-let withdrawal =
-withdrawals.find(function(item){
-
-return item.id === id;
-
-});
-
-
-
-if(!withdrawal){
-
-alert("Withdrawal not found");
-
-return;
-
-}
-
-
-
-withdrawal.status =
-"Rejected";
-
-
-
-withdrawal.rejectedDate =
-new Date().toLocaleString();
-
-
-
-localStorage.setItem(
-"cashnovaWithdrawals",
-JSON.stringify(withdrawals)
-);
-
-
-
-alert("Withdrawal rejected");
-
-
-location.reload();
-
-
-}
-
-// =================================
-// ALL USERS MANAGEMENT
-// =================================
-
-
-function loadAllUsers(){
-
-
-let usersContainer =
-document.getElementById("usersContainer");
-
-
-let usersSection =
-document.getElementById("usersSection");
-
-
-
-if(!usersContainer){
-
-return;
-
-}
-
-async function loadAllUsers(){
-
-let usersContainer =
-document.getElementById("usersContainer");
-
-
-if(!usersContainer){
-    return;
-}
-
-
-usersContainer.innerHTML = `
-<div class="empty-state">
-Loading users...
-</div>
-`;
+async function rejectWithdrawal(id){
 
 
 try{
 
-let response = await fetch(
-"https://cashnova-backend-89lg.onrender.com/api/users"
+
+let response =
+await fetch(
+
+API +
+"/api/withdrawals/reject/" +
+id,
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+}
+
+}
+
 );
 
 
-let users = await response.json();
+
+let result =
+await response.json();
 
 
 
-usersContainer.innerHTML = "";
-
-
-if(users.length === 0){
-
-usersContainer.innerHTML = `
-<div class="empty-state">
-No users found
-</div>
-`;
-
-return;
-
-}
+alert(result.message);
 
 
 
-users.forEach(function(user){
+loadWithdrawals();
 
-
-let card =
-document.createElement("div");
-
-
-card.className =
-"user-card";
-
-
-
-card.innerHTML = `
-
-<h3>
-${user.fullName || "Unknown User"}
-</h3>
-
-
-<p>
-Username:
-<b>${user.username || ""}</b>
-</p>
-
-
-<p>
-Phone:
-${user.phone || ""}
-</p>
-
-
-<p>
-Account Number:
-${user.accountNumber || ""}
-</p>
-
-
-<p>
-Total Deposits:
-<b>
-UGX ${Number(user.totalDeposits || 0).toLocaleString()}
-</b>
-</p>
-
-
-<p>
-Registered:
-${user.registrationDate || ""}
-</p>
-
-
-<span class="user-status">
-${
-user.accountActivated
-?
-"Active"
-:
-"Inactive"
-}
-</span>
-
-`;
-
-
-
-usersContainer.appendChild(card);
-
-
-});
 
 
 }catch(error){
 
+
 console.log(error);
 
 
+alert("Server connection failed");
+
+
+}
+
+
+}
+   // =================================
+// ALL USERS MANAGEMENT
+// =================================
+
+
+async function loadAllUsers(){
+
+
+let usersContainer =
+document.getElementById("usersContainer");
+
+
+
+if(!usersContainer){
+
+return;
+
+}
+
+
+
 usersContainer.innerHTML = `
+
 <div class="empty-state">
-Failed to load users
+
+Loading users...
+
 </div>
+
 `;
 
-}
 
 
-}
+try{
 
+
+let response =
+await fetch(
+
+API +
+"/api/users"
+
+);
+
+
+
+let users =
+await response.json();
 
 
 
@@ -965,6 +919,7 @@ let card =
 document.createElement("div");
 
 
+
 card.className =
 "user-card";
 
@@ -972,13 +927,9 @@ card.className =
 
 card.innerHTML = `
 
-
 <h3>
-
 ${user.fullName || "Unknown User"}
-
 </h3>
-
 
 
 <p>
@@ -987,19 +938,16 @@ Username:
 </p>
 
 
-
 <p>
 Phone:
 ${user.phone || ""}
 </p>
 
 
-
 <p>
 Account Number:
 ${user.accountNumber || ""}
 </p>
-
 
 
 <p>
@@ -1010,12 +958,10 @@ UGX ${Number(user.totalDeposits || 0).toLocaleString()}
 </p>
 
 
-
 <p>
 Registered:
-${user.registrationDate || ""}
+${user.createdAt || ""}
 </p>
-
 
 
 <span class="user-status">
@@ -1030,7 +976,6 @@ user.accountActivated
 
 </span>
 
-
 `;
 
 
@@ -1042,7 +987,30 @@ usersContainer.appendChild(card);
 });
 
 
+
+}catch(error){
+
+
+console.log(error);
+
+
+
+usersContainer.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load users
+
+</div>
+
+`;
+
 }
+
+
+}
+
+
 
 
 
@@ -1067,17 +1035,24 @@ container.innerHTML = "";
 document.getElementById("usersSection").style.display="block";
 
 
+
 loadAllUsers();
 
 
 }
 
- // =================================
+
+
+
+
+
+// =================================
 // ACTIVE USERS MANAGEMENT
 // =================================
 
 
-function loadActiveUsers(){
+async function loadActiveUsers(){
+
 
 
 let activeContainer =
@@ -1093,26 +1068,39 @@ return;
 
 
 
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-) || [];
+activeContainer.innerHTML = `
+
+<div class="empty-state">
+
+Loading active users...
+
+</div>
+
+`;
 
 
 
-activeContainer.innerHTML = "";
+
+try{
+
+
+let response =
+await fetch(
+
+API +
+"/api/admin/active-users"
+
+);
 
 
 
 let activeUsers =
-users.filter(function(user){
+await response.json();
 
 
-return user.accountActivated === true ||
-user.firstDepositCompleted === true;
 
 
-});
+activeContainer.innerHTML = "";
 
 
 
@@ -1190,7 +1178,9 @@ ${user.accountNumber || ""}
 <p>
 Total Deposits:
 <b>
+
 UGX ${Number(user.totalDeposits || 0).toLocaleString()}
+
 </b>
 </p>
 
@@ -1198,9 +1188,13 @@ UGX ${Number(user.totalDeposits || 0).toLocaleString()}
 
 <p>
 Status:
+
 <span class="user-status">
+
 Active
+
 </span>
+
 </p>
 
 
@@ -1215,7 +1209,30 @@ activeContainer.appendChild(card);
 });
 
 
+
+}catch(error){
+
+
+console.log(error);
+
+
+
+activeContainer.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load active users
+
+</div>
+
+`;
+
 }
+
+
+}
+
+
 
 
 
@@ -1239,16 +1256,17 @@ container.innerHTML = "";
 document.getElementById("activeUsersSection").style.display="block";
 
 
+
 loadActiveUsers();
 
 
 }
-// =================================
+   // =================================
 // FINANCIAL RECORDS MANAGEMENT
 // =================================
 
 
-function loadFinancialRecords(){
+async function loadFinancialRecords(){
 
 
 let financialContainer =
@@ -1263,92 +1281,39 @@ return;
 
 
 
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-) || [];
+
+financialContainer.innerHTML = `
+
+<div class="empty-state">
+
+Loading financial records...
+
+</div>
+
+`;
+
+
+
+try{
+
+
+let response =
+await fetch(
+
+API +
+"/api/admin/financial-records"
+
+);
+
+
+
+let records =
+await response.json();
+
 
 
 
 financialContainer.innerHTML = "";
-
-
-
-let records = [];
-
-
-
-// COLLECT ALL USER RECORDS
-
-users.forEach(function(user){
-
-
-
-if(user.incomeRecords){
-
-
-user.incomeRecords.forEach(function(record){
-
-
-records.push({
-
-username:user.username,
-
-type:record.type,
-
-amount:record.amount,
-
-status:record.status,
-
-date:record.date,
-
-transactionId:
-record.mobileMoneyTransactionId || ""
-
-
-});
-
-
-});
-
-
-}
-
-
-
-if(user.transactionHistory){
-
-
-user.transactionHistory.forEach(function(record){
-
-
-records.push({
-
-username:user.username,
-
-type:record.type,
-
-amount:record.amount,
-
-status:record.status,
-
-date:record.date,
-
-transactionId:
-record.mobileMoneyTransactionId || ""
-
-
-});
-
-
-});
-
-
-}
-
-
-
-});
 
 
 
@@ -1407,7 +1372,7 @@ ${record.type || "Transaction"}
 <p>
 User:
 <b>
-${record.username}
+${record.username || ""}
 </b>
 </p>
 
@@ -1436,21 +1401,6 @@ ${record.date || ""}
 
 
 
-${
-record.transactionId
-?
-`
-<p>
-Transaction ID:
-${record.transactionId}
-</p>
-`
-:
-""
-}
-
-
-
 `;
 
 
@@ -1460,6 +1410,27 @@ financialContainer.appendChild(card);
 
 
 });
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+
+financialContainer.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load financial records
+
+</div>
+
+`;
+
+}
 
 
 }
@@ -1490,10 +1461,13 @@ let financialSection =
 document.getElementById("financialSection");
 
 
+
 if(financialSection){
+
 
 financialSection.style.display =
 "block";
+
 
 }
 
@@ -1503,73 +1477,125 @@ loadFinancialRecords();
 
 
 }
-  // =================================
+
+
+
+
+
+
+
+// =================================
 // DEPOSIT RECORDS
 // =================================
 
-function loadDepositRecords(){
 
-let box = document.getElementById("financialContainer");
+async function loadDepositRecords(){
 
-if(!box) return;
+
+let box =
+document.getElementById("financialContainer");
+
+
+
+if(!box){
+
+return;
+
+}
+
+
+
+
+let response =
+await fetch(
+
+API +
+"/api/admin/deposit-records"
+
+);
+
 
 
 let deposits =
-JSON.parse(
-localStorage.getItem("cashnovaDeposits")
-) || [];
+await response.json();
 
 
-box.innerHTML="";
+
+
+box.innerHTML = "";
+
+
 
 
 deposits.forEach(function(item){
 
 
-let card=document.createElement("div");
 
-card.className="record-card";
+let card =
+document.createElement("div");
 
 
-card.innerHTML=`
+
+card.className =
+"record-card";
+
+
+
+card.innerHTML = `
+
 
 <h3>
 Deposit Record
 </h3>
 
+
 <p>
-User: ${item.username}
+User:
+${item.username}
 </p>
+
 
 <p>
 Amount:
-UGX ${Number(item.amount).toLocaleString()}
+
+UGX ${Number(item.amount || 0).toLocaleString()}
+
 </p>
+
 
 <p>
 Status:
+
 ${item.status}
+
 </p>
 
-<p>
-Transaction ID:
-${item.mobileMoneyTransactionId || ""}
-</p>
+
 
 <p>
 Date:
+
 ${item.date}
+
 </p>
 
+
 `;
+
 
 
 box.appendChild(card);
 
 
+
 });
 
+
 }
+
+
+
+
 
 
 
@@ -1578,36 +1604,62 @@ box.appendChild(card);
 // WITHDRAWAL RECORDS
 // =================================
 
-function loadWithdrawalRecords(){
+
+async function loadWithdrawalRecords(){
 
 
 let box =
 document.getElementById("financialContainer");
 
 
-if(!box)return;
+
+if(!box){
+
+return;
+
+}
+
+
+
+
+
+let response =
+await fetch(
+
+API +
+"/api/admin/withdrawal-records"
+
+);
 
 
 
 let withdrawals =
-JSON.parse(
-localStorage.getItem("cashnovaWithdrawals")
-)||[];
+await response.json();
 
 
-box.innerHTML="";
+
+
+box.innerHTML = "";
+
 
 
 
 withdrawals.forEach(function(item){
 
 
-let card=document.createElement("div");
 
-card.className="record-card";
+let card =
+document.createElement("div");
 
 
-card.innerHTML=`
+
+card.className =
+"record-card";
+
+
+
+card.innerHTML = `
+
 
 <h3>
 Withdrawal Record
@@ -1622,25 +1674,34 @@ ${item.username}
 
 <p>
 Amount:
-UGX ${Number(item.amount).toLocaleString()}
+
+UGX ${Number(item.amount || 0).toLocaleString()}
+
 </p>
 
 
 <p>
 Status:
+
 ${item.status}
+
 </p>
 
 
 <p>
 Date:
+
 ${item.date}
+
 </p>
+
 
 `;
 
 
+
 box.appendChild(card);
+
 
 
 });
@@ -1651,9 +1712,7 @@ box.appendChild(card);
 
 
 
-// =================================
-// OPEN RECORD SECTIONS
-// =================================
+
 
 
 if(section==="deposit-records"){
@@ -1661,15 +1720,22 @@ if(section==="deposit-records"){
 
 title.innerHTML="Deposit Records";
 
+
 container.innerHTML="";
 
+
 document.getElementById("financialSection").style.display="block";
+
 
 
 loadDepositRecords();
 
 
+
 }
+
+
+
 
 
 
@@ -1678,78 +1744,78 @@ if(section==="withdrawal-records"){
 
 title.innerHTML="Withdrawal Records";
 
+
 container.innerHTML="";
 
+
 document.getElementById("financialSection").style.display="block";
+
 
 
 loadWithdrawalRecords();
 
 
+
 }
-  // =================================
+   // =================================
 // INCOME RECORDS
 // =================================
 
-function loadIncomeRecords(){
+
+async function loadIncomeRecords(){
+
 
 let box =
 document.getElementById("financialContainer");
 
 
-if(!box)return;
+if(!box){
 
-
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-)||[];
-
-
-box.innerHTML="";
-
-
-let records=[];
-
-
-users.forEach(function(user){
-
-
-if(user.incomeRecords){
-
-
-user.incomeRecords.forEach(function(record){
-
-
-records.push({
-
-username:user.username,
-
-type:record.type,
-
-amount:record.amount,
-
-status:record.status,
-
-date:record.date
-
-});
-
-
-});
-
+return;
 
 }
 
 
-});
+
+box.innerHTML = `
+
+<div class="empty-state">
+
+Loading income records...
+
+</div>
+
+`;
 
 
 
-if(records.length===0){
+try{
 
 
-box.innerHTML=`
+let response =
+await fetch(
+
+API +
+"/api/admin/income-records"
+
+);
+
+
+
+let records =
+await response.json();
+
+
+
+box.innerHTML = "";
+
+
+
+
+if(records.length === 0){
+
+
+box.innerHTML = `
 
 <div class="empty-state">
 
@@ -1765,62 +1831,104 @@ return;
 
 
 
+
 records.reverse();
+
 
 
 
 records.forEach(function(record){
 
 
-let card=document.createElement("div");
+
+let card =
+document.createElement("div");
 
 
-card.className="record-card";
+
+card.className =
+"record-card";
 
 
-card.innerHTML=`
+
+card.innerHTML = `
+
 
 <h3>
-${record.type}
+${record.type || "Income"}
 </h3>
+
 
 
 <p>
 User:
-<b>${record.username}</b>
-</p>
-
-
-<p>
-Amount:
 <b>
-UGX ${Number(record.amount).toLocaleString()}
+${record.username || ""}
 </b>
 </p>
 
 
+
+<p>
+Amount:
+
+<b>
+UGX ${Number(record.amount || 0).toLocaleString()}
+</b>
+
+</p>
+
+
+
 <p>
 Status:
-${record.status}
+${record.status || ""}
 </p>
+
 
 
 <p>
 Date:
-${record.date}
+${record.date || ""}
 </p>
+
 
 
 `;
 
 
+
 box.appendChild(card);
+
 
 
 });
 
 
+
+}catch(error){
+
+
+console.log(error);
+
+
+
+box.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load income records
+
+</div>
+
+`;
+
 }
+
+
+}
+
+
 
 
 
@@ -1834,83 +1942,81 @@ title.innerHTML="Income Records";
 container.innerHTML="";
 
 
+
 document.getElementById("financialSection").style.display="block";
+
 
 
 loadIncomeRecords();
 
 
+
 }
-  // =================================
+
+
+
+
+
+
+
+
+// =================================
 // REFERRAL RECORDS
 // =================================
 
-function loadReferralRecords(){
+
+async function loadReferralRecords(){
+
 
 
 let box =
 document.getElementById("financialContainer");
 
 
-if(!box)return;
 
+if(!box){
 
-
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-)||[];
-
-
-box.innerHTML="";
-
-
-let records=[];
-
-
-
-users.forEach(function(user){
-
-
-
-if(user.transactionHistory){
-
-
-user.transactionHistory.forEach(function(record){
-
-
-if(
-record.type &&
-record.type.toLowerCase().includes("referral")
-){
-
-
-records.push({
-
-username:user.username,
-
-type:record.type,
-
-amount:record.amount,
-
-status:record.status,
-
-date:record.date
-
-
-});
-
+return;
 
 }
 
 
-});
 
 
-}
+box.innerHTML = `
+
+<div class="empty-state">
+
+Loading referral records...
+
+</div>
+
+`;
 
 
-});
+
+
+try{
+
+
+let response =
+await fetch(
+
+API +
+"/api/admin/referral-records"
+
+);
+
+
+
+let records =
+await response.json();
+
+
+
+
+box.innerHTML = "";
+
 
 
 
@@ -1918,7 +2024,7 @@ date:record.date
 if(records.length===0){
 
 
-box.innerHTML=`
+box.innerHTML = `
 
 <div class="empty-state">
 
@@ -1928,9 +2034,7 @@ No referral records found
 
 `;
 
-
 return;
-
 
 }
 
@@ -1953,43 +2057,51 @@ document.createElement("div");
 
 
 
-card.className="record-card";
+card.className =
+"record-card";
 
 
 
-card.innerHTML=`
+card.innerHTML = `
+
 
 <h3>
-${record.type}
+${record.type || "Referral Bonus"}
 </h3>
 
 
 <p>
 User:
 <b>
-${record.username}
+${record.username || ""}
 </b>
 </p>
+
 
 
 <p>
 Commission:
+
 <b>
-UGX ${Number(record.amount).toLocaleString()}
+UGX ${Number(record.amount || 0).toLocaleString()}
 </b>
+
 </p>
+
 
 
 <p>
 Status:
-${record.status}
+${record.status || ""}
 </p>
+
 
 
 <p>
 Date:
-${record.date}
+${record.date || ""}
 </p>
+
 
 
 `;
@@ -2004,7 +2116,28 @@ box.appendChild(card);
 
 
 
+}catch(error){
+
+
+console.log(error);
+
+
+
+box.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load referral records
+
+</div>
+
+`;
+
 }
+
+
+}
+
 
 
 
@@ -2018,42 +2151,89 @@ title.innerHTML="Referral Records";
 container.innerHTML="";
 
 
+
 document.getElementById("financialSection").style.display="block";
+
 
 
 loadReferralRecords();
 
 
+
 }
-  // =================================
+
+
+
+
+
+
+
+
+
+// =================================
 // ANNOUNCEMENTS
 // =================================
 
-function loadAnnouncements(){
+
+async function loadAnnouncements(){
 
 
 let box =
 document.getElementById("announcementContainer");
 
 
-if(!box)return;
+
+if(!box){
+
+return;
+
+}
+
+
+
+
+box.innerHTML = `
+
+<div class="empty-state">
+
+Loading announcements...
+
+</div>
+
+`;
+
+
+
+
+try{
+
+
+let response =
+await fetch(
+
+API +
+"/api/admin/announcements"
+
+);
 
 
 
 let announcements =
-JSON.parse(
-localStorage.getItem("cashnovaAnnouncements")
-)||[];
+await response.json();
 
 
-box.innerHTML="";
+
+
+box.innerHTML = "";
+
+
 
 
 
 if(announcements.length===0){
 
 
-box.innerHTML=`
+box.innerHTML = `
 
 <div class="empty-state">
 
@@ -2071,10 +2251,6 @@ return;
 
 
 
-announcements.reverse();
-
-
-
 announcements.forEach(function(item){
 
 
@@ -2083,14 +2259,19 @@ let card =
 document.createElement("div");
 
 
-card.className="record-card";
+
+card.className =
+"record-card";
 
 
-card.innerHTML=`
+
+card.innerHTML = `
+
 
 <h3>
 ${item.title || "Announcement"}
 </h3>
+
 
 
 <p>
@@ -2098,15 +2279,22 @@ ${item.message || ""}
 </p>
 
 
+
 <p>
 Date:
+
 ${item.date || ""}
+
 </p>
 
 
+
 <button class="delete-announcement-btn">
+
 Delete Announcement
+
 </button>
+
 
 `;
 
@@ -2114,40 +2302,67 @@ Delete Announcement
 
 box.appendChild(card);
 
+
+
 card.querySelector(".delete-announcement-btn").onclick =
-function(){
-
-let announcements =
-JSON.parse(
-localStorage.getItem("cashnovaAnnouncements")
-) || [];
+async function(){
 
 
-announcements =
-announcements.filter(function(a){
 
-return a.date !== item.date;
+await fetch(
 
-});
+API +
+"/api/admin/announcements/" +
+item._id,
 
+{
 
-localStorage.setItem(
-"cashnovaAnnouncements",
-JSON.stringify(announcements)
+method:"DELETE"
+
+}
+
 );
+
 
 
 alert("Announcement removed successfully");
 
 
+
 loadAnnouncements();
 
+
+
 };
+
+
 
 });
 
 
+
+}catch(error){
+
+
+console.log(error);
+
+
+
+box.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load announcements
+
+</div>
+
+`;
+
 }
+
+
+}
+
 
 
 
@@ -2164,25 +2379,28 @@ container.innerHTML="";
 document.getElementById("announcementSection").style.display="block";
 
 
+
 loadAnnouncements();
 
 
+
 }
-  
-
-
-// =================================
+  // =================================
 // ADMIN SETTINGS PANEL
 // =================================
 
-function loadAdminSettings(){
+async function loadAdminSettings(){
 
 
 let box =
 document.getElementById("managementContainer");
 
 
-if(!box)return;
+if(!box){
+
+return;
+
+}
 
 
 
@@ -2273,11 +2491,15 @@ Save Platform Settings
 
 <div class="settings-item">
 
+<h4>
+Deposit Rules
+</h4>
+
+
 <input 
 type="number"
 id="minimumDeposit"
 placeholder="Minimum Deposit"
-value="15000"
 >
 
 
@@ -2285,7 +2507,6 @@ value="15000"
 type="number"
 id="registrationBonus"
 placeholder="Registration Bonus"
-value="5000"
 >
 
 
@@ -2293,18 +2514,12 @@ value="5000"
 type="number"
 id="dailyLoginBonus"
 placeholder="Daily Login Bonus"
-value="100"
 >
 
 
 <button id="saveDepositRulesBtn">
 Save Deposit Rules
 </button>
-
-
-<p>
-Minimum Deposit: UGX 15,000
-</p>
 
 
 </div>
@@ -2329,15 +2544,13 @@ Withdrawal Rules
 type="number"
 id="minimumWithdrawal"
 placeholder="Minimum Withdrawal"
-value="5000"
 >
 
 
 <input 
 type="number"
 id="withdrawalFee"
-placeholder="Withdrawal Fee Percentage"
-value="14"
+placeholder="Withdrawal Fee"
 >
 
 
@@ -2345,18 +2558,12 @@ value="14"
 type="number"
 id="dailyWithdrawalLimit"
 placeholder="Daily Withdrawal Limit"
-value="2"
 >
 
 
 <button id="saveWithdrawalRulesBtn">
 Save Withdrawal Rules
 </button>
-
-
-<p>
-Minimum Withdrawal: UGX 5,000
-</p>
 
 
 </div>
@@ -2398,14 +2605,6 @@ Save Maintenance Status
 </button>
 
 
-<p>
-System Status:
-<span class="user-status">
-Active
-</span>
-</p>
-
-
 </div>
 
 
@@ -2417,8 +2616,67 @@ Active
 
 
 
+// ===============================
+// LOAD CURRENT SETTINGS
+// ===============================
 
+
+try{
+
+
+let response =
+await fetch(
+API + "/api/admin/settings"
+);
+
+
+let settings =
+await response.json();
+
+
+
+if(settings){
+
+
+document.getElementById("platformName").value =
+settings.platformName || "";
+
+
+document.getElementById("supportContact").value =
+settings.supportContact || "";
+
+
+document.getElementById("minimumDeposit").value =
+settings.minimumDeposit || "";
+
+
+document.getElementById("minimumWithdrawal").value =
+settings.minimumWithdrawal || "";
+
+
+document.getElementById("withdrawalFee").value =
+settings.withdrawalFee || "";
+
+
+document.getElementById("dailyWithdrawalLimit").value =
+settings.dailyWithdrawalLimit || "";
+
+
+}
+
+
+
+}catch(error){
+
+console.log(error);
+
+}
+
+
+
+// ===============================
 // CHANGE PASSWORD
+// ===============================
 
 let changeBtn =
 document.getElementById("changePasswordBtn");
@@ -2430,26 +2688,14 @@ if(changeBtn){
 changeBtn.onclick=function(){
 
 
-let oldPassword =
-document.getElementById("oldAdminPassword").value;
-
-
 let newPassword =
 document.getElementById("newAdminPassword").value;
 
 
 
-let adminPassword =
-localStorage.getItem("cashnovaAdminPassword")
-|| "admin123";
+if(newPassword === ""){
 
-
-
-if(oldPassword !== adminPassword){
-
-
-alert("Wrong current password");
-
+alert("Enter new password");
 
 return;
 
@@ -2473,72 +2719,58 @@ alert("Admin password changed successfully");
 }
 
 
-}
 
 
 
 
-
-
-
-if(section==="settings"){
-
-
-title.innerHTML =
-"Admin Settings";
-
-
-document.getElementById("financialSection").style.display="none";
-
-document.getElementById("announcementSection").style.display="none";
-
-document.getElementById("usersSection").style.display="none";
-
-document.getElementById("activeUsersSection").style.display="none";
-
-
-loadAdminSettings();
+// ===============================
 // SAVE PLATFORM SETTINGS
+// ===============================
+
 
 let savePlatformBtn =
 document.getElementById("savePlatformBtn");
 
 
+
 if(savePlatformBtn){
 
 
-savePlatformBtn.onclick=function(){
+savePlatformBtn.onclick=async function(){
 
 
-let platformName =
-document.getElementById("platformName").value;
+let data = {
 
 
-let supportContact =
-document.getElementById("supportContact").value;
+platformName:
+document.getElementById("platformName").value,
 
 
-
-let settings = {
-
-
-platformName:platformName,
-
-supportContact:supportContact,
-
-updatedDate:
-new Date().toLocaleString()
+supportContact:
+document.getElementById("supportContact").value
 
 
 };
 
 
 
-localStorage.setItem(
+await fetch(
 
-"cashnovaPlatformSettings",
+API + "/api/admin/settings",
 
-JSON.stringify(settings)
+{
+
+method:"PUT",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify(data)
+
+}
 
 );
 
@@ -2550,21 +2782,31 @@ alert("Platform settings saved");
 };
 
 
-
 }
+
+
+
+
+
+
+// ===============================
 // SAVE DEPOSIT RULES
+// ===============================
+
 
 let saveDepositRulesBtn =
 document.getElementById("saveDepositRulesBtn");
 
 
+
 if(saveDepositRulesBtn){
 
 
-saveDepositRulesBtn.onclick=function(){
+saveDepositRulesBtn.onclick=async function(){
 
 
-let rules = {
+
+let data = {
 
 
 minimumDeposit:
@@ -2582,22 +2824,30 @@ document.getElementById("registrationBonus").value
 dailyLoginBonus:
 Number(
 document.getElementById("dailyLoginBonus").value
-),
-
-
-updatedDate:
-new Date().toLocaleString()
+)
 
 
 };
 
 
 
-localStorage.setItem(
+await fetch(
 
-"cashnovaDepositRules",
+API + "/api/admin/settings",
 
-JSON.stringify(rules)
+{
+
+method:"PUT",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify(data)
+
+}
 
 );
 
@@ -2610,19 +2860,30 @@ alert("Deposit rules saved successfully");
 
 
 }
- // SAVE WITHDRAWAL RULES
+
+
+
+
+
+
+// ===============================
+// SAVE WITHDRAWAL RULES
+// ===============================
+
 
 let saveWithdrawalRulesBtn =
 document.getElementById("saveWithdrawalRulesBtn");
 
 
+
 if(saveWithdrawalRulesBtn){
 
 
-saveWithdrawalRulesBtn.onclick=function(){
+saveWithdrawalRulesBtn.onclick=async function(){
 
 
-let rules = {
+
+let data = {
 
 
 minimumWithdrawal:
@@ -2640,22 +2901,30 @@ document.getElementById("withdrawalFee").value
 dailyWithdrawalLimit:
 Number(
 document.getElementById("dailyWithdrawalLimit").value
-),
-
-
-updatedDate:
-new Date().toLocaleString()
+)
 
 
 };
 
 
 
-localStorage.setItem(
+await fetch(
 
-"cashnovaWithdrawalRules",
+API + "/api/admin/settings",
 
-JSON.stringify(rules)
+{
+
+method:"PUT",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify(data)
+
+}
 
 );
 
@@ -2667,18 +2936,29 @@ alert("Withdrawal rules saved successfully");
 };
 
 
-} 
-  // SAVE MAINTENANCE MODE
+}
+
+
+
+
+
+
+
+// ===============================
+// SAVE MAINTENANCE
+// ===============================
 
 
 let saveMaintenanceBtn =
 document.getElementById("saveMaintenanceBtn");
 
 
+
 if(saveMaintenanceBtn){
 
 
-saveMaintenanceBtn.onclick=function(){
+saveMaintenanceBtn.onclick=async function(){
+
 
 
 let status =
@@ -2686,25 +2966,27 @@ document.getElementById("maintenanceStatus").value;
 
 
 
-let maintenance = {
+await fetch(
 
+API + "/api/admin/maintenance",
 
-status:status,
+{
 
+method:"PUT",
 
-updatedDate:
-new Date().toLocaleString()
+headers:{
 
+"Content-Type":"application/json"
 
-};
+},
 
+body:JSON.stringify({
 
+status:status
 
-localStorage.setItem(
+})
 
-"cashnovaMaintenance",
-
-JSON.stringify(maintenance)
+}
 
 );
 
@@ -2716,278 +2998,8 @@ alert("Maintenance status updated");
 };
 
 
-
-}
-}
-  // =================================
-// CREATE ANNOUNCEMENT
-// =================================
-
-function createAnnouncement(){
-
-
-let text =
-document.getElementById("announcementText");
-
-
-if(!text){
-
-return;
-
 }
 
 
-
-let message =
-text.value.trim();
-
-
-
-if(message === ""){
-
-
-alert("Please write an announcement");
-
-
-return;
-
-}
-
-
-
-let announcements =
-JSON.parse(
-localStorage.getItem("cashnovaAnnouncements")
-) || [];
-
-
-
-announcements.push({
-
-title:"CashNova Announcement",
-
-message:message,
-
-date:new Date().toLocaleString()
-
-});
-
-
-
-localStorage.setItem(
-"cashnovaAnnouncements",
-JSON.stringify(announcements)
-);
-
-
-
-alert("Announcement posted successfully");
-
-
-text.value="";
-
-
-loadAnnouncements();
-
-
-}
-
-
-
-// CONNECT BUTTON
-
-let addAnnouncementBtn =
-document.getElementById("addAnnouncementBtn");
-
-
-
-if(addAnnouncementBtn){
-
-
-addAnnouncementBtn.onclick =
-function(){
-
-createAnnouncement();
-
-};
-
-
-}
-  // =================================
-// UPDATE TEAM MEMBER
-// =================================
-
-function updateTeamMemberDeposit(user, users){
-
-users.forEach(function(owner){
-
-
-if(!owner.teamMembers){
-
-return;
-
-}
-
-
-owner.teamMembers.forEach(function(member){
-
-
-if(member.username === user.username){
-
-
-member.depositStatus = "Active";
-
-
-member.firstDepositAmount =
-Number(user.firstDepositAmount || 0);
-
-
-
-member.totalDeposits =
-Number(user.totalDeposits || 0);
-
-
-
-let rate = 0;
-
-
-if(Number(member.level) === 1){
-
-rate = 20;
-
-}
-else if(Number(member.level) === 2){
-
-rate = 3;
-
-}
-else if(Number(member.level) === 3){
-
-rate = 1;
-
-}
-
-
-
-member.commissionRate =
-rate + "%";
-
-
-
-member.commissionEarned =
-Number(member.firstDepositAmount || 0)
-*
-rate / 100;
-
-
-}
-
-
-});
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-// =================================
-// REFERRAL BONUS
-// =================================
-
-function calculateReferralBonus(user, amount, users){
-
-    let percentages = [20, 3, 1];
-
-    let currentUser = user;
-
-
-    for(let i = 0; i < 3; i++){
-
-
-        if(!currentUser.referredBy){
-
-            break;
-
-        }
-
-
-
-        let referrer = users.find(function(item){
-
-            return item.myReferralCode === currentUser.referredBy;
-
-        });
-
-
-
-        if(!referrer){
-
-            break;
-
-        }
-
-
-
-        let bonus =
-        Number(amount) * percentages[i] / 100;
-
-
-
-        // ADD BONUS TO WALLET
-
-        referrer.walletBalance =
-        Number(referrer.walletBalance || 0)
-        +
-        bonus;
-
-
-
-        // ADD REFERRAL INCOME
-
-        referrer.referralIncome =
-        Number(referrer.referralIncome || 0)
-        +
-        bonus;
-
-
-
-        // CREATE TRANSACTION HISTORY
-
-        if(!referrer.transactionHistory){
-
-            referrer.transactionHistory = [];
-
-        }
-
-
-
-        referrer.transactionHistory.push({
-
-            type:
-            "Level " + (i + 1) + " Referral Bonus",
-
-            amount: bonus,
-
-            status: "Credited",
-
-            date: new Date().toLocaleString()
-
-        });
-
-
-
-        currentUser = referrer;
-
-
-    }
-
-
-}
-});
+} 
+   
