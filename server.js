@@ -20,8 +20,6 @@ app.use(express.json());
 connectDB();
 
 
-// Routes
-const userRoutes = require("./userRoutes");
 
 app.use("/api/users", userRoutes);
 app.use("/api/deposits", depositRoutes);
