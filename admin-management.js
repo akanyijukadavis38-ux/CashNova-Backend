@@ -795,12 +795,140 @@ return;
 
 }
 
+async function loadAllUsers(){
+
+let usersContainer =
+document.getElementById("usersContainer");
 
 
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-) || [];
+if(!usersContainer){
+    return;
+}
+
+
+usersContainer.innerHTML = `
+<div class="empty-state">
+Loading users...
+</div>
+`;
+
+
+try{
+
+let response = await fetch(
+"https://cashnova-backend-89lg.onrender.com/api/users"
+);
+
+
+let users = await response.json();
+
+
+
+usersContainer.innerHTML = "";
+
+
+if(users.length === 0){
+
+usersContainer.innerHTML = `
+<div class="empty-state">
+No users found
+</div>
+`;
+
+return;
+
+}
+
+
+
+users.forEach(function(user){
+
+
+let card =
+document.createElement("div");
+
+
+card.className =
+"user-card";
+
+
+
+card.innerHTML = `
+
+<h3>
+${user.fullName || "Unknown User"}
+</h3>
+
+
+<p>
+Username:
+<b>${user.username || ""}</b>
+</p>
+
+
+<p>
+Phone:
+${user.phone || ""}
+</p>
+
+
+<p>
+Account Number:
+${user.accountNumber || ""}
+</p>
+
+
+<p>
+Total Deposits:
+<b>
+UGX ${Number(user.totalDeposits || 0).toLocaleString()}
+</b>
+</p>
+
+
+<p>
+Registered:
+${user.registrationDate || ""}
+</p>
+
+
+<span class="user-status">
+${
+user.accountActivated
+?
+"Active"
+:
+"Inactive"
+}
+</span>
+
+`;
+
+
+
+usersContainer.appendChild(card);
+
+
+});
+
+
+}catch(error){
+
+console.log(error);
+
+
+usersContainer.innerHTML = `
+<div class="empty-state">
+Failed to load users
+</div>
+`;
+
+}
+
+
+}
+
+
 
 
 
