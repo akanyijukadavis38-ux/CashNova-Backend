@@ -1,11 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./db");
+
 const depositRoutes = require("./depositRoutes");
 const withdrawalRoutes = require("./withdrawalRoutes");
+const userRoutes = require("./userRoutes");
+const adminRoutes = require("./adminRoutes");
+
 const app = express();
-
-
 // Allow frontend connection
 app.use(cors());
 
@@ -24,6 +26,7 @@ const userRoutes = require("./userRoutes");
 app.use("/api/users", userRoutes);
 app.use("/api/deposits", depositRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
+app.use("/api/admin", adminRoutes);
 // Test route
 app.get("/", function(req, res){
 
