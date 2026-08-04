@@ -462,7 +462,6 @@ message:error.message
 // ANNOUNCEMENTS
 // =====================================
 
-const Announcement = require("./Announcement");
 
 
 // GET ANNOUNCEMENTS
@@ -567,7 +566,7 @@ message:error.message
 // ADMIN SETTINGS
 // =====================================
 
-const Settings = require("./Settings");
+
 
 
 // GET SETTINGS
