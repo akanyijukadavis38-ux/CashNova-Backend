@@ -14,12 +14,14 @@ let response = await fetch(
 users = await response.json();
 
 
-
 let deposits = [];
 
 let depositResponse = await fetch(
 "https://cashnova-backend-89lg.onrender.com/api/admin/deposit-records"
 );
+
+deposits = await depositResponse.json();
+
 
 
 let withdrawals = [];
@@ -27,6 +29,8 @@ let withdrawals = [];
 let withdrawalResponse = await fetch(
 "https://cashnova-backend-89lg.onrender.com/api/admin/withdrawal-records"
 );
+
+withdrawals = await withdrawalResponse.json();
 
 
 
