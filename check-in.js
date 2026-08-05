@@ -24,40 +24,24 @@ document.getElementById("totalBonus");
 
 // LOAD CURRENT USER DATA
 
-function getUserData(){
+async function getUserData(){
 
+let userId =
+localStorage.getItem("cashnovaUserId");
 
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-) || [];
+if(!userId){
 
+return null;
 
+}
 
-let username =
-localStorage.getItem("cashnovaCurrentUser");
+let response = await fetch(
 
+"https://cashnova-backend-89lg.onrender.com/api/users/" + userId
 
+);
 
-let index =
-users.findIndex(function(user){
-
-return user.username === username;
-
-});
-
-
-
-return {
-
-users: users,
-
-index: index,
-
-user: users[index]
-
-};
-
+return await response.json();
 
 }
 
@@ -68,38 +52,34 @@ user: users[index]
 
 
 // SHOW TOTAL CHECK-IN BONUS
+async function displayTotalBonus(){
 
-function displayTotalBonus(){
+let user = await getUserData();
 
-
-let data = getUserData();
-
-
-if(!data.user){
+if(!user){
 
 return;
 
 }
 
-
-
-let total =
-data.user.totalCheckInBonus || 0;
-
-
-
 totalBonus.innerHTML =
-
-"UGX " + Number(total).toLocaleString();
-
+"UGX " +
+Number(user.totalCheckInBonus || 0).toLocaleString();
 
 }
 
-
-
-
-
 displayTotalBonus();
+
+
+
+
+
+
+
+
+
+
+
 
 
 
