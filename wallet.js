@@ -92,28 +92,8 @@ user.walletBalance || 0
 // ===============================
 
 
-let totalIncome = 0;
-
-
-
-if(user.incomeRecords){
-
-
-user.incomeRecords.forEach(function(record){
-
-
-if(record.type !== "Deposit"){
-
-totalIncome +=
-Number(record.amount || 0);
-
-}
-
-
-});
-
-
-}
+let totalIncome =
+Number(user.cumulativeIncome || 0);
 
 
 
