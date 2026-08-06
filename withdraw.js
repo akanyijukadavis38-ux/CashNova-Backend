@@ -1,3 +1,4 @@
+alert("withdraw.js loaded");
 /* =================================
    CASHNOVA WITHDRAW SYSTEM
    MONGODB CONNECTED VERSION
