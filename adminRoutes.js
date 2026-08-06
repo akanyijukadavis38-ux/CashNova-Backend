@@ -92,13 +92,18 @@ date:record.date
 
 }
 
-
-
 // WITHDRAWALS
 
 if(user.withdrawalRecords){
 
 user.withdrawalRecords.forEach(function(record){
+
+
+if(
+record.status === "Approved" ||
+record.status === "Rejected"
+){
+
 
 records.push({
 
@@ -113,6 +118,9 @@ status:record.status,
 date:record.date
 
 });
+
+
+}
 
 
 });
