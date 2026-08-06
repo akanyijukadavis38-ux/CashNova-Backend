@@ -1414,5 +1414,140 @@ container.appendChild(card);
 
 
 } 
+ // =====================================
+// PART 6 - INDIVIDUAL FINANCIAL RECORDS
+// =====================================
+
+
+if(section === "deposit-records"){
+
+title.innerHTML =
+"Deposit Records";
+
+loadSpecificRecords("Deposit");
+
+}
+
+
+
+if(section === "withdrawal-records"){
+
+title.innerHTML =
+"Withdrawal Records";
+
+loadSpecificRecords("Withdrawal");
+
+}
+
+
+
+if(section === "income-records"){
+
+title.innerHTML =
+"Income Records";
+
+loadSpecificRecords("Income");
+
+}
+
+
+
+if(section === "referral-records"){
+
+title.innerHTML =
+"Referral Records";
+
+loadSpecificRecords("Referral");
+
+}
+
+
+
+
+
+async function loadSpecificRecords(type){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Loading ${type} records...
+
+</div>
+
+`;
+
+
+
+try{
+
+
+const response =
+await fetch(
+API + "/api/admin/financial-records"
+);
+
+
+
+const records =
+await response.json();
+
+
+
+const filtered =
+records.filter(function(record){
+
+
+if(type === "Income"){
+
+return (
+record.type !== "Deposit" &&
+record.type !== "Withdrawal" &&
+!record.type.toLowerCase().includes("referral")
+);
+
+}
+
+
+if(type === "Referral"){
+
+return record.type.toLowerCase().includes("referral");
+
+}
+
+
+
+return record.type === type;
+
+
+});
+
+
+
+displayFinancialRecords(filtered);
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load records
+
+</div>
+
+`;
+
+}
+
+
+} 
   
 });
