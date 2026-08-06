@@ -1417,56 +1417,32 @@ container.appendChild(card);
 // =====================================
 
 
-if(section === "deposit-records"){
-
-title.innerHTML =
-"Deposit Records";
-
-loadFilteredRecords("Deposit");
-
-}
+if(
+section === "deposit-records" ||
+section === "withdrawal-records" ||
+section === "income-records" ||
+section === "referral-records"
+){
 
 
-if(section === "withdrawal-records"){
+loadFinancialRecords(section);
 
-title.innerHTML =
-"Withdrawal Records";
-
-loadFilteredRecords("Withdrawal");
-
-}
-
-
-if(section === "income-records"){
-
-title.innerHTML =
-"Income Records";
-
-loadFilteredRecords("Income");
-
-}
-
-
-if(section === "referral-records"){
-
-title.innerHTML =
-"Referral Records";
-
-loadFilteredRecords("Referral");
 
 }
 
 
 
 
-async function loadFilteredRecords(type){
+
+
+async function loadFinancialRecords(type){
 
 
 container.innerHTML = `
 
 <div class="empty-state">
 
-Loading ${type} records...
+Loading records...
 
 </div>
 
@@ -1493,14 +1469,22 @@ let filteredRecords = [];
 
 
 
-if(type === "Deposit"){
+
+
+if(type === "deposit-records"){
+
+
+title.innerHTML =
+"Deposit Records";
 
 
 filteredRecords =
 records.filter(function(record){
+
 
 return record.type === "Deposit";
 
+
 });
 
 
@@ -1508,14 +1492,22 @@ return record.type === "Deposit";
 
 
 
-if(type === "Withdrawal"){
+
+
+if(type === "withdrawal-records"){
+
+
+title.innerHTML =
+"Withdrawal Records";
 
 
 filteredRecords =
 records.filter(function(record){
+
 
 return record.type === "Withdrawal";
 
+
 });
 
 
@@ -1523,17 +1515,24 @@ return record.type === "Withdrawal";
 
 
 
-if(type === "Income"){
+
+
+if(type === "income-records"){
+
+
+title.innerHTML =
+"Income Records";
 
 
 filteredRecords =
 records.filter(function(record){
+
 
 return (
-record.type !== "Deposit" &&
-record.type !== "Withdrawal" &&
-!record.type.toLowerCase().includes("referral")
+record.type.includes("Income") ||
+record.type === "Registration Bonus"
 );
+
 
 });
 
@@ -1542,13 +1541,24 @@ record.type !== "Withdrawal" &&
 
 
 
-if(type === "Referral"){
+
+
+if(type === "referral-records"){
+
+
+title.innerHTML =
+"Referral Records";
 
 
 filteredRecords =
 records.filter(function(record){
 
-return record.type.toLowerCase().includes("referral");
+
+return (
+record.type === "Referral Income" ||
+record.type === "Referral Bonus"
+);
+
 
 });
 
@@ -1557,7 +1567,9 @@ return record.type.toLowerCase().includes("referral");
 
 
 
-showRecords(filteredRecords);
+
+
+displayFinancialRecords(filteredRecords);
 
 
 
@@ -1585,7 +1597,11 @@ Failed to load records
 
 
 
-function showRecords(records){
+
+
+
+
+function displayFinancialRecords(records){
 
 
 container.innerHTML = "";
@@ -1611,28 +1627,38 @@ return;
 
 
 
+
+
 records.forEach(function(record){
+
 
 
 const card =
 document.createElement("div");
 
 
+
 card.className =
 "financial-card";
 
 
+
 card.innerHTML = `
 
+
 <h3>
-${record.type}
+${record.type || "Record"}
 </h3>
+
 
 
 <p>
 Username:
-<b>${record.username || ""}</b>
+<b>
+${record.username || ""}
+</b>
 </p>
+
 
 
 <p>
@@ -1643,10 +1669,12 @@ UGX ${Number(record.amount || 0).toLocaleString()}
 </p>
 
 
+
 <p>
 Status:
 ${record.status || ""}
 </p>
+
 
 
 <p>
@@ -1654,16 +1682,20 @@ Date:
 ${formatDate(record.date)}
 </p>
 
+
+
 `;
+
 
 
 container.appendChild(card);
 
 
+
 });
 
 
-} 
+}
 
 
   
