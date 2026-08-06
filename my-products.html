@@ -23,7 +23,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 <div class="products-page">
 
 
+
 <header class="products-header">
+
 
 <button class="back-button"
 onclick="history.back()">
@@ -39,9 +41,11 @@ onclick="history.back()">
 My Products
 </h1>
 
+
 <p>
 Track your active investments
 </p>
+
 
 </div>
 
@@ -57,19 +61,23 @@ Track your active investments
 
 <div class="banner-left">
 
+
 <h2>
 Your Investment Portfolio
 </h2>
 
 
 <p>
+
 Monitor every VIP investment,
 daily income and remaining days
 in one place.
+
 </p>
 
 
 </div>
+
 
 
 <div class="banner-icon">
@@ -86,11 +94,14 @@ in one place.
 
 
 
-<section
+
+<section 
 class="my-products-container"
 id="myProductsContainer">
 
+
 </section>
+
 
 
 
@@ -123,6 +134,8 @@ localStorage.getItem(
 
 
 
+
+
 if(!userId){
 
 
@@ -131,7 +144,7 @@ container.innerHTML = `
 <div class="empty-products">
 
 <h2>
-Login required
+Login Required
 </h2>
 
 <p>
@@ -141,6 +154,7 @@ Please login again.
 </div>
 
 `;
+
 
 return;
 
@@ -158,21 +172,13 @@ try{
 const response =
 await fetch(
 
-"https://cash-nova-backend.vercel.app/api/users/" + userId
+"https://cashnova-backend-89lg.onrender.com/api/users/" 
++
+userId
 
 );
 
 
-
-
-
-if(!response.ok){
-
-throw new Error(
-"Unable to load user"
-);
-
-}
 
 
 
@@ -184,7 +190,30 @@ await response.json();
 
 
 
-const myProducts =
+if(!response.ok){
+
+
+throw new Error(
+user.message || "Unable to load account"
+);
+
+
+}
+
+
+
+
+
+console.log(
+"Loaded User:",
+user
+);
+
+
+
+
+
+const products =
 user.purchasedProducts || [];
 
 
@@ -192,39 +221,31 @@ user.purchasedProducts || [];
 
 
 
-
-if(myProducts.length === 0){
-
+if(products.length === 0){
 
 
 container.innerHTML = `
 
-
 <div class="empty-products">
 
 
-<i class="fa-solid fa-box-open empty-icon"></i>
+<i class="fa-solid fa-box-open"></i>
 
 
 <h2>
-
 No Active Products
-
 </h2>
 
 
 <p>
-
-Purchase a VIP investment
-to see it here.
-
+Purchase a VIP investment to see it here.
 </p>
 
 
 </div>
 
-
 `;
+
 
 return;
 
@@ -236,21 +257,14 @@ return;
 
 
 
-
-
-myProducts.forEach(
-function(product){
+container.innerHTML = "";
 
 
 
-const card =
-document.createElement(
-"div"
-);
 
 
-card.className =
-"my-product-card";
+
+products.forEach(function(product){
 
 
 
@@ -268,6 +282,7 @@ new Date(product.endDate);
 
 const today =
 new Date();
+
 
 
 
@@ -293,16 +308,16 @@ Math.ceil(
 
 
 
-const totalEarned =
-product.totalEarned || 0;
+
+const card =
+document.createElement(
+"div"
+);
 
 
 
-
-
-const status =
-product.status || "Active";
-
+card.className =
+"my-product-card";
 
 
 
@@ -328,9 +343,7 @@ ${product.name}
 
 
 <p>
-
 VIP Investment Plan
-
 </p>
 
 
@@ -340,7 +353,7 @@ VIP Investment Plan
 
 <span class="status-badge">
 
-${status}
+${product.status || "Active"}
 
 </span>
 
@@ -354,13 +367,9 @@ ${status}
 
 <div class="product-icon">
 
-
 <i class="fa-solid fa-gem"></i>
 
-
 </div>
-
-
 
 
 
@@ -371,9 +380,7 @@ ${status}
 
 
 <small>
-
 Investment Amount
-
 </small>
 
 
@@ -392,7 +399,6 @@ UGX ${Number(product.price).toLocaleString()}
 
 
 
-
 <div class="stats-grid">
 
 
@@ -404,9 +410,7 @@ UGX ${Number(product.price).toLocaleString()}
 
 
 <span>
-
 Daily Income
-
 </span>
 
 
@@ -431,15 +435,13 @@ UGX ${Number(product.dailyIncome).toLocaleString()}
 
 
 <span>
-
 Total Earned
-
 </span>
 
 
 <b>
 
-UGX ${Number(totalEarned).toLocaleString()}
+UGX ${Number(product.totalEarned || 0).toLocaleString()}
 
 </b>
 
@@ -456,19 +458,16 @@ UGX ${Number(totalEarned).toLocaleString()}
 
 
 
-
 <div class="period-box">
 
 
 <p>
-
 Investment Period
-
 </p>
 
 
-<strong>
 
+<strong>
 
 ${startDate.toLocaleDateString()}
 
@@ -530,7 +529,9 @@ catch(error){
 
 
 
-console.log(error);
+console.log(
+error
+);
 
 
 
@@ -541,15 +542,13 @@ container.innerHTML = `
 
 
 <h2>
-
-Error loading products
-
+Error Loading Products
 </h2>
 
 
 <p>
 
-Please try again.
+${error.message}
 
 </p>
 
@@ -562,7 +561,6 @@ Please try again.
 
 
 }
-
 
 
 
