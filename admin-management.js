@@ -1240,4 +1240,175 @@ container.appendChild(card);
 
 
 }
+ // =====================================
+// PART 5 - FINANCIAL RECORDS
+// =====================================
+
+// OPEN FINANCIAL RECORDS
+
+if(section === "financial"){
+
+
+title.innerHTML =
+"Financial Records";
+
+
+loadFinancialRecords();
+
+
+}
+
+
+
+
+async function loadFinancialRecords(){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Loading financial records...
+
+</div>
+
+`;
+
+
+try{
+
+
+const response =
+await fetch(
+
+API + "/api/admin/financial-records"
+
+);
+
+
+const records =
+await response.json();
+
+
+displayFinancialRecords(records);
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load financial records
+
+</div>
+
+`;
+
+}
+
+
+}
+
+
+
+
+
+function displayFinancialRecords(records){
+
+
+container.innerHTML = "";
+
+
+if(records.length === 0){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+No financial records found
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+
+records.forEach(function(record){
+
+
+const card =
+document.createElement("div");
+
+
+card.className =
+"financial-card";
+
+
+card.innerHTML = `
+
+<h3>
+
+${record.type || "Record"}
+
+</h3>
+
+
+<p>
+
+Username:
+<b>
+${record.username || ""}
+</b>
+
+</p>
+
+
+<p>
+
+Amount:
+<b>
+
+UGX ${Number(record.amount || 0).toLocaleString()}
+
+</b>
+
+</p>
+
+
+<p>
+
+Status:
+${record.status || ""}
+
+</p>
+
+
+<p>
+
+Date:
+${formatDate(record.date)}
+
+</p>
+
+`;
+
+
+container.appendChild(card);
+
+
+});
+
+
+} 
+  
 });
