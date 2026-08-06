@@ -1244,24 +1244,28 @@ container.appendChild(card);
 // PART 5 - FINANCIAL RECORDS
 // =====================================
 
-// OPEN FINANCIAL RECORDS
 
-if(section === "financial"){
+if(
+section === "deposit-records" ||
+section === "withdrawal-records" ||
+section === "income-records" ||
+section === "referral-records"
+){
 
 
 title.innerHTML =
 "Financial Records";
 
 
-loadFinancialRecords();
+loadFinancialRecords(section);
 
 
 }
 
 
 
+async function loadFinancialRecords(type){
 
-async function loadFinancialRecords(){
 
 
 container.innerHTML = `
@@ -1289,8 +1293,8 @@ API + "/api/admin/financial-records"
 const records =
 await response.json();
 
+displayFinancialRecords(records,type);
 
-displayFinancialRecords(records);
 
 
 }catch(error){
@@ -1318,7 +1322,7 @@ Failed to load financial records
 
 
 
-function displayFinancialRecords(records){
+function displayFinancialRecords(records,type){
 
 
 container.innerHTML = "";
