@@ -50,7 +50,7 @@ return;
 
 
 user = data;
-
+console.log("WITHDRAW USER:", user);
 
 }
 
