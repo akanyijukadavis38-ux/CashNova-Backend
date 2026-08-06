@@ -53,8 +53,6 @@ return;
 }
 let allRecords = [
 
-...(user.incomeRecords || []),
-
 ...(user.transactionHistory || []),
 
 ...(user.depositRecords || []),
