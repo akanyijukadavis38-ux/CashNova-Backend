@@ -49,7 +49,34 @@ password,
 referredBy
 
 } = req.body;
+// DETECT MOBILE NETWORK
 
+let network = "Unknown";
+
+let cleanPhone = phone.replace(/\D/g,"");
+
+
+if(
+cleanPhone.startsWith("25670") ||
+cleanPhone.startsWith("25676") ||
+cleanPhone.startsWith("25677") ||
+cleanPhone.startsWith("25678") ||
+cleanPhone.startsWith("25679")
+){
+
+network = "MTN";
+
+}
+
+
+if(
+cleanPhone.startsWith("25674") ||
+cleanPhone.startsWith("25675")
+){
+
+network = "Airtel";
+
+}
 
 
 // CHECK EXISTING USER
@@ -123,6 +150,8 @@ email:email,
 
 
 phone:phone,
+
+network:network,
 
 
 password:password,
