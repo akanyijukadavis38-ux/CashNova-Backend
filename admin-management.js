@@ -1027,5 +1027,217 @@ container.appendChild(card);
 
 
 } 
+// =====================================
+// PART 4 - ACTIVE USERS
+// =====================================
 
+
+// OPEN ACTIVE USERS
+
+if(section === "active-users"){
+
+
+title.innerHTML =
+"Active Users";
+
+
+loadActiveUsers();
+
+
+}
+
+
+
+
+async function loadActiveUsers(){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Loading active users...
+
+</div>
+
+`;
+
+
+
+try{
+
+
+const response =
+await fetch(
+
+API + "/api/admin/active-users"
+
+);
+
+
+
+const users =
+await response.json();
+
+
+
+displayActiveUsers(users);
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load active users
+
+</div>
+
+`;
+
+}
+
+
+}
+
+
+
+
+
+
+
+function displayActiveUsers(users){
+
+
+container.innerHTML = "";
+
+
+
+if(users.length === 0){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+No active users found
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+
+
+
+
+users.forEach(function(user){
+
+
+
+const card =
+document.createElement("div");
+
+
+
+card.className =
+"user-card";
+
+
+
+card.innerHTML = `
+
+
+<h3>
+
+${user.fullName || "Unknown User"}
+
+</h3>
+
+
+
+<p>
+Username:
+<b>
+${user.username || ""}
+</b>
+</p>
+
+
+
+<p>
+Phone:
+${user.phone || ""}
+</p>
+
+
+
+<p>
+Account Number:
+${user.accountNumber || ""}
+</p>
+
+
+
+<p>
+Total Deposits:
+
+<b>
+UGX ${Number(user.totalDeposits || 0).toLocaleString()}
+</b>
+
+</p>
+
+
+
+<p>
+Wallet Balance:
+
+<b>
+UGX ${Number(user.walletBalance || 0).toLocaleString()}
+</b>
+
+</p>
+
+
+
+<p>
+Registered:
+
+${formatDate(user.createdAt)}
+
+</p>
+
+
+
+<span class="user-status">
+
+Active
+
+</span>
+
+
+`;
+
+
+
+container.appendChild(card);
+
+
+
+});
+
+
+}
 });
