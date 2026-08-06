@@ -42,7 +42,21 @@ loadDeposits();
 
 }
 
+// ===============================
+// OPEN WITHDRAWAL MANAGEMENT
+// ===============================
 
+if(section === "withdrawal"){
+
+
+title.innerHTML =
+"Pending Withdrawals";
+
+
+loadWithdrawals();
+
+
+}
 
 
 
@@ -402,6 +416,9 @@ alert("Deposit rejection failed");
 
 
 }
+  
+
+
   // =====================================
 // PART 2 - WITHDRAWALS
 // =====================================
