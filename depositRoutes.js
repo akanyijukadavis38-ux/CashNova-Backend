@@ -233,7 +233,68 @@ message:error.message
 
 
 });
+// =====================================
+// REJECT DEPOSIT
+// =====================================
 
 router.post("/reject/:id", async function(req,res){
+
+try{
+
+
+const deposit =
+await Deposit.findById(req.params.id);
+
+
+
+if(!deposit){
+
+return res.status(404).json({
+
+message:"Deposit not found"
+
+});
+
+}
+
+
+
+// Change deposit status
+
+deposit.status = "Rejected";
+
+deposit.rejectedDate = new Date();
+
+
+
+await deposit.save();
+
+
+
+
+res.json({
+
+message:"Deposit rejected",
+
+deposit:deposit
+
+});
+
+
+
+}catch(error){
+
+
+res.status(500).json({
+
+message:error.message
+
+});
+
+
+}
+
+
+});
 
 module.exports = router;
