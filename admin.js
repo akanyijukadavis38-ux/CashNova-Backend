@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async function(){
 let users = [];
 
 let response = await fetch(
-"https://cashnova-backend-89lg.onrender.com/api/admin/users"
+"https://cashnova-backend-89lg.onrender.com/api/users"
 );
 
 users = await response.json();
@@ -17,7 +17,7 @@ users = await response.json();
 let deposits = [];
 
 let depositResponse = await fetch(
-"https://cashnova-backend-89lg.onrender.com/api/admin/deposit-records"
+"https://cashnova-backend-89lg.onrender.com/api/deposits"
 );
 
 deposits = await depositResponse.json();
@@ -27,7 +27,7 @@ deposits = await depositResponse.json();
 let withdrawals = [];
 
 let withdrawalResponse = await fetch(
-"https://cashnova-backend-89lg.onrender.com/api/admin/withdrawal-records"
+"https://cashnova-backend-89lg.onrender.com/api/withdrawals"
 );
 
 withdrawals = await withdrawalResponse.json();
