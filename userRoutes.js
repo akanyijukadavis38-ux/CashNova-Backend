@@ -1087,6 +1087,167 @@ message:error.message
 
 });
 // =================================
+// CREATE WITHDRAWAL REQUEST
+// =================================
+
+router.post("/withdrawals", async function(req,res){
+
+try{
+
+
+const {
+
+userId,
+amount,
+phone
+
+} = req.body;
+
+
+
+const user =
+await User.findById(userId);
+
+
+
+if(!user){
+
+return res.status(404).json({
+
+message:"User not found"
+
+});
+
+}
+
+
+
+// CHECK BALANCE
+
+if(
+Number(user.walletBalance || 0)
+<
+Number(amount)
+){
+
+return res.status(400).json({
+
+message:"Insufficient balance"
+
+});
+
+}
+
+
+
+// CALCULATE FEE
+
+const fee =
+Number(amount) * 14 / 100;
+
+
+const receiveAmount =
+Number(amount) - fee;
+
+
+
+
+// CREATE WITHDRAWAL RECORD
+
+const withdrawal = {
+
+
+amount:Number(amount),
+
+fee:Number(fee),
+
+receiveAmount:Number(receiveAmount),
+
+phone:user.phone,
+
+network:user.network,
+
+status:"Pending",
+
+date:new Date().toLocaleString()
+
+};
+
+
+
+
+// SAVE RECORD
+
+if(!user.withdrawalRecords){
+
+user.withdrawalRecords=[];
+
+}
+
+
+user.withdrawalRecords.push(withdrawal);
+
+
+
+
+// DEDUCT BALANCE AFTER REQUEST
+
+user.walletBalance =
+Number(user.walletBalance || 0)
+-
+Number(amount);
+
+
+
+
+
+user.transactionHistory.push({
+
+type:"Withdrawal",
+
+amount:Number(amount),
+
+status:"Pending",
+
+date:new Date().toLocaleString()
+
+});
+
+
+
+
+await user.save();
+
+
+
+
+
+res.json({
+
+message:"Withdrawal request submitted",
+
+walletBalance:user.walletBalance,
+
+withdrawal:withdrawal
+
+});
+
+
+
+}catch(error){
+
+
+res.status(500).json({
+
+message:error.message
+
+});
+
+
+}
+
+});
+// =================================
 // ADMIN GET ALL USERS
 // =================================
 
