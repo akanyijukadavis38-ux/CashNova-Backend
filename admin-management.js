@@ -6,7 +6,12 @@
 
 
 document.addEventListener("DOMContentLoaded", function(){
+let title =
+document.getElementById("managementTitle");
 
+
+let container =
+document.getElementById("managementContainer");
 
 // ===============================
 // BACKEND URL
@@ -70,25 +75,6 @@ async function loadDeposits() {
 
 
 let withdrawals = [];
-
-
-
-
-
-
-// ===============================
-// ELEMENTS
-// ===============================
-
-
-let title =
-document.getElementById("managementTitle");
-
-
-let container =
-document.getElementById("managementContainer");
-
-
 
 
 
