@@ -1,15 +1,12 @@
-alert("withdraw.js loaded");
 /* =================================
    CASHNOVA WITHDRAW SYSTEM
-   MONGODB CONNECTED VERSION
+   CLEAN MONGODB VERSION
 ================================= */
 
 document.addEventListener("DOMContentLoaded", async function(){
 
 
-let userId =
-localStorage.getItem("cashnovaUserId");
-
+const userId = localStorage.getItem("cashnovaUserId");
 
 
 if(!userId){
@@ -21,29 +18,30 @@ return;
 }
 
 
-
-// GET USER DATA FROM DATABASE
-
 let user;
 
 
+// ================================
+// LOAD USER DATA
+// ================================
 
 try{
 
 
-let response = await fetch(
+const response = await fetch(
 
 "https://cashnova-backend-89lg.onrender.com/api/users/" + userId
 
 );
 
 
-let data = await response.json();
+const data = await response.json();
+
 
 
 if(!response.ok){
 
-alert(data.message || "User not found");
+alert(data.message || "Unable to load account");
 
 return;
 
@@ -51,36 +49,27 @@ return;
 
 
 user = data;
-console.log("Withdraw.js loaded");
 
-console.log(user);
 
-console.log(user.walletBalance);
 
-console.log(user.phone);
-
-}
-
-catch(error){
+}catch(error){
 
 
 console.log(error);
 
-alert("Server connection failed");
+alert("Server connection error");
 
 return;
-
 
 }
 
 
 
-
 // ================================
-// SHOW WALLET BALANCE
+// SHOW BALANCE
 // ================================
 
-let walletBalance =
+const walletBalance =
 document.getElementById("walletBalance");
 
 
@@ -88,19 +77,18 @@ if(walletBalance){
 
 walletBalance.innerHTML =
 "UGX " +
-Number(user.walletBalance || 0).toLocaleString();
+Number(user.walletBalance || 0)
+.toLocaleString();
 
 }
 
 
 
-
-
 // ================================
-// LOAD PHONE NUMBER
+// SHOW REGISTERED NUMBER
 // ================================
 
-let withdrawPhone =
+const withdrawPhone =
 document.getElementById("withdrawPhone");
 
 
@@ -110,67 +98,59 @@ withdrawPhone.value =
 user.phone || "";
 
 }
-  // ================================
-// ELEMENTS
+
+
+
+// ================================
+// CALCULATE FEE
 // ================================
 
-let withdrawAmount =
+
+const withdrawAmount =
 document.getElementById("withdrawAmount");
 
 
-let withdrawFee =
+const withdrawFee =
 document.getElementById("withdrawFee");
 
 
-let receiveAmount =
+const receiveAmount =
 document.getElementById("receiveAmount");
 
 
 
-
-
-// ================================
-// CALCULATE WITHDRAWAL FEE
-// ================================
-
 if(withdrawAmount){
 
-withdrawAmount.oninput = function(){
+
+withdrawAmount.addEventListener("input", function(){
 
 
-let amount =
-Number(withdrawAmount.value || 0);
+const amount =
+Number(this.value || 0);
 
 
-let fee =
-amount * 14 / 100;
+const fee =
+amount * 0.14;
 
 
-let receive =
+const receive =
 amount - fee;
 
 
-
-if(withdrawFee){
 
 withdrawFee.innerHTML =
 "UGX " +
 fee.toLocaleString();
 
-}
 
-
-
-if(receiveAmount){
 
 receiveAmount.innerHTML =
 "UGX " +
 receive.toLocaleString();
 
-}
 
 
-};
+});
 
 
 }
@@ -180,10 +160,11 @@ receive.toLocaleString();
 
 
 // ================================
-// CONFIRM WITHDRAWAL
+// SUBMIT WITHDRAWAL
 // ================================
 
-let confirmWithdraw =
+
+const confirmWithdraw =
 document.getElementById("confirmWithdraw");
 
 
@@ -195,44 +176,8 @@ confirmWithdraw.onclick = async function(){
 
 
 
-// FIRST DEPOSIT CHECK
-
-if(user.firstDepositCompleted !== true){
-
-alert(
-"Complete your first deposit before withdrawal."
-);
-
-return;
-
-}
-
-
-
-
-// PRODUCT PURCHASE CHECK
-
-if(
-!user.purchasedProducts ||
-user.purchasedProducts.length === 0
-){
-
-alert(
-"Purchase a product before withdrawal."
-);
-
-return;
-
-}
-
-
-
-
-
-let amount =
+const amount =
 Number(withdrawAmount.value || 0);
-
-
 
 
 
@@ -251,19 +196,21 @@ return;
 
 if(amount > Number(user.walletBalance || 0)){
 
+
 alert(
 "Insufficient wallet balance"
 );
 
+
 return;
 
 }
- // ================================
-// SEND WITHDRAWAL TO BACKEND
-// ================================
 
 
-let response =
+
+
+
+const response =
 await fetch(
 
 "https://cashnova-backend-89lg.onrender.com/api/withdrawals",
@@ -280,7 +227,7 @@ headers:{
 
 body:JSON.stringify({
 
-userId:userId,
+userId:user._id,
 
 amount:amount,
 
@@ -288,14 +235,18 @@ phone:user.phone
 
 })
 
+
 }
 
 );
 
 
 
-let data =
+
+
+const result =
 await response.json();
+
 
 
 
@@ -304,7 +255,7 @@ if(!response.ok){
 
 
 alert(
-data.message || "Withdrawal failed"
+result.message || "Withdrawal failed"
 );
 
 
@@ -322,25 +273,15 @@ alert(
 
 
 
-// UPDATE DISPLAYED BALANCE
-
-if(walletBalance){
-
-walletBalance.innerHTML =
-"UGX " +
-Number(data.walletBalance || 0)
-.toLocaleString();
-
-}
-
-
-
-location.reload();
+window.location.reload();
 
 
 
 };
 
 
-} 
-  
+}
+
+
+
+});
