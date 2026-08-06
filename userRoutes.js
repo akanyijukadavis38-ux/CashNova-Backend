@@ -997,10 +997,11 @@ date:new Date().toLocaleString()
 
 
 
-
 // DEPOSIT RECORD
 
 user.depositRecords.push({
+
+type:"Deposit",
 
 amount:Number(deposit.amount),
 
@@ -1009,6 +1010,7 @@ status:"Credited",
 date:new Date().toLocaleString()
 
 });
+
 
 
 
