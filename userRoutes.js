@@ -576,7 +576,7 @@ let hoursPassed =
 
 
 
-if(hoursPassed >= 0.01){
+if(hoursPassed >= 24){
 
 
 
