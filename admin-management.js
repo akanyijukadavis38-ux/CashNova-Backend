@@ -4,7 +4,31 @@ document.addEventListener("DOMContentLoaded", function(){
 const API =
 "https://cashnova-backend-89lg.onrender.com";
 
+function formatDate(date){
 
+if(!date){
+return "";
+}
+
+return new Date(date).toLocaleString("en-UG",{
+
+timeZone:"Africa/Kampala",
+
+year:"numeric",
+
+month:"short",
+
+day:"numeric",
+
+hour:"2-digit",
+
+minute:"2-digit",
+
+second:"2-digit"
+
+});
+
+}
 
 const title =
 document.getElementById("managementTitle");
@@ -223,7 +247,7 @@ ${deposit.mobileMoneyTransactionId || ""}
 
 <p>
 Date:
-${deposit.date || ""}
+${formatDate(deposit.date)}
 </p>
 
 
@@ -601,8 +625,7 @@ UGX ${Number(withdrawal.receiveAmount || 0).toLocaleString()}
 
 <p>
 Date:
-
-${withdrawal.date || ""}
+${formatDate(withdrawal.date)}
 
 </p>
 
