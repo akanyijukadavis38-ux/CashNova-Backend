@@ -968,67 +968,57 @@ return;
 
 
 
-    // Add purchased product to user account
+    
+try{
 
-    user.purchasedProducts.push(selectedInvestment);
+const response = await fetch(
+"https://cashnova-backend-89lg.onrender.com/api/users/purchase/" + user._id,
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(selectedInvestment)
+}
+);
 
-// =====================================
-// DEDUCT PRODUCT PRICE FROM WALLET
-// =====================================
+const result = await response.json();
 
-user.walletBalance =
-Number(user.walletBalance || 0)
--
-Number(selectedInvestment.price);
-// =====================================
-// ADD PURCHASE HISTORY
-// =====================================
+if(!response.ok){
 
-if(!user.transactionHistory){
+alert(result.message);
 
-    user.transactionHistory = [];
+return;
 
 }
 
+localStorage.setItem(
+"cashnovaUserData",
+JSON.stringify(result.user)
+);
 
-user.transactionHistory.push({
+alert(result.message);
 
-    type:"Product Purchase",
+purchaseBox.style.display = "none";
 
-    product:selectedInvestment.name,
+window.location.href = "my-products.html";
 
-    amount:selectedInvestment.price,
+}catch(error){
 
-    status:"Completed",
+console.log(error);
 
-    date:new Date().toLocaleString()
+alert("Unable to complete purchase.");
 
-});
+}
 
+};   
+
+}    
 
     
 
 
-    alert("Purchase successful");
-
-
-
-
-
-    purchaseBox.style.display = "none";
-
-
-
-
-
-    window.location.href = "my-products.html";
-
-
-
-};
-
-
-}
+    
 
 
 
