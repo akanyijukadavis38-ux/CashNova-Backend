@@ -1412,36 +1412,61 @@ container.appendChild(card);
 
 }
 
- 
-
 // =====================================
-// PART 5A - DEPOSIT RECORDS
+// PART 5 - FINANCIAL RECORDS
 // =====================================
 
 
 if(section === "deposit-records"){
 
-
 title.innerHTML =
 "Deposit Records";
 
+loadFilteredRecords("Deposit");
 
-loadDepositRecords();
+}
 
+
+if(section === "withdrawal-records"){
+
+title.innerHTML =
+"Withdrawal Records";
+
+loadFilteredRecords("Withdrawal");
+
+}
+
+
+if(section === "income-records"){
+
+title.innerHTML =
+"Income Records";
+
+loadFilteredRecords("Income");
+
+}
+
+
+if(section === "referral-records"){
+
+title.innerHTML =
+"Referral Records";
+
+loadFilteredRecords("Referral");
 
 }
 
 
 
 
-async function loadDepositRecords(){
+async function loadFilteredRecords(type){
 
 
 container.innerHTML = `
 
 <div class="empty-state">
 
-Loading deposit records...
+Loading ${type} records...
 
 </div>
 
@@ -1464,18 +1489,75 @@ await response.json();
 
 
 
-const deposits =
+let filteredRecords = [];
+
+
+
+if(type === "Deposit"){
+
+
+filteredRecords =
 records.filter(function(record){
 
-
 return record.type === "Deposit";
-
 
 });
 
 
+}
 
-displayFinancialRecords(deposits);
+
+
+if(type === "Withdrawal"){
+
+
+filteredRecords =
+records.filter(function(record){
+
+return record.type === "Withdrawal";
+
+});
+
+
+}
+
+
+
+if(type === "Income"){
+
+
+filteredRecords =
+records.filter(function(record){
+
+return (
+record.type !== "Deposit" &&
+record.type !== "Withdrawal" &&
+!record.type.toLowerCase().includes("referral")
+);
+
+});
+
+
+}
+
+
+
+if(type === "Referral"){
+
+
+filteredRecords =
+records.filter(function(record){
+
+return record.type.toLowerCase().includes("referral");
+
+});
+
+
+}
+
+
+
+showRecords(filteredRecords);
 
 
 
@@ -1489,7 +1571,7 @@ container.innerHTML = `
 
 <div class="empty-state">
 
-Failed to load deposit records
+Failed to load records
 
 </div>
 
@@ -1499,5 +1581,90 @@ Failed to load deposit records
 
 
 }
+
+
+
+
+function showRecords(records){
+
+
+container.innerHTML = "";
+
+
+
+if(records.length === 0){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+No records found
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+
+records.forEach(function(record){
+
+
+const card =
+document.createElement("div");
+
+
+card.className =
+"financial-card";
+
+
+card.innerHTML = `
+
+<h3>
+${record.type}
+</h3>
+
+
+<p>
+Username:
+<b>${record.username || ""}</b>
+</p>
+
+
+<p>
+Amount:
+<b>
+UGX ${Number(record.amount || 0).toLocaleString()}
+</b>
+</p>
+
+
+<p>
+Status:
+${record.status || ""}
+</p>
+
+
+<p>
+Date:
+${formatDate(record.date)}
+</p>
+
+`;
+
+
+container.appendChild(card);
+
+
+});
+
+
+} 
+
+
   
 });
