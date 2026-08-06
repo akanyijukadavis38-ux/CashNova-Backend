@@ -616,20 +616,7 @@ product.lastIncomeDate = now;
 
 
 
-// INCOME RECORD
 
-user.incomeRecords.push({
-
-type:
-product.name + " Daily Income",
-
-amount:Number(product.dailyIncome),
-
-status:"Completed",
-
-date:now.toLocaleString()
-
-});
 
 
 
