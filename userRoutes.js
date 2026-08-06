@@ -654,14 +654,16 @@ updated=true;
 
 
 
-
-
-
 if(updated){
+
+user.markModified("purchasedProducts");
 
 await user.save();
 
 }
+
+
+
 
 
 
