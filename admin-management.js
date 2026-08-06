@@ -1,3 +1,4 @@
+alert("Admin Management JS Loaded");
 /* =================================
    CASHNOVA ADMIN MANAGEMENT
    COMPLETE SYSTEM
