@@ -819,5 +819,213 @@ alert("Failed to reject withdrawal");
 
 
 }
+ // OPEN ALL USERS
+
+if(section === "users"){
+
+
+title.innerHTML =
+"All Users";
+
+
+loadAllUsers();
+
+
+}
+
+
+
+
+async function loadAllUsers(){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Loading users...
+
+</div>
+
+`;
+
+
+
+try{
+
+
+const response =
+await fetch(
+
+API + "/api/admin/users"
+
+);
+
+
+
+const users =
+await response.json();
+
+
+
+displayUsers(users);
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load users
+
+</div>
+
+`;
+
+}
+
+
+}
+
+
+
+
+
+
+
+function displayUsers(users){
+
+
+container.innerHTML = "";
+
+
+
+if(users.length === 0){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+No users found
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+
+
+
+
+users.forEach(function(user){
+
+
+
+const card =
+document.createElement("div");
+
+
+
+card.className =
+"user-card";
+
+
+
+card.innerHTML = `
+
+
+<h3>
+
+${user.fullName || "Unknown User"}
+
+</h3>
+
+
+
+<p>
+Username:
+<b>
+${user.username || ""}
+</b>
+</p>
+
+
+
+<p>
+Phone:
+${user.phone || ""}
+</p>
+
+
+
+<p>
+Account Number:
+${user.accountNumber || ""}
+</p>
+
+
+
+<p>
+Total Deposits:
+
+<b>
+UGX ${Number(user.totalDeposits || 0).toLocaleString()}
+</b>
+
+</p>
+
+
+
+<p>
+Status:
+
+<span class="user-status">
+
+${
+user.accountActivated
+?
+"Active"
+:
+"Inactive"
+}
+
+</span>
+
+</p>
+
+
+
+<p>
+Registered:
+
+${formatDate(user.createdAt)}
+
+</p>
+
+
+`;
+
+
+
+container.appendChild(card);
+
+
+
+});
+
+
+} 
 
 });
