@@ -1406,10 +1406,12 @@ ${formatDate(record.date)}
 
 `;
 
-
 container.appendChild(card);
 
-} 
+});
+
+}
+
  
 
 // =====================================
