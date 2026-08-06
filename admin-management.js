@@ -218,8 +218,6 @@ ${deposit.date || ""}
 Pending
 </span>
 
-
-
 <div class="admin-actions">
 
 <button class="approve-btn">
@@ -227,7 +225,13 @@ Approve
 </button>
 
 
+<button class="reject-btn">
+Reject
+</button>
+
 </div>
+
+
 
 
 `;
@@ -249,7 +253,18 @@ approveDeposit(deposit._id);
 
 };
 
+const rejectButton =
+card.querySelector(".reject-btn");
 
+
+
+rejectButton.onclick = function(){
+
+
+rejectDeposit(deposit._id);
+
+
+};
 
 
 container.appendChild(card);
@@ -329,6 +344,63 @@ alert("Deposit approval failed");
 
 }
 
+async function rejectDeposit(id){
 
+
+try{
+
+
+const response =
+await fetch(
+
+API +
+"/api/deposits/reject/" +
+id,
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+}
+
+}
+
+);
+
+
+
+const result =
+await response.json();
+
+
+
+alert(result.message);
+
+
+
+loadDeposits();
+
+
+
+}
+
+
+catch(error){
+
+
+console.log(error);
+
+
+alert("Deposit rejection failed");
+
+
+}
+
+
+}
 
 });
