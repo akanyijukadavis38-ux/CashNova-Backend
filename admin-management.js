@@ -402,5 +402,382 @@ alert("Deposit rejection failed");
 
 
 }
+  // =====================================
+// PART 2 - WITHDRAWALS
+// =====================================
+
+
+let withdrawals = [];
+
+
+// LOAD WITHDRAWALS
+
+async function loadWithdrawals(){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Loading withdrawals...
+
+</div>
+
+`;
+
+
+
+try{
+
+
+let response = await fetch(
+API + "/api/withdrawals"
+);
+
+
+
+withdrawals = await response.json();
+
+
+
+displayWithdrawals();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load withdrawals
+
+</div>
+
+`;
+
+}
+
+
+}
+
+
+
+
+
+// DISPLAY PENDING WITHDRAWALS
+
+function displayWithdrawals(){
+
+
+container.innerHTML = "";
+
+
+
+let pendingWithdrawals =
+withdrawals.filter(function(item){
+
+
+return item.status === "Pending";
+
+
+});
+
+
+
+
+
+if(pendingWithdrawals.length === 0){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+No pending withdrawals
+
+</div>
+
+`;
+
+
+return;
+
+}
+
+
+
+
+
+
+
+pendingWithdrawals.forEach(function(withdrawal){
+
+
+
+let card =
+document.createElement("div");
+
+
+
+card.className =
+"withdraw-card";
+
+
+
+card.innerHTML = `
+
+
+<h3>
+Withdrawal Request
+</h3>
+
+
+<p>
+Username:
+<b>${withdrawal.username || ""}</b>
+</p>
+
+
+
+<p>
+Phone:
+${withdrawal.phone || ""}
+</p>
+
+
+
+<p>
+Amount:
+
+<b>
+UGX ${Number(withdrawal.amount || 0).toLocaleString()}
+</b>
+
+</p>
+
+
+
+<p>
+Fee:
+
+UGX ${Number(withdrawal.fee || 0).toLocaleString()}
+
+</p>
+
+
+
+<p>
+Receive:
+
+<b>
+UGX ${Number(withdrawal.receiveAmount || 0).toLocaleString()}
+</b>
+
+</p>
+
+
+
+<p>
+Date:
+
+${withdrawal.date || ""}
+
+</p>
+
+
+
+<span class="pending">
+Pending
+</span>
+
+
+
+<div class="admin-actions">
+
+
+<button class="approve-btn">
+
+Approve
+
+</button>
+
+
+
+<button class="reject-btn">
+
+Reject
+
+</button>
+
+
+</div>
+
+
+`;
+
+
+
+
+
+card.querySelector(".approve-btn").onclick =
+function(){
+
+approveWithdrawal(withdrawal._id);
+
+};
+
+
+
+
+
+card.querySelector(".reject-btn").onclick =
+function(){
+
+rejectWithdrawal(withdrawal._id);
+
+};
+
+
+
+
+
+container.appendChild(card);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+// APPROVE WITHDRAWAL
+
+async function approveWithdrawal(id){
+
+
+try{
+
+
+let response =
+await fetch(
+
+API + "/api/withdrawals/approve/" + id,
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+}
+
+}
+
+);
+
+
+
+let result =
+await response.json();
+
+
+
+alert(result.message);
+
+
+
+loadWithdrawals();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+alert("Failed to approve withdrawal");
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+// REJECT WITHDRAWAL
+
+async function rejectWithdrawal(id){
+
+
+try{
+
+
+let response =
+await fetch(
+
+API + "/api/withdrawals/reject/" + id,
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+}
+
+}
+
+);
+
+
+
+let result =
+await response.json();
+
+
+
+alert(result.message);
+
+
+
+loadWithdrawals();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+alert("Failed to reject withdrawal");
+
+
+}
+
+
+}
 
 });
