@@ -51,14 +51,19 @@ container.innerHTML =
 return;
 
 }
-
-
 let allRecords = [
 
 ...(user.incomeRecords || []),
-...(user.transactionHistory || [])
+
+...(user.transactionHistory || []),
+
+...(user.depositRecords || []),
+
+...(user.withdrawalRecords || [])
 
 ];
+
+
 // Remove locked registration bonus from history
 allRecords = allRecords.filter(function(record){
 
