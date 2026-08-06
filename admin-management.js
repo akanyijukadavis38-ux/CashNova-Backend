@@ -1409,70 +1409,37 @@ ${formatDate(record.date)}
 
 container.appendChild(card);
 
-
-});
-
-
 } 
- // =====================================
-// PART 6 - INDIVIDUAL FINANCIAL RECORDS
+ 
+
+// =====================================
+// PART 5A - DEPOSIT RECORDS
 // =====================================
 
 
 if(section === "deposit-records"){
 
+
 title.innerHTML =
 "Deposit Records";
 
-loadSpecificRecords("Deposit");
 
-}
+loadDepositRecords();
 
-
-
-if(section === "withdrawal-records"){
-
-title.innerHTML =
-"Withdrawal Records";
-
-loadSpecificRecords("Withdrawal");
-
-}
-
-
-
-if(section === "income-records"){
-
-title.innerHTML =
-"Income Records";
-
-loadSpecificRecords("Income");
-
-}
-
-
-
-if(section === "referral-records"){
-
-title.innerHTML =
-"Referral Records";
-
-loadSpecificRecords("Referral");
 
 }
 
 
 
 
-
-async function loadSpecificRecords(type){
+async function loadDepositRecords(){
 
 
 container.innerHTML = `
 
 <div class="empty-state">
 
-Loading ${type} records...
+Loading deposit records...
 
 </div>
 
@@ -1495,37 +1462,18 @@ await response.json();
 
 
 
-const filtered =
+const deposits =
 records.filter(function(record){
 
 
-if(type === "Income"){
-
-return (
-record.type !== "Deposit" &&
-record.type !== "Withdrawal" &&
-!record.type.toLowerCase().includes("referral")
-);
-
-}
-
-
-if(type === "Referral"){
-
-return record.type.toLowerCase().includes("referral");
-
-}
-
-
-
-return record.type === type;
+return record.type === "Deposit";
 
 
 });
 
 
 
-displayFinancialRecords(filtered);
+displayFinancialRecords(deposits);
 
 
 
@@ -1539,7 +1487,7 @@ container.innerHTML = `
 
 <div class="empty-state">
 
-Failed to load records
+Failed to load deposit records
 
 </div>
 
@@ -1548,6 +1496,6 @@ Failed to load records
 }
 
 
-} 
+}
   
 });
