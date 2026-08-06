@@ -37,7 +37,10 @@ password:{
 accountNumber:{
     type:String
 },
-
+network: {
+    type: String,
+    default: ""
+},
 
 
 // MONEY
