@@ -50,7 +50,13 @@ return;
 
 
 user = data;
-console.log("WITHDRAW USER:", user);
+console.log("Withdraw.js loaded");
+
+console.log(user);
+
+console.log(user.walletBalance);
+
+console.log(user.phone);
 
 }
 
