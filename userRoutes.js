@@ -434,7 +434,13 @@ Number(price);
 
 
 // SAVE PRODUCT
+if(!user.purchasedProducts){
+    user.purchasedProducts = [];
+}
 
+if(!user.transactionHistory){
+    user.transactionHistory = [];
+}
 user.purchasedProducts.push(
 purchasedProduct
 );
