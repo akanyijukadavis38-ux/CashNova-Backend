@@ -1855,5 +1855,279 @@ error.message ||
 }
 
 }
-  
+  // =====================================
+// PART 6 - ADMIN SETTINGS
+// =====================================
+
+if(section === "settings"){
+
+title.innerHTML = "Admin Settings";
+
+loadSettings();
+
+}
+
+
+
+async function loadSettings(){
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Loading settings...
+
+</div>
+
+`;
+
+
+
+try{
+
+
+const response =
+await fetch(
+API + "/api/admin/settings"
+);
+
+
+
+const settings =
+await response.json();
+
+
+
+displaySettings(settings);
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load settings
+
+</div>
+
+`;
+
+}
+
+
+}
+
+
+
+
+
+function displaySettings(settings){
+
+
+container.innerHTML = `
+
+
+<div class="settings-card">
+
+
+<h3>
+Platform Settings
+</h3>
+
+
+<label>
+Platform Name
+</label>
+
+<input 
+id="platformName"
+value="${settings.platformName || "CashNova"}"
+>
+
+
+
+<label>
+Support Contact
+</label>
+
+<input 
+id="supportContact"
+value="${settings.supportContact || ""}"
+>
+
+
+
+<label>
+Minimum Deposit
+</label>
+
+<input 
+id="minimumDeposit"
+type="number"
+value="${settings.minimumDeposit || 15000}"
+>
+
+
+
+<label>
+Minimum Withdrawal
+</label>
+
+<input 
+id="minimumWithdrawal"
+type="number"
+value="${settings.minimumWithdrawal || 5000}"
+>
+
+
+
+<label>
+Withdrawal Fee %
+</label>
+
+<input 
+id="withdrawalFee"
+type="number"
+value="${settings.withdrawalFee || 14}"
+>
+
+
+
+<label>
+Daily Withdrawal Limit
+</label>
+
+<input 
+id="dailyWithdrawalLimit"
+type="number"
+value="${settings.dailyWithdrawalLimit || 2}"
+>
+
+
+
+
+<button id="saveSettingsBtn">
+
+Save Settings
+
+</button>
+
+
+
+</div>
+
+
+`;
+
+
+
+document.getElementById("saveSettingsBtn").onclick =
+updateSettings;
+
+
+
+}
+
+
+
+
+async function updateSettings(){
+
+
+
+const data = {
+
+
+platformName:
+document.getElementById("platformName").value,
+
+
+supportContact:
+document.getElementById("supportContact").value,
+
+
+minimumDeposit:
+Number(document.getElementById("minimumDeposit").value),
+
+
+minimumWithdrawal:
+Number(document.getElementById("minimumWithdrawal").value),
+
+
+withdrawalFee:
+Number(document.getElementById("withdrawalFee").value),
+
+
+dailyWithdrawalLimit:
+Number(document.getElementById("dailyWithdrawalLimit").value)
+
+
+};
+
+
+
+
+try{
+
+
+const response =
+await fetch(
+
+API + "/api/admin/settings",
+
+{
+
+method:"PUT",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify(data)
+
+}
+
+);
+
+
+
+const result =
+await response.json();
+
+
+
+alert(
+result.message ||
+"Settings updated"
+);
+
+
+
+loadSettings();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+alert(
+"Failed to update settings"
+);
+
+
+}
+
+
+}
 });
