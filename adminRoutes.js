@@ -424,34 +424,12 @@ router.get("/withdrawal-records", async function(req,res){
 
 try{
 
-const users = await User.find();
-
-let records=[];
-
-
-users.forEach(function(user){
-
-if(user.withdrawalRecords){
-
-user.withdrawalRecords.forEach(function(record){
-
-records.push({
-
-username:user.username,
-
-amount:record.amount,
-
-status:record.status,
-
-date:record.date
-
-});
-
-});
-
+const records =
+await Withdrawal.find({
+status:{
+$in:["Approved","Rejected"]
 }
-
-});
+}).sort({date:-1});
 
 
 res.json(records);
@@ -460,7 +438,9 @@ res.json(records);
 }catch(error){
 
 res.status(500).json({
+
 message:error.message
+
 });
 
 }
