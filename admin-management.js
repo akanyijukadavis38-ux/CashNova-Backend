@@ -1403,6 +1403,457 @@ container.appendChild(card);
 
 
 }
+// =====================================
+// PART - ANNOUNCEMENTS
+// =====================================
 
+if(section === "announcements"){
+
+title.innerHTML = "Announcements";
+
+loadAnnouncements();
+
+}
+
+
+// =====================================
+// LOAD ANNOUNCEMENTS
+// =====================================
+
+async function loadAnnouncements(){
+
+const announcementSection =
+document.getElementById("announcementSection");
+
+const announcementContainer =
+document.getElementById("announcementContainer");
+
+const addAnnouncementBtn =
+document.getElementById("addAnnouncementBtn");
+
+const announcementText =
+document.getElementById("announcementText");
+
+
+if(announcementSection){
+
+announcementSection.style.display = "block";
+
+}
+
+
+// SHOW LOADING
+
+if(announcementContainer){
+
+announcementContainer.innerHTML = `
+
+<div class="empty-state">
+
+Loading announcements...
+
+</div>
+
+`;
+
+}
+
+
+try{
+
+const response =
+await fetch(
+API + "/api/admin/announcements"
+);
+
+
+if(!response.ok){
+
+throw new Error("Failed to load announcements");
+
+}
+
+
+const announcements =
+await response.json();
+
+
+displayAnnouncements(announcements);
+
+
+
+}catch(error){
+
+console.log(error);
+
+
+if(announcementContainer){
+
+announcementContainer.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load announcements
+
+</div>
+
+`;
+
+}
+
+}
+
+
+
+// =====================================
+// POST ANNOUNCEMENT
+// =====================================
+
+if(addAnnouncementBtn){
+
+addAnnouncementBtn.onclick =
+async function(){
+
+
+const message =
+announcementText.value.trim();
+
+
+if(!message){
+
+alert("Please write an announcement.");
+
+return;
+
+}
+
+
+
+addAnnouncementBtn.disabled = true;
+
+addAnnouncementBtn.innerHTML =
+"Posting...";
+
+
+
+try{
+
+
+const response =
+await fetch(
+
+API + "/api/admin/announcements",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+title:"CashNova Announcement",
+
+message:message
+
+})
+
+}
+
+);
+
+
+
+const result =
+await response.json();
+
+
+
+if(!response.ok){
+
+throw new Error(
+result.message ||
+"Failed to post announcement"
+);
+
+}
+
+
+
+alert(
+result.message ||
+"Announcement posted successfully"
+);
+
+
+
+announcementText.value = "";
+
+
+
+await loadAnnouncements();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+alert(
+error.message ||
+"Failed to post announcement"
+);
+
+
+
+}finally{
+
+
+addAnnouncementBtn.disabled = false;
+
+addAnnouncementBtn.innerHTML =
+"Post Announcement";
+
+
+}
+
+};
+
+}
+
+}
+
+
+// =====================================
+// DISPLAY ANNOUNCEMENTS
+// =====================================
+
+function displayAnnouncements(announcements){
+
+
+const announcementContainer =
+document.getElementById("announcementContainer");
+
+
+if(!announcementContainer){
+
+return;
+
+}
+
+
+
+announcementContainer.innerHTML = "";
+
+
+
+if(
+!announcements ||
+announcements.length === 0
+){
+
+announcementContainer.innerHTML = `
+
+<div class="empty-state">
+
+No announcements yet.
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+
+announcements.forEach(function(announcement){
+
+
+const card =
+document.createElement("div");
+
+
+card.className =
+"announcement-card";
+
+
+
+const date =
+announcement.date
+?
+formatDate(announcement.date)
+:
+"";
+
+
+card.innerHTML = `
+
+<h3>
+
+${announcement.title ||
+"CashNova Announcement"}
+
+</h3>
+
+
+<p>
+
+${announcement.message || ""}
+
+</p>
+
+
+<small>
+
+${date}
+
+</small>
+
+
+<div class="admin-actions">
+
+
+<button
+class="delete-announcement-btn"
+data-id="${announcement._id}"
+>
+
+Delete
+
+</button>
+
+
+</div>
+
+`;
+
+
+
+const deleteButton =
+card.querySelector(
+".delete-announcement-btn"
+);
+
+
+
+deleteButton.onclick =
+function(){
+
+deleteAnnouncement(
+announcement._id
+);
+
+};
+
+
+
+announcementContainer.appendChild(card);
+
+
+});
+
+
+}
+
+
+// =====================================
+// DELETE ANNOUNCEMENT
+// =====================================
+
+async function deleteAnnouncement(id){
+
+
+if(!id){
+
+return;
+
+}
+
+
+
+const confirmDelete =
+confirm(
+"Are you sure you want to delete this announcement?"
+);
+
+
+if(!confirmDelete){
+
+return;
+
+}
+
+
+
+try{
+
+
+const response =
+await fetch(
+
+API +
+"/api/admin/announcements/" +
+id,
+
+{
+
+method:"DELETE"
+
+}
+
+);
+
+
+
+const result =
+await response.json();
+
+
+
+if(!response.ok){
+
+throw new Error(
+result.message ||
+"Failed to delete announcement"
+);
+
+}
+
+
+
+alert(
+result.message ||
+"Announcement deleted"
+);
+
+
+
+loadAnnouncements();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+alert(
+error.message ||
+"Failed to delete announcement"
+);
+
+
+}
+
+}
   
 });
