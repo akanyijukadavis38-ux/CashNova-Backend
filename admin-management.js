@@ -1240,177 +1240,7 @@ container.appendChild(card);
 
 
 }
- // =====================================
-// PART 5 - FINANCIAL RECORDS
-// =====================================
-
-
-if(
-section === "deposit-records" ||
-section === "withdrawal-records" ||
-section === "income-records" ||
-section === "referral-records"
-){
-
-
-title.innerHTML =
-"Financial Records";
-
-
-loadFinancialRecords(section);
-
-
-}
-
-
-
-async function loadFinancialRecords(type){
-
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-Loading financial records...
-
-</div>
-
-`;
-
-
-try{
-
-
-const response =
-await fetch(
-
-API + "/api/admin/financial-records"
-
-);
-
-
-const records =
-await response.json();
-
-displayFinancialRecords(records,type);
-
-
-
-}catch(error){
-
-
-console.log(error);
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-Failed to load financial records
-
-</div>
-
-`;
-
-}
-
-
-}
-
-
-
-
-
-function displayFinancialRecords(records,type){
-
-
-container.innerHTML = "";
-
-
-if(records.length === 0){
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-No financial records found
-
-</div>
-
-`;
-
-return;
-
-}
-
-
-
-records.forEach(function(record){
-
-
-const card =
-document.createElement("div");
-
-
-card.className =
-"financial-card";
-
-
-card.innerHTML = `
-
-<h3>
-
-${record.type || "Record"}
-
-</h3>
-
-
-<p>
-
-Username:
-<b>
-${record.username || ""}
-</b>
-
-</p>
-
-
-<p>
-
-Amount:
-<b>
-
-UGX ${Number(record.amount || 0).toLocaleString()}
-
-</b>
-
-</p>
-
-
-<p>
-
-Status:
-${record.status || ""}
-
-</p>
-
-
-<p>
-
-Date:
-${formatDate(record.date)}
-
-</p>
-
-`;
-
-container.appendChild(card);
-
-});
-
-}
+ 
 
 // =====================================
 // PART 5 - FINANCIAL RECORDS
@@ -1424,14 +1254,9 @@ section === "income-records" ||
 section === "referral-records"
 ){
 
-
 loadFinancialRecords(section);
 
-
 }
-
-
-
 
 
 
@@ -1449,13 +1274,12 @@ Loading records...
 `;
 
 
-
 try{
 
 
 const response =
 await fetch(
-API + "/api/admin/financial-records"
+API + "/api/admin/" + type
 );
 
 
@@ -1465,111 +1289,7 @@ await response.json();
 
 
 
-let filteredRecords = [];
-
-
-
-
-
-if(type === "deposit-records"){
-
-
-title.innerHTML =
-"Deposit Records";
-
-
-filteredRecords =
-records.filter(function(record){
-
-
-return record.type === "Deposit";
-
-
-});
-
-
-}
-
-
-
-
-
-if(type === "withdrawal-records"){
-
-
-title.innerHTML =
-"Withdrawal Records";
-
-
-filteredRecords =
-records.filter(function(record){
-
-
-return record.type === "Withdrawal";
-
-
-});
-
-
-}
-
-
-
-
-
-if(type === "income-records"){
-
-
-title.innerHTML =
-"Income Records";
-
-
-filteredRecords =
-records.filter(function(record){
-
-
-return (
-record.type.includes("Income") ||
-record.type === "Registration Bonus"
-);
-
-
-});
-
-
-}
-
-
-
-
-
-if(type === "referral-records"){
-
-
-title.innerHTML =
-"Referral Records";
-
-
-filteredRecords =
-records.filter(function(record){
-
-
-return (
-record.type === "Referral Income" ||
-record.type === "Referral Bonus"
-);
-
-
-});
-
-
-}
-
-
-
-
-
-displayFinancialRecords(filteredRecords);
+displayFinancialRecords(records);
 
 
 
@@ -1598,9 +1318,6 @@ Failed to load records
 
 
 
-
-
-
 function displayFinancialRecords(records){
 
 
@@ -1608,7 +1325,7 @@ container.innerHTML = "";
 
 
 
-if(records.length === 0){
+if(!records || records.length === 0){
 
 
 container.innerHTML = `
@@ -1627,10 +1344,7 @@ return;
 
 
 
-
-
 records.forEach(function(record){
-
 
 
 const card =
@@ -1645,11 +1359,9 @@ card.className =
 
 card.innerHTML = `
 
-
 <h3>
 ${record.type || "Record"}
 </h3>
-
 
 
 <p>
@@ -1660,7 +1372,6 @@ ${record.username || ""}
 </p>
 
 
-
 <p>
 Amount:
 <b>
@@ -1669,20 +1380,16 @@ UGX ${Number(record.amount || 0).toLocaleString()}
 </p>
 
 
-
 <p>
 Status:
 ${record.status || ""}
 </p>
 
 
-
 <p>
 Date:
 ${formatDate(record.date)}
 </p>
-
-
 
 `;
 
@@ -1696,7 +1403,6 @@ container.appendChild(card);
 
 
 }
-
 
   
 });
