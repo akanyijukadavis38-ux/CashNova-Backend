@@ -57,9 +57,13 @@ let allRecords = [
 
 ...(user.depositRecords || []),
 
-...(user.withdrawalRecords || [])
+...(user.withdrawalRecords || []),
+
+...(user.incomeRecords || [])
 
 ];
+
+
 
 
 // Remove locked registration bonus from history
@@ -82,11 +86,11 @@ let uniqueRecords = [];
 let recordKeys = new Set();
 
 allRecords.forEach(function(record){
-
-    let key =
-        record.type + "-" +
-        (record.mobileMoneyTransactionId || "") + "-" +
-        Number(record.amount);
+let key =
+record.type + "-" +
+Number(record.amount) + "-" +
+new Date(record.date).getTime();
+   
 
     if(!recordKeys.has(key)){
         recordKeys.add(key);
