@@ -2130,4 +2130,223 @@ alert(
 
 
 }
+  // =====================================
+// PART 7 - MAINTENANCE MODE
+// =====================================
+
+
+if(section === "maintenance"){
+
+title.innerHTML =
+"Maintenance Mode";
+
+
+loadMaintenance();
+
+}
+
+
+
+
+async function loadMaintenance(){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Loading maintenance status...
+
+</div>
+
+`;
+
+
+
+try{
+
+
+const response =
+await fetch(
+API + "/api/admin/maintenance"
+);
+
+
+
+const data =
+await response.json();
+
+
+
+displayMaintenance(data);
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+Failed to load maintenance
+
+</div>
+
+`;
+
+}
+
+
+}
+
+
+
+
+
+function displayMaintenance(data){
+
+
+container.innerHTML = `
+
+
+<div class="settings-card">
+
+
+<h3>
+Platform Maintenance
+</h3>
+
+
+
+<p>
+Current Status:
+<b id="maintenanceStatus">
+${data.status}
+</b>
+</p>
+
+
+
+<button id="activateMaintenance">
+
+Enable Maintenance
+
+</button>
+
+
+
+<button id="disableMaintenance">
+
+Disable Maintenance
+
+</button>
+
+
+
+</div>
+
+
+`;
+
+
+
+
+document.getElementById(
+"activateMaintenance"
+).onclick = function(){
+
+
+updateMaintenance("maintenance");
+
+
+};
+
+
+
+document.getElementById(
+"disableMaintenance"
+).onclick = function(){
+
+
+updateMaintenance("active");
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+async function updateMaintenance(status){
+
+
+try{
+
+
+const response =
+await fetch(
+
+API + "/api/admin/maintenance",
+
+{
+
+method:"PUT",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+status:status
+
+})
+
+}
+
+);
+
+
+
+const result =
+await response.json();
+
+
+
+alert(
+result.message
+);
+
+
+
+loadMaintenance();
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+alert(
+"Failed to update maintenance"
+);
+
+
+}
+
+
+}
 });
