@@ -557,3 +557,119 @@
     line-height:1.5;
 
 }
+/* =====================================
+   ADMIN SETTINGS & MAINTENANCE
+===================================== */
+
+
+.settings-card{
+
+background:white;
+
+border-radius:15px;
+
+padding:20px;
+
+margin:20px 0;
+
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
+
+}
+
+
+
+.settings-card h3{
+
+font-size:22px;
+
+margin-bottom:20px;
+
+}
+
+
+
+.settings-card label{
+
+display:block;
+
+margin-top:15px;
+
+font-weight:bold;
+
+}
+
+
+
+.settings-card input{
+
+width:100%;
+
+padding:12px;
+
+margin-top:8px;
+
+border-radius:10px;
+
+border:1px solid #ddd;
+
+font-size:15px;
+
+}
+
+
+
+.settings-card button{
+
+margin-top:20px;
+
+padding:12px 20px;
+
+border:none;
+
+border-radius:10px;
+
+background:#0066ff;
+
+color:white;
+
+font-size:15px;
+
+cursor:pointer;
+
+margin-right:10px;
+
+}
+
+
+
+.settings-card button:hover{
+
+opacity:0.85;
+
+}
+
+
+
+/* Maintenance buttons */
+
+#activateMaintenance{
+
+background:#d9534f;
+
+}
+
+
+
+#disableMaintenance{
+
+background:#28a745;
+
+}
+
+
+
+#maintenanceStatus{
+
+font-size:18px;
+
+}
