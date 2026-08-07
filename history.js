@@ -253,10 +253,32 @@ card.innerHTML = `
 ${record.type}
 </h4>
 
-
 <p>
-${record.date}
+${
+record.date
+?
+new Date(record.date).toLocaleString("en-UG",{
+
+timeZone:"Africa/Kampala",
+
+year:"numeric",
+
+month:"short",
+
+day:"numeric",
+
+hour:"2-digit",
+
+minute:"2-digit",
+
+second:"2-digit"
+
+})
+:
+""
+}
 </p>
+
 
 
 ${
