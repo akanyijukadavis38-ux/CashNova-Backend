@@ -1829,186 +1829,8 @@ message:error.message
 }
 
 });
-// =================================
-// GET TEAM SUMMARY
-// =================================
 
-router.get("/team/:id", async function(req,res){
 
-try{
-
-    const user =
-        await User.findById(req.params.id).lean();
-
-    if(!user){
-
-        return res.status(404).json({
-            message:"User not found"
-        });
-
-    }
-
-
-    // =================================
-    // GET TEAM MEMBERS
-    // =================================
-
-    const teamMembers =
-        Array.isArray(user.teamMembers)
-            ? user.teamMembers
-            : [];
-
-
-    // =================================
-    // CALCULATE LEVEL 1
-    // =================================
-
-    const level1 =
-        teamMembers.filter(function(member){
-
-            return Number(member.level) === 1;
-
-        });
-
-
-    // =================================
-    // CALCULATE LEVEL 2
-    // =================================
-
-    const level2 =
-        teamMembers.filter(function(member){
-
-            return Number(member.level) === 2;
-
-        });
-
-
-    // =================================
-    // CALCULATE LEVEL 3
-    // =================================
-
-    const level3 =
-        teamMembers.filter(function(member){
-
-            return Number(member.level) === 3;
-
-        });
-
-
-    // =================================
-    // FIRST DEPOSIT TOTALS
-    // =================================
-
-    const level1Amount =
-        level1.reduce(function(total,member){
-
-            return total +
-                Number(
-                    member.firstDepositAmount || 0
-                );
-
-        },0);
-
-
-    const level2Amount =
-        level2.reduce(function(total,member){
-
-            return total +
-                Number(
-                    member.firstDepositAmount || 0
-                );
-
-        },0);
-
-
-    const level3Amount =
-        level3.reduce(function(total,member){
-
-            return total +
-                Number(
-                    member.firstDepositAmount || 0
-                );
-
-        },0);
-
-
-    // =================================
-    // TOTAL TEAM FIRST DEPOSITS
-    // =================================
-
-    const totalTeamDeposits =
-        level1Amount +
-        level2Amount +
-        level3Amount;
-
-
-    // =================================
-    // RETURN TEAM SUMMARY
-    // =================================
-
-    res.json({
-
-        myReferralCode:
-            user.myReferralCode || "",
-
-        referralCode:
-            user.referralCode || "",
-
-        referredBy:
-            user.referredBy || "",
-
-        referralIncome:
-            Number(
-                user.referralIncome || 0
-            ),
-
-        totalTeam:
-            teamMembers.length,
-
-        totalTeamDeposits:
-            totalTeamDeposits,
-
-        teamMembers:
-            teamMembers,
-
-        levels:{
-
-            level1:{
-                members:level1.length,
-                amount:level1Amount
-            },
-
-            level2:{
-                members:level2.length,
-                amount:level2Amount
-            },
-
-            level3:{
-                members:level3.length,
-                amount:level3Amount
-            }
-
-        }
-
-    });
-
-
-}catch(error){
-
-    console.log(
-        "Team summary error:",
-        error
-    );
-
-    res.status(500).json({
-
-        message:error.message
-
-    });
-
-}
-
-});
 // =================================
 // GET USER BY ID
 // =================================
@@ -2052,111 +1874,129 @@ message:error.message
 
 
 });
+
 // =================================
-// GET REAL TEAM DATA
+// CASHNOVA REAL TEAM DATA
+// ONE TEAM ROUTE ONLY
 // =================================
 
 router.get("/team/:id", async function(req, res){
 
-try{
+try {
 
-    const owner =
-        await User.findById(req.params.id).lean();
+    const owner = await User.findById(req.params.id).lean();
 
-    if(!owner){
+    if (!owner) {
 
         return res.status(404).json({
-            message:"User not found"
+            message: "User not found"
         });
 
     }
 
 
-    const allUsers =
-        await User.find({}).lean();
+    // =================================
+    // GET ALL USERS
+    // =================================
 
+    const allUsers = await User.find({}).lean();
+
+
+    // =================================
+    // TEAM MEMBERS
+    // =================================
 
     const teamMembers = [];
 
 
     // =================================
-    // LEVEL 1
+    // FIND FIRST CREDITED DEPOSIT
     // =================================
 
-    const level1Users =
-        allUsers.filter(function(user){
+    async function getFirstDeposit(userId) {
 
-            return String(user.referredBy || "") ===
-                String(owner.myReferralCode || "");
+        const deposit = await Deposit.findOne({
 
-        });
+            userId: userId,
+
+            status: "Credited"
+
+        })
+        .sort({
+            approvedDate: 1,
+            date: 1
+        })
+        .lean();
+
+
+        if (!deposit) {
+
+            return {
+                amount: 0,
+                status: "Not yet deposited"
+            };
+
+        }
+
+
+        return {
+            amount: Number(deposit.amount || 0),
+            status: "Active"
+        };
+
+    }
 
 
     // =================================
-    // ADD MEMBER WITH REAL FIRST DEPOSIT
+    // ADD MEMBER
     // =================================
 
-    async function addMember(user, level){
+    async function addMember(user, level) {
 
-        const firstDeposit =
-            await Deposit.findOne({
-
-                userId:user._id,
-
-                status:"Credited"
-
-            })
-            .sort({
-                approvedDate:1,
-                date:1
-            })
-            .lean();
-
-
-        const firstDepositAmount =
-            firstDeposit
-                ? Number(firstDeposit.amount || 0)
-                : 0;
+        const deposit =
+            await getFirstDeposit(user._id);
 
 
         teamMembers.push({
 
-            userId:user._id,
+            userId: user._id,
 
-            username:user.username,
+            username: user.username || "",
 
-            fullName:user.fullName,
+            fullName: user.fullName || "",
 
-            level:level,
+            level: level,
 
             firstDepositAmount:
-                firstDepositAmount,
+                deposit.amount,
 
             depositStatus:
-                firstDeposit
-                    ? "Active"
-                    : "Not yet deposited",
+                deposit.status,
 
-            joinedDate:user.createdAt
+            joinedDate:
+                user.createdAt || null
 
         });
-
-
-        return user;
 
     }
 
 
     // =================================
     // LEVEL 1
+    // DIRECT REFERRALS
     // =================================
 
-    for(const level1User of level1Users){
+    const level1Users = allUsers.filter(function(user) {
 
-        await addMember(
-            level1User,
-            1
-        );
+        return String(user.referredBy || "") ===
+            String(owner.myReferralCode || "");
+
+    });
+
+
+    for (const user of level1Users) {
+
+        await addMember(user, 1);
 
     }
 
@@ -2165,23 +2005,19 @@ try{
     // LEVEL 2
     // =================================
 
-    for(const level1User of level1Users){
+    for (const level1User of level1Users) {
 
-        const level2Users =
-            allUsers.filter(function(user){
+        const level2Users = allUsers.filter(function(user) {
 
-                return String(user.referredBy || "") ===
-                    String(level1User.myReferralCode || "");
+            return String(user.referredBy || "") ===
+                String(level1User.myReferralCode || "");
 
-            });
+        });
 
 
-        for(const level2User of level2Users){
+        for (const user of level2Users) {
 
-            await addMember(
-                level2User,
-                2
-            );
+            await addMember(user, 2);
 
         }
 
@@ -2192,34 +2028,29 @@ try{
     // LEVEL 3
     // =================================
 
-    for(const level1User of level1Users){
+    for (const level1User of level1Users) {
 
-        const level2Users =
-            allUsers.filter(function(user){
+        const level2Users = allUsers.filter(function(user) {
+
+            return String(user.referredBy || "") ===
+                String(level1User.myReferralCode || "");
+
+        });
+
+
+        for (const level2User of level2Users) {
+
+            const level3Users = allUsers.filter(function(user) {
 
                 return String(user.referredBy || "") ===
-                    String(level1User.myReferralCode || "");
+                    String(level2User.myReferralCode || "");
 
             });
 
 
-        for(const level2User of level2Users){
+            for (const user of level3Users) {
 
-            const level3Users =
-                allUsers.filter(function(user){
-
-                    return String(user.referredBy || "") ===
-                        String(level2User.myReferralCode || "");
-
-                });
-
-
-            for(const level3User of level3Users){
-
-                await addMember(
-                    level3User,
-                    3
-                );
+                await addMember(user, 3);
 
             }
 
@@ -2229,58 +2060,59 @@ try{
 
 
     // =================================
-    // LEVEL STATISTICS
+    // SEPARATE LEVELS
     // =================================
 
     const level1 =
-        teamMembers.filter(function(member){
+        teamMembers.filter(function(member) {
 
-            return member.level === 1;
+            return Number(member.level) === 1;
 
         });
 
 
     const level2 =
-        teamMembers.filter(function(member){
+        teamMembers.filter(function(member) {
 
-            return member.level === 2;
+            return Number(member.level) === 2;
 
         });
 
 
     const level3 =
-        teamMembers.filter(function(member){
+        teamMembers.filter(function(member) {
 
-            return member.level === 3;
+            return Number(member.level) === 3;
 
         });
 
 
-    function totalAmount(members){
+    // =================================
+    // TOTAL FIRST DEPOSITS
+    // =================================
 
-        return members.reduce(
-            function(total, member){
+    function calculateAmount(members) {
 
-                return total +
-                    Number(
-                        member.firstDepositAmount || 0
-                    );
+        return members.reduce(function(total, member) {
 
-            },
-            0
-        );
+            return total +
+                Number(member.firstDepositAmount || 0);
+
+        }, 0);
 
     }
 
 
     const level1Amount =
-        totalAmount(level1);
+        calculateAmount(level1);
+
 
     const level2Amount =
-        totalAmount(level2);
+        calculateAmount(level2);
+
 
     const level3Amount =
-        totalAmount(level3);
+        calculateAmount(level3);
 
 
     const totalTeamDeposits =
@@ -2290,19 +2122,33 @@ try{
 
 
     // =================================
-    // RESPONSE
+    // ACTIVE MEMBERS
+    // =================================
+
+    const activeMembers =
+        teamMembers.filter(function(member) {
+
+            return member.depositStatus === "Active";
+
+        }).length;
+
+
+    // =================================
+    // SEND TEAM DATA
     // =================================
 
     res.json({
 
-        owner:{
+        owner: {
 
-            username:owner.username,
+            username:
+                owner.username || "",
 
-            fullName:owner.fullName,
+            fullName:
+                owner.fullName || "",
 
             myReferralCode:
-                owner.myReferralCode,
+                owner.myReferralCode || "",
 
             referredBy:
                 owner.referredBy || "",
@@ -2313,71 +2159,98 @@ try{
         },
 
 
+        myReferralCode:
+            owner.myReferralCode || "",
+
+
+        referredBy:
+            owner.referredBy || "",
+
+
+        referralIncome:
+            Number(owner.referralIncome || 0),
+
+
         totalTeam:
             teamMembers.length,
+
+
+        activeMembers:
+            activeMembers,
 
 
         totalTeamDeposits:
             totalTeamDeposits,
 
 
-        activeMembers:
-            teamMembers.filter(function(member){
+        levels: {
 
-                return member.depositStatus === "Active";
+            level1: {
 
-            }).length,
+                members:
+                    level1.length,
 
-
-        levels:{
-
-            level1:{
-
-                members:level1.length,
-
-                amount:level1Amount
+                amount:
+                    level1Amount
 
             },
 
-            level2:{
 
-                members:level2.length,
+            level2: {
 
-                amount:level2Amount
+                members:
+                    level2.length,
+
+                amount:
+                    level2Amount
 
             },
 
-            level3:{
 
-                members:level3.length,
+            level3: {
 
-                amount:level3Amount
+                members:
+                    level3.length,
+
+                amount:
+                    level3Amount
 
             }
 
         },
 
 
-        teamMembers:teamMembers
+        teamMembers:
+            teamMembers
 
     });
 
 
-}catch(error){
+}
+catch(error) {
 
     console.log(
-        "Team API error:",
+        "CashNova Team API Error:",
         error
     );
 
 
     res.status(500).json({
 
-        message:error.message
+        message:
+            "Unable to load team data",
+
+        error:
+            error.message
 
     });
 
 }
 
 });
+        
+    
+
+
+
 module.exports = router;
