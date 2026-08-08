@@ -434,53 +434,6 @@ message:error.message
 
 
 
-
-
-
-
-// =================================
-// GET USER BY ID
-// =================================
-
-router.get("/:id", async function(req,res){
-
-try{
-
-
-const user =
-await User.findById(req.params.id);
-
-
-
-if(!user){
-
-return res.status(404).json({
-
-message:"User not found"
-
-});
-
-}
-
-
-
-res.json(user);
-
-
-
-}catch(error){
-
-
-res.status(500).json({
-
-message:error.message
-
-});
-
-}
-
-
-});
 // =================================
 // PURCHASE PRODUCT
 // =================================
@@ -988,7 +941,6 @@ message:error.message
 
 
 
-
 // =================================
 // ADMIN APPROVE DEPOSIT
 // =================================
@@ -997,47 +949,59 @@ router.put("/admin/deposit/approve/:id", async function(req,res){
 
 try{
 
-
 const deposit =
 await Deposit.findById(req.params.id);
-
-
 
 if(!deposit){
 
 return res.status(404).json({
-
 message:"Deposit not found"
-
 });
 
 }
 
 
+// PREVENT DOUBLE APPROVAL
+
+if(deposit.status === "Credited"){
+
+return res.status(400).json({
+message:"This deposit has already been approved"
+});
+
+}
 
 
 const user =
 await User.findById(deposit.userId);
 
-
-
-
-
 if(!user){
 
 return res.status(404).json({
-
 message:"User not found"
-
 });
 
 }
 
 
+// MAKE SURE ARRAYS EXIST
+
+if(!user.incomeRecords){
+user.incomeRecords = [];
+}
+
+if(!user.transactionHistory){
+user.transactionHistory = [];
+}
+
+if(!user.depositRecords){
+user.depositRecords = [];
+}
 
 
-
-// ADD DEPOSIT TO WALLET
+// =================================
+// ADD DEPOSIT TO USER WALLET
+// =================================
 
 user.walletBalance =
 Number(user.walletBalance || 0)
@@ -1045,12 +1009,9 @@ Number(user.walletBalance || 0)
 Number(deposit.amount);
 
 
-
-
-
-
-
-// UPDATE TOTAL DEPOSIT
+// =================================
+// UPDATE TOTAL DEPOSITS
+// =================================
 
 user.totalDeposits =
 Number(user.totalDeposits || 0)
@@ -1058,73 +1019,60 @@ Number(user.totalDeposits || 0)
 Number(deposit.amount);
 
 
+// =================================
+// FIRST DEPOSIT
+// =================================
+
+const isFirstDeposit =
+user.firstDepositCompleted !== true;
 
 
-
-
-
-
-// FIRST DEPOSIT APPROVAL
-
-if(user.firstDepositCompleted !== true){
-
-
+if(isFirstDeposit){
 
 user.firstDepositCompleted = true;
 
+user.accountActivated = true;
 
 
-
-// UNLOCK BONUS
+// =================================
+// UNLOCK REGISTRATION BONUS
+// =================================
 
 if(user.registrationBonusUnlocked !== true){
 
-
-
 user.registrationBonusUnlocked = true;
 
+user.registrationBonusStatus = "Unlocked";
 
 
-user.registrationBonusStatus =
-"Unlocked";
+const bonus =
+Number(user.registrationBonus || 5000);
 
-
-
-
-
-// ADD BONUS TO CUMULATIVE INCOME
 
 user.cumulativeIncome =
 Number(user.cumulativeIncome || 0)
 +
-Number(user.registrationBonus || 5000);
-
-
-
-
+bonus;
 
 
 user.incomeRecords.push({
 
 type:"Registration Bonus",
 
-amount:Number(user.registrationBonus || 5000),
+amount:bonus,
 
 status:"Completed",
 
 date:new Date().toLocaleString()
 
 });
-
-
-
 
 
 user.transactionHistory.push({
 
 type:"Registration Bonus",
 
-amount:Number(user.registrationBonus || 5000),
+amount:bonus,
 
 status:"Completed",
 
@@ -1132,20 +1080,14 @@ date:new Date().toLocaleString()
 
 });
 
-
+}
 
 }
 
 
-
-}
-
-
-
-
-
-
-// DEPOSIT RECORD
+// =================================
+// SAVE DEPOSIT RECORD
+// =================================
 
 user.depositRecords.push({
 
@@ -1160,34 +1102,239 @@ date:new Date().toLocaleString()
 });
 
 
+// =================================
+// SAVE DEPOSIT TRANSACTION
+// =================================
+
+user.transactionHistory.push({
+
+type:"Deposit",
+
+amount:Number(deposit.amount),
+
+status:"Credited",
+
+date:new Date().toLocaleString(),
+
+mobileMoneyTransactionId:
+deposit.mobileMoneyTransactionId || ""
+
+});
 
 
+// =================================
+// UPDATE REFERRAL NETWORK
+// =================================
+
+// Referral commission is paid ONLY
+// on the user's FIRST approved deposit.
+
+if(isFirstDeposit){
+
+const depositAmount =
+Number(deposit.amount);
 
 
+// =================================
+// FIND ALL USERS WHO HAVE THIS USER
+// IN THEIR TEAM
+// =================================
 
+const referrers =
+await User.find({
+
+"teamMembers.userId": user._id
+
+});
+
+
+// =================================
+// PROCESS EACH REFERRAL LEVEL
+// =================================
+
+for(const referrer of referrers){
+
+if(!referrer.teamMembers){
+continue;
+}
+
+
+for(const member of referrer.teamMembers){
+
+if(
+String(member.userId) !==
+String(user._id)
+){
+
+continue;
+}
+
+
+const level =
+Number(member.level || 0);
+
+
+let percentage = 0;
+
+
+if(level === 1){
+
+percentage = 0.20;
+
+}
+
+else if(level === 2){
+
+percentage = 0.03;
+
+}
+
+else if(level === 3){
+
+percentage = 0.01;
+
+}
+
+
+if(percentage === 0){
+
+continue;
+}
+
+
+// =================================
+// CALCULATE COMMISSION
+// =================================
+
+const commission =
+depositAmount * percentage;
+
+
+// =================================
+// UPDATE TEAM MEMBER
+// =================================
+
+member.firstDepositAmount =
+depositAmount;
+
+member.depositStatus =
+"Active";
+
+
+// =================================
+// UPDATE REFERRER WALLET
+// =================================
+
+referrer.walletBalance =
+Number(referrer.walletBalance || 0)
++
+commission;
+
+
+// =================================
+// UPDATE REFERRER INCOME
+// =================================
+
+referrer.referralIncome =
+Number(referrer.referralIncome || 0)
++
+commission;
+
+
+referrer.cumulativeIncome =
+Number(referrer.cumulativeIncome || 0)
++
+commission;
+
+
+// =================================
+// INCOME RECORD
+// =================================
+
+if(!referrer.incomeRecords){
+
+referrer.incomeRecords = [];
+
+}
+
+
+referrer.incomeRecords.push({
+
+type:"Referral Commission",
+
+amount:commission,
+
+level:level,
+
+referredUsername:user.username,
+
+status:"Completed",
+
+date:new Date().toLocaleString()
+
+});
+
+
+// =================================
+// TRANSACTION HISTORY
+// =================================
+
+if(!referrer.transactionHistory){
+
+referrer.transactionHistory = [];
+
+}
+
+
+referrer.transactionHistory.push({
+
+type:"Referral Commission",
+
+amount:commission,
+
+level:level,
+
+referredUsername:user.username,
+
+status:"Completed",
+
+date:new Date().toLocaleString()
+
+});
+
+
+referrer.markModified("teamMembers");
+
+await referrer.save();
+
+}
+
+}
+
+}
+
+
+// =================================
 // UPDATE DEPOSIT STATUS
+// =================================
 
-deposit.status="Credited";
+deposit.status = "Credited";
 
-
-deposit.approvedDate=new Date();
-
-
+deposit.approvedDate = new Date();
 
 
-
-
+// =================================
+// SAVE EVERYTHING
+// =================================
 
 await user.save();
-
 
 await deposit.save();
 
 
-
-
-
-
+// =================================
+// RESPONSE
+// =================================
 
 res.json({
 
@@ -1200,10 +1347,12 @@ deposit:deposit
 });
 
 
-
-
 }catch(error){
 
+console.log(
+"Approve deposit error:",
+error
+);
 
 res.status(500).json({
 
@@ -1211,11 +1360,10 @@ message:error.message
 
 });
 
-
 }
 
-
 });
+
 // =================================
 // CREATE WITHDRAWAL REQUEST
 // =================================
@@ -1637,6 +1785,50 @@ message:error.message
 });
 
 }
+
+});
+
+// =================================
+// GET USER BY ID
+// =================================
+
+router.get("/:id", async function(req,res){
+
+try{
+
+
+const user =
+await User.findById(req.params.id);
+
+
+
+if(!user){
+
+return res.status(404).json({
+
+message:"User not found"
+
+});
+
+}
+
+
+
+res.json(user);
+
+
+
+}catch(error){
+
+
+res.status(500).json({
+
+message:error.message
+
+});
+
+}
+
 
 });
 module.exports = router;
