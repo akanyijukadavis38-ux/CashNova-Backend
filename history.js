@@ -1,486 +1,651 @@
 /* =================================
-   CASHNOVA ADVANCED HISTORY SYSTEM
+   CASHNOVA TRANSACTION HISTORY
+   MONGODB VERSION
 ================================= */
 
 document.addEventListener("DOMContentLoaded", async function(){
 
+    const container =
+        document.getElementById("historyContainer");
+
+    const userId =
+        localStorage.getItem("cashnovaUserId");
 
 
-let container =
-document.getElementById("historyContainer");
+    // =================================
+    // CHECK USER
+    // =================================
 
-let userId =
-localStorage.getItem("cashnovaUserId");
+    if(!container){
+        return;
+    }
 
-if(!userId){
+    if(!userId){
 
-container.innerHTML =
-"<p class='empty-history'>User not found</p>";
+        container.innerHTML =
+            "<p class='empty-history'>User not found</p>";
 
-return;
-
-}
-
-let user;
-
-try{
-
-let response = await fetch(
-
-"https://cashnova-backend-89lg.onrender.com/api/users/" +
-userId
-
-);
-
-user = await response.json();
-
-}catch(error){
-
-container.innerHTML =
-"<p class='empty-history'>Failed to load history</p>";
-
-return;
-
-}
-
-if(!user || user.message){
-
-container.innerHTML =
-"<p class='empty-history'>User not found</p>";
-
-return;
-
-}
-let allRecords = [
-
-...(user.transactionHistory || []),
-
-...(user.depositRecords || []),
-
-...(user.withdrawalRecords || []),
-
-...(user.incomeRecords || [])
-
-];
+        return;
+    }
 
 
+    // =================================
+    // LOAD USER FROM MONGODB
+    // =================================
+
+    let user;
+
+    try{
+
+        const response = await fetch(
+            "https://cashnova-backend-89lg.onrender.com/api/users/" +
+            userId
+        );
 
 
-// Remove locked registration bonus from history
-allRecords = allRecords.filter(function(record){
+        if(!response.ok){
 
-    if(
-        record.type === "Registration Bonus" &&
-        record.status === "Locked"
-    ){
+            throw new Error("Failed to load user");
 
-        return false;
+        }
+
+
+        user = await response.json();
+
+
+    }catch(error){
+
+        console.log("History loading error:", error);
+
+        container.innerHTML =
+            "<p class='empty-history'>Failed to load history</p>";
+
+        return;
 
     }
 
-    return true;
 
-});
-// Remove duplicate records
-let uniqueRecords = [];
-let recordKeys = new Set();
+    if(!user || user.message){
 
-allRecords.forEach(function(record){
-let key =
-record.type + "-" +
-Number(record.amount) + "-" +
-new Date(record.date).getTime();
-   
+        container.innerHTML =
+            "<p class='empty-history'>User not found</p>";
 
-    if(!recordKeys.has(key)){
-        recordKeys.add(key);
-        uniqueRecords.push(record);
+        return;
+
     }
 
-});
 
-// REMOVE DUPLICATES
+    // =================================
+    // COLLECT ALL RECORDS
+    // =================================
 
-allRecords = uniqueRecords;
+    let allRecords = [];
 
 
-// SORT NEWEST TRANSACTIONS FIRST
+    // TRANSACTION HISTORY
 
-allRecords.sort(function(a,b){
+    if(Array.isArray(user.transactionHistory)){
 
-    return new Date(b.date) - new Date(a.date);
+        user.transactionHistory.forEach(function(record){
 
-});
+            allRecords.push({
+                ...record,
+                source:"transactionHistory"
+            });
 
+        });
 
+    }
 
 
+    // DEPOSIT RECORDS
 
-if(allRecords.length === 0){
+    if(Array.isArray(user.depositRecords)){
 
-container.innerHTML =
-"<p class='empty-history'>No transaction history available</p>";
+        user.depositRecords.forEach(function(record){
 
-return;
+            allRecords.push({
+                ...record,
+                type: record.type || "Deposit",
+                source:"depositRecords"
+            });
 
-}
+        });
 
+    }
 
 
+    // WITHDRAWAL RECORDS
 
+    if(Array.isArray(user.withdrawalRecords)){
 
+        user.withdrawalRecords.forEach(function(record){
 
+            allRecords.push({
+                ...record,
+                type: record.type || "Withdrawal",
+                source:"withdrawalRecords"
+            });
 
-function displayHistory(records){
+        });
 
+    }
 
-container.innerHTML = "";
 
+    // INCOME RECORDS
 
+    if(Array.isArray(user.incomeRecords)){
 
-records.forEach(function(record){
+        user.incomeRecords.forEach(function(record){
 
+            allRecords.push({
+                ...record,
+                source:"incomeRecords"
+            });
 
+        });
 
-let card =
-document.createElement("div");
+    }
 
 
-card.className =
-"history-card";
+    // =================================
+    // REMOVE ONLY LOCKED REGISTRATION BONUS
+    // =================================
 
+    allRecords =
+        allRecords.filter(function(record){
 
+            return !(
+                record.type === "Registration Bonus" &&
+                record.status === "Locked"
+            );
 
+        });
 
 
-let type =
-record.type.toLowerCase();
+    // =================================
+    // SORT NEWEST FIRST
+    // =================================
 
+    allRecords.sort(function(a,b){
 
+        const dateA =
+            new Date(a.date).getTime() || 0;
 
-let icon =
-"fa-money-bill-transfer";
+        const dateB =
+            new Date(b.date).getTime() || 0;
 
 
+        return dateB - dateA;
 
-if(type.includes("deposit")){
+    });
 
-icon="fa-arrow-down";
 
-}
+    // =================================
+    // UGANDA DATE & TIME
+    // =================================
 
+    function formatUgandaDate(date){
 
+        if(!date){
+            return "Date unavailable";
+        }
 
-if(type.includes("withdraw")){
 
-icon="fa-arrow-up";
+        const parsedDate =
+            new Date(date);
 
-}
 
+        if(isNaN(parsedDate.getTime())){
 
+            return String(date);
 
-if(type.includes("bonus")){
+        }
 
-icon="fa-gift";
 
-}
+        return parsedDate.toLocaleString(
+            "en-UG",
+            {
+                timeZone:"Africa/Kampala",
 
+                year:"numeric",
 
+                month:"short",
 
-if(type.includes("daily") ||
-type.includes("income") ||
-type.includes("profit")){
+                day:"numeric",
 
-icon="fa-chart-line";
+                hour:"2-digit",
 
-}
+                minute:"2-digit",
 
+                second:"2-digit",
 
+                hour12:false
+            }
+        );
 
-if(type.includes("referral")){
+    }
 
-icon="fa-users";
 
-}
+    // =================================
+    // GET RECORD TYPE
+    // =================================
 
+    function getRecordType(record){
 
+        return String(
+            record.type || "Transaction"
+        );
 
+    }
 
 
+    // =================================
+    // GET ICON
+    // =================================
 
+    function getIcon(type){
 
-let statusClass =
-"status-pending";
+        const lowerType =
+            type.toLowerCase();
 
 
+        if(lowerType.includes("deposit")){
+            return "fa-arrow-down";
+        }
 
-if(record.status === "Approved" ||
-record.status === "Credited"){
 
-statusClass =
-"status-approved";
+        if(lowerType.includes("withdraw")){
+            return "fa-arrow-up";
+        }
 
-}
 
+        if(lowerType.includes("bonus")){
+            return "fa-gift";
+        }
 
 
-if(record.status === "Rejected"){
+        if(
+            lowerType.includes("daily") ||
+            lowerType.includes("income") ||
+            lowerType.includes("profit")
+        ){
 
-statusClass =
-"status-rejected";
+            return "fa-chart-line";
 
-}
+        }
 
 
+        if(lowerType.includes("referral")){
 
+            return "fa-users";
 
+        }
 
 
+        if(lowerType.includes("purchase")){
 
-card.innerHTML = `
+            return "fa-box-open";
 
+        }
 
-<div class="history-left">
 
+        return "fa-money-bill-transfer";
 
-<div class="history-icon">
+    }
 
-<i class="fa-solid ${icon}"></i>
 
-</div>
+    // =================================
+    // GET STATUS CLASS
+    // =================================
 
+    function getStatusClass(status){
 
-<div class="history-details">
+        const currentStatus =
+            String(status || "").toLowerCase();
 
 
-<h4>
-${record.type}
-</h4>
+        if(
+            currentStatus === "approved" ||
+            currentStatus === "credited" ||
+            currentStatus === "completed"
+        ){
 
-<p>
-${
-record.date
-?
-new Date(record.date).toLocaleString("en-UG",{
+            return "status-approved";
 
-timeZone:"Africa/Kampala",
+        }
 
-year:"numeric",
 
-month:"short",
+        if(currentStatus === "rejected"){
 
-day:"numeric",
+            return "status-rejected";
 
-hour:"2-digit",
+        }
 
-minute:"2-digit",
 
-second:"2-digit"
+        return "status-pending";
 
-})
-:
-""
-}
-</p>
+    }
 
 
+    // =================================
+    // DISPLAY HISTORY
+    // =================================
 
-${
-record.mobileMoneyTransactionId
-?
-`
-<p>
-Transaction ID:
-<b>${record.mobileMoneyTransactionId}</b>
-</p>
-`
-:
-""
-}
+    function displayHistory(records){
 
+        container.innerHTML = "";
 
-</div>
 
+        if(!records || records.length === 0){
 
+            container.innerHTML =
+                "<p class='empty-history'>No transaction history available</p>";
 
+            return;
 
+        }
 
-<div class="history-right">
 
+        records.forEach(function(record){
 
-<div class="history-amount">
+            const card =
+                document.createElement("div");
 
-UGX ${Number(record.amount).toLocaleString()}
 
-</div>
+            card.className =
+                "history-card";
 
 
-<span class="history-status ${statusClass}">
+            const type =
+                getRecordType(record);
 
-${record.status}
 
-</span>
+            const icon =
+                getIcon(type);
 
 
-</div>
+            const status =
+                record.status || "Pending";
 
 
-`;
+            const statusClass =
+                getStatusClass(status);
 
 
+            const amount =
+                Number(record.amount || 0);
 
-container.appendChild(card);
 
+            const formattedAmount =
+                amount.toLocaleString("en-UG");
 
 
-});
+            const formattedDate =
+                formatUgandaDate(record.date);
 
 
-}
+            // =================================
+            // TRANSACTION ID
+            // =================================
 
+            let transactionIdHTML = "";
 
 
+            if(record.mobileMoneyTransactionId){
 
+                transactionIdHTML = `
 
+                    <p>
+                        Transaction ID:
+                        <b>
+                            ${record.mobileMoneyTransactionId}
+                        </b>
+                    </p>
 
-// SHOW ALL FIRST
+                `;
 
-displayHistory(allRecords);
+            }
 
 
+            // =================================
+            // PRODUCT NAME
+            // =================================
 
+            let productHTML = "";
 
 
+            if(record.product){
 
+                productHTML = `
 
+                    <p>
+                        Product:
+                        <b>
+                            ${record.product}
+                        </b>
+                    </p>
 
-// FILTER BUTTONS
+                `;
 
+            }
 
-let filterButtons =
-document.querySelectorAll(".history-filters button");
 
+            // =================================
+            // CARD
+            // =================================
 
+            card.innerHTML = `
 
-filterButtons.forEach(function(button){
+                <div class="history-left">
 
+                    <div class="history-icon">
 
+                        <i class="fa-solid ${icon}"></i>
 
-button.onclick=function(){
+                    </div>
 
 
+                    <div class="history-details">
 
-filterButtons.forEach(function(btn){
+                        <h4>
+                            ${type}
+                        </h4>
 
-btn.classList.remove("active");
 
-});
+                        <p>
+                            ${formattedDate}
+                        </p>
 
+                        ${productHTML}
 
+                        ${transactionIdHTML}
 
-button.classList.add("active");
+                    </div>
 
 
+                    <div class="history-right">
 
-let selected =
-button.innerText;
+                        <div class="history-amount">
 
+                            UGX ${formattedAmount}
 
+                        </div>
 
-let filtered =
-allRecords;
 
+                        <span class="history-status ${statusClass}">
 
+                            ${status}
 
-if(selected !== "All"){
+                        </span>
 
+                    </div>
 
+                </div>
 
-filtered =
-allRecords.filter(function(record){
+            `;
 
 
+            container.appendChild(card);
 
-let type =
-record.type.toLowerCase();
+        });
 
+    }
 
 
+    // =================================
+    // SHOW ALL HISTORY
+    // =================================
 
+    displayHistory(allRecords);
 
-if(selected === "Deposits"){
 
-return type.includes("deposit");
+    // =================================
+    // FILTER BUTTONS
+    // =================================
 
-}
+    const filterButtons =
+        document.querySelectorAll(
+            ".history-filters button"
+        );
 
 
+    filterButtons.forEach(function(button){
 
+        button.onclick = function(){
 
+            filterButtons.forEach(function(btn){
 
-if(selected === "Withdrawals"){
+                btn.classList.remove("active");
 
-return type.includes("withdraw");
+            });
 
-}
 
+            button.classList.add("active");
 
 
+            const selected =
+                button.innerText.trim();
 
 
-if(selected === "Daily Income"){
+            let filtered =
+                allRecords;
 
-return type.includes("daily") ||
-type.includes("income") ||
-type.includes("profit");
 
-}
+            // =================================
+            // ALL
+            // =================================
 
+            if(selected === "All"){
 
+                filtered =
+                    allRecords;
 
+            }
 
 
-if(selected === "Bonus"){
+            // =================================
+            // DEPOSITS
+            // =================================
 
-return type.includes("bonus");
+            else if(selected === "Deposits"){
 
-}
+                filtered =
+                    allRecords.filter(function(record){
 
+                        return getRecordType(record)
+                            .toLowerCase()
+                            .includes("deposit");
 
+                    });
 
+            }
 
 
-if(selected === "Referral"){
+            // =================================
+            // WITHDRAWALS
+            // =================================
 
-return type.includes("referral");
+            else if(selected === "Withdrawals"){
 
-}
+                filtered =
+                    allRecords.filter(function(record){
 
+                        return getRecordType(record)
+                            .toLowerCase()
+                            .includes("withdraw");
 
+                    });
 
+            }
 
 
-return false;
+            // =================================
+            // DAILY INCOME
+            // =================================
 
+            else if(selected === "Daily Income"){
 
+                filtered =
+                    allRecords.filter(function(record){
 
-});
+                        const type =
+                            getRecordType(record)
+                                .toLowerCase();
 
 
-}
+                        return (
+                            type.includes("daily") ||
+                            type.includes("income") ||
+                            type.includes("profit")
+                        );
 
+                    });
 
+            }
 
-displayHistory(filtered);
 
+            // =================================
+            // BONUS
+            // =================================
 
+            else if(selected === "Bonus"){
 
-};
+                filtered =
+                    allRecords.filter(function(record){
 
+                        return getRecordType(record)
+                            .toLowerCase()
+                            .includes("bonus");
 
+                    });
 
-});
+            }
 
+
+            // =================================
+            // REFERRAL
+            // =================================
+
+            else if(selected === "Referral"){
+
+                filtered =
+                    allRecords.filter(function(record){
+
+                        return getRecordType(record)
+                            .toLowerCase()
+                            .includes("referral");
+
+                    });
+
+            }
+
+
+            displayHistory(filtered);
+
+        };
+
+    });
 
 
 });
