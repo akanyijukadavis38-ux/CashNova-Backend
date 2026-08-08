@@ -1874,17 +1874,18 @@ message:error.message
 
 
 });
-
-// =================================
+    
+ // =================================
 // CASHNOVA REAL TEAM DATA
-// ONE TEAM ROUTE ONLY
+// COMMISSION SUMMARY + REAL DEPOSITS
 // =================================
 
 router.get("/team/:id", async function(req, res){
 
 try {
 
-    const owner = await User.findById(req.params.id).lean();
+    const owner =
+        await User.findById(req.params.id).lean();
 
     if (!owner) {
 
@@ -1899,7 +1900,8 @@ try {
     // GET ALL USERS
     // =================================
 
-    const allUsers = await User.find({}).lean();
+    const allUsers =
+        await User.find({}).lean();
 
 
     // =================================
@@ -1910,45 +1912,54 @@ try {
 
 
     // =================================
-    // FIND FIRST CREDITED DEPOSIT
+    // FIND FIRST APPROVED DEPOSIT
     // =================================
 
     async function getFirstDeposit(userId) {
 
-        const deposit = await Deposit.findOne({
+        const deposit =
+            await Deposit.findOne({
 
-            userId: userId,
+                userId: userId,
 
-            status: "Credited"
+                status: "Credited"
 
-        })
-        .sort({
-            approvedDate: 1,
-            date: 1
-        })
-        .lean();
+            })
+            .sort({
+                approvedDate: 1,
+                date: 1
+            })
+            .lean();
 
 
         if (!deposit) {
 
             return {
+
                 amount: 0,
+
                 status: "Not yet deposited"
+
             };
 
         }
 
 
         return {
-            amount: Number(deposit.amount || 0),
-            status: "Active"
+
+            amount:
+                Number(deposit.amount || 0),
+
+            status:
+                "Active"
+
         };
 
     }
 
 
     // =================================
-    // ADD MEMBER
+    // ADD TEAM MEMBER
     // =================================
 
     async function addMember(user, level) {
@@ -1957,18 +1968,54 @@ try {
             await getFirstDeposit(user._id);
 
 
+        let commissionRate = 0;
+
+
+        if(level === 1){
+
+            commissionRate = 0.20;
+
+        }
+        else if(level === 2){
+
+            commissionRate = 0.03;
+
+        }
+        else if(level === 3){
+
+            commissionRate = 0.01;
+
+        }
+
+
+        const commissionAmount =
+            Number(deposit.amount || 0)
+            *
+            commissionRate;
+
+
         teamMembers.push({
 
-            userId: user._id,
+            userId:
+                user._id,
 
-            username: user.username || "",
+            username:
+                user.username || "",
 
-            fullName: user.fullName || "",
+            fullName:
+                user.fullName || "",
 
-            level: level,
+            level:
+                level,
 
             firstDepositAmount:
-                deposit.amount,
+                Number(deposit.amount || 0),
+
+            commissionRate:
+                commissionRate,
+
+            commissionAmount:
+                commissionAmount,
 
             depositStatus:
                 deposit.status,
@@ -1983,18 +2030,18 @@ try {
 
     // =================================
     // LEVEL 1
-    // DIRECT REFERRALS
     // =================================
 
-    const level1Users = allUsers.filter(function(user) {
+    const level1Users =
+        allUsers.filter(function(user){
 
-        return String(user.referredBy || "") ===
-            String(owner.myReferralCode || "");
+            return String(user.referredBy || "") ===
+                String(owner.myReferralCode || "");
 
-    });
+        });
 
 
-    for (const user of level1Users) {
+    for(const user of level1Users){
 
         await addMember(user, 1);
 
@@ -2005,17 +2052,18 @@ try {
     // LEVEL 2
     // =================================
 
-    for (const level1User of level1Users) {
+    for(const level1User of level1Users){
 
-        const level2Users = allUsers.filter(function(user) {
+        const level2Users =
+            allUsers.filter(function(user){
 
-            return String(user.referredBy || "") ===
-                String(level1User.myReferralCode || "");
+                return String(user.referredBy || "") ===
+                    String(level1User.myReferralCode || "");
 
-        });
+            });
 
 
-        for (const user of level2Users) {
+        for(const user of level2Users){
 
             await addMember(user, 2);
 
@@ -2028,27 +2076,29 @@ try {
     // LEVEL 3
     // =================================
 
-    for (const level1User of level1Users) {
+    for(const level1User of level1Users){
 
-        const level2Users = allUsers.filter(function(user) {
-
-            return String(user.referredBy || "") ===
-                String(level1User.myReferralCode || "");
-
-        });
-
-
-        for (const level2User of level2Users) {
-
-            const level3Users = allUsers.filter(function(user) {
+        const level2Users =
+            allUsers.filter(function(user){
 
                 return String(user.referredBy || "") ===
-                    String(level2User.myReferralCode || "");
+                    String(level1User.myReferralCode || "");
 
             });
 
 
-            for (const user of level3Users) {
+        for(const level2User of level2Users){
+
+            const level3Users =
+                allUsers.filter(function(user){
+
+                    return String(user.referredBy || "") ===
+                        String(level2User.myReferralCode || "");
+
+                });
+
+
+            for(const user of level3Users){
 
                 await addMember(user, 3);
 
@@ -2064,7 +2114,7 @@ try {
     // =================================
 
     const level1 =
-        teamMembers.filter(function(member) {
+        teamMembers.filter(function(member){
 
             return Number(member.level) === 1;
 
@@ -2072,7 +2122,7 @@ try {
 
 
     const level2 =
-        teamMembers.filter(function(member) {
+        teamMembers.filter(function(member){
 
             return Number(member.level) === 2;
 
@@ -2080,7 +2130,7 @@ try {
 
 
     const level3 =
-        teamMembers.filter(function(member) {
+        teamMembers.filter(function(member){
 
             return Number(member.level) === 3;
 
@@ -2088,37 +2138,46 @@ try {
 
 
     // =================================
-    // TOTAL FIRST DEPOSITS
+    // CALCULATE COMMISSION
     // =================================
 
-    function calculateAmount(members) {
+    function calculateCommission(members){
 
-        return members.reduce(function(total, member) {
+        return members.reduce(
+            function(total, member){
 
-            return total +
-                Number(member.firstDepositAmount || 0);
+                return total +
+                    Number(
+                        member.commissionAmount || 0
+                    );
 
-        }, 0);
+            },
+            0
+        );
 
     }
 
 
-    const level1Amount =
-        calculateAmount(level1);
+    const level1Commission =
+        calculateCommission(level1);
 
 
-    const level2Amount =
-        calculateAmount(level2);
+    const level2Commission =
+        calculateCommission(level2);
 
 
-    const level3Amount =
-        calculateAmount(level3);
+    const level3Commission =
+        calculateCommission(level3);
 
 
-    const totalTeamDeposits =
-        level1Amount +
-        level2Amount +
-        level3Amount;
+    // =================================
+    // TOTAL COMMISSION
+    // =================================
+
+    const totalCommission =
+        level1Commission +
+        level2Commission +
+        level3Commission;
 
 
     // =================================
@@ -2126,7 +2185,7 @@ try {
     // =================================
 
     const activeMembers =
-        teamMembers.filter(function(member) {
+        teamMembers.filter(function(member){
 
             return member.depositStatus === "Active";
 
@@ -2154,7 +2213,9 @@ try {
                 owner.referredBy || "",
 
             referralIncome:
-                Number(owner.referralIncome || 0)
+                Number(
+                    owner.referralIncome || 0
+                )
 
         },
 
@@ -2168,7 +2229,9 @@ try {
 
 
         referralIncome:
-            Number(owner.referralIncome || 0),
+            Number(
+                owner.referralIncome || 0
+            ),
 
 
         totalTeam:
@@ -2179,8 +2242,8 @@ try {
             activeMembers,
 
 
-        totalTeamDeposits:
-            totalTeamDeposits,
+        totalCommission:
+            totalCommission,
 
 
         levels: {
@@ -2191,7 +2254,20 @@ try {
                     level1.length,
 
                 amount:
-                    level1Amount
+                    level1Commission,
+
+                depositAmount:
+                    level1.reduce(
+                        function(total, member){
+
+                            return total +
+                                Number(
+                                    member.firstDepositAmount || 0
+                                );
+
+                        },
+                        0
+                    )
 
             },
 
@@ -2202,7 +2278,20 @@ try {
                     level2.length,
 
                 amount:
-                    level2Amount
+                    level2Commission,
+
+                depositAmount:
+                    level2.reduce(
+                        function(total, member){
+
+                            return total +
+                                Number(
+                                    member.firstDepositAmount || 0
+                                );
+
+                        },
+                        0
+                    )
 
             },
 
@@ -2213,7 +2302,20 @@ try {
                     level3.length,
 
                 amount:
-                    level3Amount
+                    level3Commission,
+
+                depositAmount:
+                    level3.reduce(
+                        function(total, member){
+
+                            return total +
+                                Number(
+                                    member.firstDepositAmount || 0
+                                );
+
+                        },
+                        0
+                    )
 
             }
 
@@ -2247,9 +2349,7 @@ catch(error) {
 
 }
 
-});
-        
-    
+});   
 
 
 
