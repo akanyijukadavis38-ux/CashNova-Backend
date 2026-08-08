@@ -3,6 +3,7 @@ const router = express.Router();
 
 const User = require("./User");
 const Deposit = require("./Deposit");
+const Withdrawal = require("./Withdrawal");
 
 
 
@@ -1269,5 +1270,244 @@ message:error.message
 }
 
 });
+// =================================
+// USER TRANSACTION HISTORY
+// =================================
 
+router.get("/history/:id", async function(req, res){
+
+try{
+
+const userId = req.params.id;
+
+
+// FIND USER
+
+const user =
+await User.findById(userId).lean();
+
+if(!user){
+
+return res.status(404).json({
+
+message:"User not found"
+
+});
+
+}
+
+
+// =================================
+// GET REAL DEPOSITS
+// =================================
+
+const deposits =
+await Deposit.find({
+userId:userId
+})
+.sort({date:-1})
+.lean();
+
+
+// =================================
+// GET REAL WITHDRAWALS
+// =================================
+
+const withdrawals =
+await Withdrawal.find({
+userId:userId
+})
+.sort({date:-1})
+.lean();
+
+
+// =================================
+// OTHER TRANSACTIONS
+// =================================
+
+let otherTransactions =
+Array.isArray(user.transactionHistory)
+?
+user.transactionHistory.filter(function(record){
+
+const type =
+String(record.type || "").toLowerCase();
+
+
+// Deposits and withdrawals are already
+// coming from their real collections.
+
+if(type.includes("deposit")){
+
+return false;
+
+}
+
+if(type.includes("withdraw")){
+
+return false;
+
+}
+
+return true;
+
+})
+:
+[];
+
+
+// =================================
+// REMOVE EXACT DUPLICATES FROM
+// OTHER TRANSACTIONS
+// =================================
+
+const uniqueTransactions = [];
+
+const transactionKeys = new Set();
+
+
+otherTransactions.forEach(function(record){
+
+const key = [
+
+String(record.type || ""),
+
+String(record.product || ""),
+
+String(record.amount || 0),
+
+String(record.date || ""),
+
+String(record.status || "")
+
+].join("|");
+
+
+if(!transactionKeys.has(key)){
+
+transactionKeys.add(key);
+
+uniqueTransactions.push(record);
+
+}
+
+});
+
+
+// =================================
+// FORMAT DEPOSITS
+// =================================
+
+const depositHistory =
+deposits.map(function(deposit){
+
+return {
+
+type:"Deposit",
+
+amount:Number(deposit.amount || 0),
+
+status:deposit.status || "Pending",
+
+date:deposit.date,
+
+mobileMoneyTransactionId:
+deposit.mobileMoneyTransactionId || "",
+
+depositId:deposit._id,
+
+method:deposit.method || ""
+
+};
+
+});
+
+
+// =================================
+// FORMAT WITHDRAWALS
+// =================================
+
+const withdrawalHistory =
+withdrawals.map(function(withdrawal){
+
+return {
+
+type:"Withdrawal",
+
+amount:Number(withdrawal.amount || 0),
+
+fee:Number(withdrawal.fee || 0),
+
+receiveAmount:
+Number(withdrawal.receiveAmount || 0),
+
+status:withdrawal.status || "Pending",
+
+date:withdrawal.date,
+
+withdrawalId:withdrawal._id,
+
+phone:withdrawal.phone || "",
+
+approvedDate:withdrawal.approvedDate || null
+
+};
+
+});
+
+
+// =================================
+// COMBINE EVERYTHING
+// =================================
+
+const history = [
+
+...depositHistory,
+
+...withdrawalHistory,
+
+...uniqueTransactions
+
+];
+
+
+// =================================
+// SORT NEWEST FIRST
+// =================================
+
+history.sort(function(a,b){
+
+return new Date(b.date || 0) -
+new Date(a.date || 0);
+
+});
+
+
+// =================================
+// SEND HISTORY
+// =================================
+
+res.json({
+
+history:history
+
+});
+
+
+}catch(error){
+
+console.log(
+"History error:",
+error
+);
+
+res.status(500).json({
+
+message:error.message
+
+});
+
+}
+
+});
 module.exports = router;
