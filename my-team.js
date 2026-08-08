@@ -1,434 +1,614 @@
 /* =================================
    CASHNOVA MY TEAM SYSTEM
+   MONGODB VERSION
 ================================= */
-
 
 document.addEventListener("DOMContentLoaded", function(){
 
+    // =================================
+    // BACKEND URL
+    // =================================
 
+    const API_URL =
+        "https://cashnova-backend-89lg.onrender.com/api/users";
 
-function getCurrentUserData(){
 
+    // =================================
+    // GET CURRENT USER FROM MONGODB
+    // =================================
 
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-) || [];
+    async function getCurrentUserData(){
 
+        const userId =
+            localStorage.getItem("cashnovaUserId");
 
-let username =
-localStorage.getItem("cashnovaCurrentUser");
+        if(!userId){
 
+            console.log("CashNova user ID not found");
 
+            return null;
+        }
 
-return users.find(function(user){
 
-return user.username === username;
+        try{
 
-});
+            const response =
+                await fetch(
+                    API_URL + "/" + userId
+                );
 
 
-}
+            if(!response.ok){
 
+                console.log(
+                    "Failed to load user:",
+                    response.status
+                );
 
+                return null;
+            }
 
 
+            const user =
+                await response.json();
 
 
-function showMembers(level){
+            // Keep latest user data locally too
+            localStorage.setItem(
+                "cashnovaUserData",
+                JSON.stringify(user)
+            );
 
 
-let user = getCurrentUserData();
+            return user;
 
 
-if(!user){
+        }catch(error){
 
-return;
+            console.log(
+                "Team user loading error:",
+                error
+            );
 
-}
+            return null;
+        }
 
+    }
 
 
 
-// GET ALL TEAM MEMBERS
+    // =================================
+    // SHOW MEMBERS
+    // =================================
 
-let members =
-user.teamMembers || [];
+    async function showMembers(level){
 
+        const user =
+            await getCurrentUserData();
 
 
+        if(!user){
 
-// FILTER BY LEVEL
+            const container =
+                document.getElementById(
+                    "membersContainer"
+                );
 
-if(level !== undefined){
 
+            if(container){
 
-members =
-members.filter(function(member){
+                container.innerHTML = `
+                    <div class="empty-state">
 
+                        <i class="fa-solid fa-user-group"></i>
 
-return Number(member.level) === Number(level);
+                        <p>
+                            Unable to load team members
+                        </p>
 
+                    </div>
+                `;
 
-});
+            }
 
+            return;
+        }
 
-}
 
+        // =================================
+        // GET ALL TEAM MEMBERS
+        // =================================
 
+        const allMembers =
+            Array.isArray(user.teamMembers)
+            ?
+            user.teamMembers
+            :
+            [];
 
 
+        // =================================
+        // FILTER BY LEVEL
+        // =================================
 
+        let members =
+            allMembers.filter(function(member){
 
-// TOTAL MEMBERS (ALL LEVELS)
+                return Number(member.level) ===
+                       Number(level);
 
-let totalMembers =
-document.getElementById("totalMembers");
+            });
 
 
+        // =================================
+        // TOTAL MEMBERS
+        // =================================
 
-if(totalMembers){
+        const totalMembers =
+            document.getElementById(
+                "totalMembers"
+            );
 
 
-let allMembers =
-user.teamMembers || [];
+        if(totalMembers){
 
+            totalMembers.innerHTML =
+                allMembers.length;
 
+        }
 
-totalMembers.innerHTML =
-allMembers.length;
 
+        // =================================
+        // ACTIVE MEMBERS
+        // =================================
 
-}
+        const activeMembers =
+            document.getElementById(
+                "activeMembers"
+            );
 
 
+        if(activeMembers){
 
-// ACTIVE MEMBERS
+            const active =
+                allMembers.filter(
+                    function(member){
 
-let activeMembers =
-document.getElementById("activeMembers");
+                        return (
+                            member.depositStatus ===
+                            "Active"
+                        );
 
+                    }
+                );
 
 
-if(activeMembers){
+            activeMembers.innerHTML =
+                active.length;
 
-let allMembers =
-user.teamMembers || [];
+        }
 
-let active =
-allMembers.filter(function(member){
 
-return member.depositStatus === "Active";
+        // =================================
+        // REFERRAL EARNINGS
+        // =================================
 
-});
+        const referralEarnings =
+            document.getElementById(
+                "referralEarnings"
+            );
 
 
-activeMembers.innerHTML =
-active.length;
+        if(referralEarnings){
 
-}
+            referralEarnings.innerHTML =
+                "UGX " +
+                Number(
+                    user.referralIncome || 0
+                ).toLocaleString();
 
+        }
 
 
+        // =================================
+        // TOTAL TEAM DEPOSITS
+        // =================================
 
+        const teamDeposits =
+            document.getElementById(
+                "teamDeposits"
+            );
 
-// REFERRAL EARNINGS
 
-let referralEarnings =
-document.getElementById("referralEarnings");
+        if(teamDeposits){
 
+            let totalDeposits = 0;
 
 
-if(referralEarnings){
+            allMembers.forEach(
+                function(member){
 
-referralEarnings.innerHTML =
-"UGX " +
-Number(user.referralIncome || 0)
-.toLocaleString();
+                    totalDeposits +=
+                        Number(
+                            member.firstDepositAmount ||
+                            0
+                        );
 
-}
-// TOTAL TEAM FIRST DEPOSITS
+                }
+            );
 
-let teamDeposits =
-document.getElementById("teamDeposits");
 
-if(teamDeposits){
+            teamDeposits.innerHTML =
+                "UGX " +
+                totalDeposits.toLocaleString();
 
-    let totalFirstDeposits = 0;
+        }
 
-    (user.teamMembers || []).forEach(function(member){
 
-        totalFirstDeposits += Number(member.firstDepositAmount || 0);
+        // =================================
+        // MEMBERS CONTAINER
+        // =================================
 
-    });
+        const container =
+            document.getElementById(
+                "membersContainer"
+            );
 
-    teamDeposits.innerHTML =
-    "UGX " + totalFirstDeposits.toLocaleString();
 
-}
+        if(!container){
 
-let container =
-document.getElementById("membersContainer");
+            return;
+        }
 
 
+        // =================================
+        // NO MEMBERS
+        // =================================
 
-if(!container){
+        if(members.length === 0){
 
-return;
+            container.innerHTML = `
 
-}
+                <div class="empty-state">
 
+                    <i class="fa-solid fa-user-group"></i>
 
+                    <p>
+                        No members in this level yet
+                    </p>
 
+                </div>
 
+            `;
 
+            return;
+        }
 
-if(members.length === 0){
 
+        // =================================
+        // CLEAR OLD MEMBERS
+        // =================================
 
-container.innerHTML =
+        container.innerHTML = "";
 
-`
-<div class="empty-state">
 
-<i class="fa-solid fa-user-group"></i>
+        // =================================
+        // DISPLAY MEMBERS
+        // =================================
 
-<p>
-No members in this level yet
-</p>
+        members.forEach(
+            function(member){
 
-</div>
-`;
+                const card =
+                    document.createElement("div");
 
-return;
 
-}
+                card.className =
+                    "member-card";
 
 
+                // =================================
+                // HIDE USERNAME
+                // =================================
 
+                let hiddenAccount =
+                    "****";
 
 
+                if(member.username){
 
-container.innerHTML = "";
+                    const username =
+                        String(
+                            member.username
+                        );
 
 
+                    if(username.length > 4){
 
+                        hiddenAccount =
+                            "****" +
+                            username.slice(-4);
 
+                    }else{
 
+                        hiddenAccount =
+                            "****";
 
-members.forEach(function(member){
+                    }
 
+                }
 
 
-let card =
-document.createElement("div");
+                // =================================
+                // MEMBER DEPOSIT
+                // =================================
 
+                const depositAmount =
+                    Number(
+                        member.firstDepositAmount ||
+                        0
+                    );
 
 
-card.className =
-"member-card";
+                // =================================
+                // COMMISSION PERCENTAGE
+                // =================================
 
+                let percentage = 0;
 
 
+                if(Number(member.level) === 1){
 
+                    percentage = 0.20;
 
-let hiddenAccount =
-member.username ?
+                }
 
-"****" + member.username.slice(-4)
+                else if(
+                    Number(member.level) === 2
+                ){
 
-:
+                    percentage = 0.03;
 
-"****";
+                }
 
+                else if(
+                    Number(member.level) === 3
+                ){
 
-card.innerHTML =
+                    percentage = 0.01;
 
-`
+                }
 
-<div class="member-top">
 
-<h3>
-${hiddenAccount}
-</h3>
+                // =================================
+                // COMMISSION
+                // =================================
 
-<span class="level-badge">
-Level ${member.level}
-</span>
+                const commission =
+                    depositAmount *
+                    percentage;
 
-</div>
 
+                // =================================
+                // JOINED DATE
+                // =================================
 
+                let joinedDate =
+                    "Unknown";
 
-<div class="member-info">
 
-<p>
-<i class="fa-solid fa-wallet"></i>
-Deposit:
-<span class="deposit-badge">
-${member.depositStatus || "Not yet deposited"}
-</span>
-</p>
+                if(member.joinedDate){
 
+                    const date =
+                        new Date(
+                            member.joinedDate
+                        );
 
 
+                    if(!isNaN(date.getTime())){
 
-<p>
-<i class="fa-solid fa-wallet"></i>
-Deposit:
-<b>
-UGX ${Number(member.firstDepositAmount || 0).toLocaleString()}
-</b>
-</p>
+                        joinedDate =
+                            date.toLocaleDateString();
 
-<p>
-<i class="fa-solid fa-percent"></i>
-Commission Earnings:
-<b>
-UGX ${
-(
-Number(member.firstDepositAmount || 0) *
-(
-Number(member.level) === 1 ? 0.20 :
-Number(member.level) === 2 ? 0.03 :
-Number(member.level) === 3 ? 0.01 : 0
-)
-)
-.toLocaleString()
-}
-</b>
-</p>
+                    }
 
+                }
 
 
+                // =================================
+                // MEMBER CARD
+                // =================================
 
+                card.innerHTML = `
 
-<p>
-<i class="fa-solid fa-calendar"></i>
-Joined:
-${member.joinedDate || "Unknown"}
-</p>
+                    <div class="member-top">
 
+                        <h3>
+                            ${hiddenAccount}
+                        </h3>
 
-</div>
+                        <span class="level-badge">
+                            Level ${member.level}
+                        </span>
 
-`;
+                    </div>
 
 
+                    <div class="member-info">
 
+                        <p>
 
+                            <i class="fa-solid fa-wallet"></i>
 
+                            Deposit Status:
 
-container.appendChild(card);
+                            <span class="deposit-badge">
 
+                                ${
+                                    member.depositStatus ||
+                                    "Not yet deposited"
+                                }
 
+                            </span>
 
-});
+                        </p>
 
 
-}
+                        <p>
 
+                            <i class="fa-solid fa-money-bill-wave"></i>
 
+                            Deposit:
 
+                            <b>
+                                UGX ${depositAmount.toLocaleString()}
+                            </b>
 
+                        </p>
 
 
+                        <p>
 
+                            <i class="fa-solid fa-percent"></i>
 
+                            Commission:
 
-function setActiveButton(button){
+                            <b>
+                                UGX ${commission.toLocaleString()}
+                            </b>
 
+                        </p>
 
-document.querySelectorAll(".level-buttons button")
-.forEach(function(btn){
 
-btn.classList.remove("active");
+                        <p>
 
-});
+                            <i class="fa-solid fa-calendar"></i>
 
+                            Joined:
 
-button.classList.add("active");
+                            ${joinedDate}
 
+                        </p>
 
-}
+                    </div>
 
+                `;
 
 
+                container.appendChild(card);
 
+            }
+        );
 
+    }
 
 
-let levelOneButton =
-document.getElementById("levelOneButton");
 
+    // =================================
+    // ACTIVE BUTTON
+    // =================================
 
-let levelTwoButton =
-document.getElementById("levelTwoButton");
+    function setActiveButton(button){
 
+        document
+            .querySelectorAll(
+                ".level-buttons button"
+            )
+            .forEach(
+                function(btn){
 
-let levelThreeButton =
-document.getElementById("levelThreeButton");
+                    btn.classList.remove(
+                        "active"
+                    );
 
+                }
+            );
 
 
+        button.classList.add("active");
 
+    }
 
 
-if(levelOneButton){
 
-levelOneButton.onclick = function(){
+    // =================================
+    // LEVEL BUTTONS
+    // =================================
 
-setActiveButton(levelOneButton);
+    const levelOneButton =
+        document.getElementById(
+            "levelOneButton"
+        );
 
-showMembers(1);
 
-};
+    const levelTwoButton =
+        document.getElementById(
+            "levelTwoButton"
+        );
 
-}
 
+    const levelThreeButton =
+        document.getElementById(
+            "levelThreeButton"
+        );
 
 
 
+    if(levelOneButton){
 
+        levelOneButton.onclick =
+            function(){
 
-if(levelTwoButton){
+                setActiveButton(
+                    levelOneButton
+                );
 
-levelTwoButton.onclick = function(){
+                showMembers(1);
 
-setActiveButton(levelTwoButton);
+            };
 
-showMembers(2);
+    }
 
-};
 
-}
 
+    if(levelTwoButton){
 
+        levelTwoButton.onclick =
+            function(){
 
+                setActiveButton(
+                    levelTwoButton
+                );
 
+                showMembers(2);
 
+            };
 
-if(levelThreeButton){
+    }
 
-levelThreeButton.onclick = function(){
 
-setActiveButton(levelThreeButton);
 
-showMembers(3);
+    if(levelThreeButton){
 
-};
+        levelThreeButton.onclick =
+            function(){
 
-}
+                setActiveButton(
+                    levelThreeButton
+                );
 
+                showMembers(3);
 
+            };
 
+    }
 
 
 
-// LOAD LEVEL ONE BY DEFAULT
+    // =================================
+    // LOAD LEVEL 1 BY DEFAULT
+    // =================================
 
-showMembers(1);
-
-
+    showMembers(1);
 
 });
