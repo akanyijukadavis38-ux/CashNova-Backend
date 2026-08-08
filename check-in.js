@@ -1,256 +1,364 @@
 /* =================================
    CASHNOVA CHECK-IN SYSTEM
+   MONGODB / RENDER VERSION
 ================================= */
-
 
 document.addEventListener("DOMContentLoaded", function(){
 
+    const API =
+        "https://cashnova-backend-89lg.onrender.com/api/users";
 
 
-const checkInButton =
-document.getElementById("checkInButton");
+    const checkInButton =
+        document.getElementById("checkInButton");
 
 
-const checkMessage =
-document.getElementById("checkMessage");
+    const checkMessage =
+        document.getElementById("checkMessage");
 
 
-const totalBonus =
-document.getElementById("totalBonus");
+    const totalBonus =
+        document.getElementById("totalBonus");
 
 
+    /* =================================
+       GET CURRENT USER ID
+    ================================= */
 
+    function getUserId(){
 
+        return localStorage.getItem(
+            "cashnovaUserId"
+        );
 
-// LOAD CURRENT USER DATA
+    }
 
-async function getUserData(){
 
-let userId =
-localStorage.getItem("cashnovaUserId");
+    /* =================================
+       FORMAT MONEY
+    ================================= */
 
-if(!userId){
+    function money(amount){
 
-return null;
+        return "UGX " +
+            Number(amount || 0)
+                .toLocaleString();
 
-}
+    }
 
-let response = await fetch(
 
-"https://cashnova-backend-89lg.onrender.com/api/users/" + userId
+    /* =================================
+       LOAD USER FROM MONGODB
+    ================================= */
 
-);
+    async function getUserData(){
 
-return await response.json();
+        const userId =
+            getUserId();
 
-}
 
+        if(!userId){
 
+            return null;
 
+        }
 
 
+        try{
 
+            const response =
+                await fetch(
+                    API + "/" + userId
+                );
 
-// SHOW TOTAL CHECK-IN BONUS
-async function displayTotalBonus(){
 
-let user = await getUserData();
+            if(!response.ok){
 
-if(!user){
+                throw new Error(
+                    "Unable to load user"
+                );
 
-return;
+            }
 
-}
 
-totalBonus.innerHTML =
-"UGX " +
-Number(user.totalCheckInBonus || 0).toLocaleString();
+            const user =
+                await response.json();
 
-}
 
-displayTotalBonus();
+            /* Save latest user locally */
 
+            localStorage.setItem(
+                "cashnovaUserData",
+                JSON.stringify(user)
+            );
 
 
+            return user;
 
 
+        }
+        catch(error){
 
+            console.error(
+                "Check-in user loading error:",
+                error
+            );
 
+            return null;
 
+        }
 
+    }
 
 
+    /* =================================
+       DISPLAY TOTAL BONUS
+    ================================= */
 
+    async function displayTotalBonus(){
 
+        const user =
+            await getUserData();
 
 
+        if(!user){
 
+            totalBonus.textContent =
+                "UGX 0";
 
+            return;
 
+        }
 
 
-// CHECK-IN BUTTON
+        totalBonus.textContent =
+            money(
+                user.totalCheckInBonus || 0
+            );
 
+    }
 
-checkInButton.onclick = function(){
 
+    /* =================================
+       CHECK CURRENT STATUS
+    ================================= */
 
+    async function checkCurrentStatus(){
 
-let data = getUserData();
+        const user =
+            await getUserData();
 
 
+        if(!user){
 
-if(!data.user){
+            return;
 
+        }
 
-checkMessage.innerHTML =
-"User session missing";
 
+        if(!user.lastCheckInDate){
 
-return;
+            checkInButton.disabled = false;
 
+            checkInButton.textContent =
+                "Check In Now";
 
-}
+            return;
 
+        }
 
 
+        const lastCheckIn =
+            new Date(
+                user.lastCheckInDate
+            );
 
 
-let user = data.user;
+        const now =
+            new Date();
 
 
+        const hoursPassed =
+            (now - lastCheckIn) /
+            (1000 * 60 * 60);
 
-let now = new Date();
 
+        if(hoursPassed < 24){
 
+            checkInButton.disabled = true;
 
-let lastCheckIn = user.lastCheckInDate
+            checkInButton.textContent =
+                "Already Checked In";
 
-? new Date(user.lastCheckInDate)
+        }
+        else{
 
-: null;
+            checkInButton.disabled = false;
 
+            checkInButton.textContent =
+                "Check In Now";
 
+        }
 
+    }
 
 
-if(lastCheckIn){
+    /* =================================
+       CHECK-IN BUTTON
+    ================================= */
 
+    checkInButton.onclick =
+        async function(){
 
+        const userId =
+            getUserId();
 
-let hoursPassed =
 
-(now - lastCheckIn) /
+        if(!userId){
 
-(1000 * 60 * 60);
+            checkMessage.textContent =
+                "User session missing.";
 
+            return;
 
+        }
 
 
+        /* Prevent double clicking */
 
-if(hoursPassed < 24){
+        checkInButton.disabled = true;
 
+        checkInButton.textContent =
+            "Checking in...";
 
 
-checkMessage.innerHTML =
+        checkMessage.textContent =
+            "";
 
-"You have already checked in for today. Try again after 24 hours.";
 
+        try{
 
+            const response =
+                await fetch(
+                    API +
+                    "/check-in/" +
+                    userId,
+                    {
 
-return;
+                        method:"POST",
 
+                        headers:{
+                            "Content-Type":
+                                "application/json"
+                        }
 
+                    }
+                );
 
-}
 
+            const data =
+                await response.json();
 
 
-}
+            /* =================================
+               CHECK SERVER RESPONSE
+            ================================= */
 
+            if(!response.ok){
 
+                checkMessage.textContent =
+                    data.message ||
+                    "Check-in unavailable.";
 
 
+                checkInButton.disabled = true;
 
+                checkInButton.textContent =
+                    "Already Checked In";
 
 
-// GIVE CHECK-IN BONUS
+                return;
 
+            }
 
-let bonus = 100;
 
+            /* =================================
+               SUCCESS
+            ================================= */
 
+            checkMessage.textContent =
+                "Congratulations! You received UGX 100 Check-in Bonus.";
 
-// USE EXISTING WALLET SYSTEM
 
-addIncome(
+            checkMessage.style.color =
+                "green";
 
-bonus,
 
-"Check-in Bonus"
+            checkInButton.disabled =
+                true;
 
-);
-console.log("Check-in bonus added");
-// RELOAD USER AFTER addIncome()
 
-data = getUserData();
+            checkInButton.textContent =
+                "Checked In ✓";
 
-user = data.user;
 
+            /* Update total immediately */
 
+            totalBonus.textContent =
+                money(
+                    data.totalCheckInBonus
+                );
 
-// SAVE CHECK-IN TIME
 
+            /* Save latest user */
 
-user.lastCheckInDate =
+            if(data.user){
 
-now.toISOString();
+                localStorage.setItem(
+                    "cashnovaUserData",
+                    JSON.stringify(
+                        data.user
+                    )
+                );
 
+            }
 
 
+        }
+        catch(error){
 
+            console.error(
+                "Check-in error:",
+                error
+            );
 
-user.totalCheckInBonus =
 
-(user.totalCheckInBonus || 0)
+            checkMessage.textContent =
+                "Unable to complete check-in. Please try again.";
 
-+ bonus;
 
+            checkMessage.style.color =
+                "red";
 
 
+            checkInButton.disabled =
+                false;
 
 
-data.users[data.index] = user;
+            checkInButton.textContent =
+                "Check In Now";
 
+        }
 
+    };
 
-localStorage.setItem(
 
-"cashnovaUsers",
+    /* =================================
+       START
+    ================================= */
 
-JSON.stringify(data.users)
+    displayTotalBonus();
 
-);
-
-
-
-
-
-checkMessage.innerHTML =
-
-"Congratulations! You received UGX 100 Check-in Bonus.";
-
-
-
-
-
-displayTotalBonus();
-
-
-
-};
-
-
-
+    checkCurrentStatus();
 
 });
