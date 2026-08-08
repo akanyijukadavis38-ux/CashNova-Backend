@@ -630,7 +630,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const user =
             await loadUser();
+if (user) {
 
+    user.teamMembers =
+        user.teamMembers || [];
+
+    user.referralIncome =
+        user.owner
+            ? user.owner.referralIncome
+            : 0;
+
+}
 
         if (!user) {
 
