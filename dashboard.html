@@ -479,76 +479,111 @@ return;
 
 }
 
-
-
 // =====================================
 // LIVE RECHARGE NOTIFICATION
+// MONGODB VERSION
 // =====================================
 
-let notificationBox =
+const notificationBox =
 document.getElementById("rechargeNotification");
-
-
-let deposits =
-JSON.parse(
-localStorage.getItem("cashnovaDeposits")
-) || [];
-
-
-
-let creditedDeposits =
-deposits.filter(function(deposit){
-
-return deposit.status === "Credited";
-
-});
-
 
 
 if(notificationBox){
 
+    try{
 
-if(creditedDeposits.length > 0){
-
-
-let messages = creditedDeposits.map(function(deposit){
-
-
-let user =
-deposit.username || "User";
+        const response = await fetch(
+            "https://cashnova-backend-89lg.onrender.com/api/deposits"
+        );
 
 
-let masked =
-user.substring(0,3) + "***";
+        if(!response.ok){
+
+            throw new Error(
+                "Failed to load deposits"
+            );
+
+        }
 
 
-
-return masked +
-" recharged UGX " +
-Number(deposit.amount).toLocaleString();
+        const deposits =
+            await response.json();
 
 
+        // Only show successfully credited deposits
 
-});
+        const creditedDeposits =
+            deposits.filter(function(deposit){
 
+                return deposit.status === "Credited";
 
-
-notificationBox.innerHTML =
-messages.join(" &nbsp;&nbsp; ⭐ &nbsp;&nbsp; ");
-
-
-
-}else{
+            });
 
 
-notificationBox.innerHTML =
-"No recent recharge";
+        if(creditedDeposits.length > 0){
 
+            const messages =
+                creditedDeposits.map(function(deposit){
+
+                    const user =
+                        deposit.username || "User";
+
+
+                    let masked;
+
+                    if(user.length <= 3){
+
+                        masked =
+                            user + "***";
+
+                    }else{
+
+                        masked =
+                            user.substring(0,3) + "***";
+
+                    }
+
+
+                    return (
+                        masked +
+                        " recharged UGX " +
+                        Number(
+                            deposit.amount || 0
+                        ).toLocaleString()
+                    );
+
+                });
+
+
+            notificationBox.innerHTML =
+                messages.join(
+                    " &nbsp;&nbsp; ⭐ &nbsp;&nbsp; "
+                );
+
+
+        }else{
+
+            notificationBox.innerHTML =
+                "No recent recharge";
+
+        }
+
+
+    }catch(error){
+
+        console.log(
+            "Recharge notification error:",
+            error
+        );
+
+
+        notificationBox.innerHTML =
+            "No recent recharge";
+
+    }
 
 }
 
-
-}
 
 if(!currentUser){
 
