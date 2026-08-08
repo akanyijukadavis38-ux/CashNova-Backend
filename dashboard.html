@@ -759,8 +759,6 @@ console.log(error);
 
 }
 
-
-
 // =====================================
 // ANNOUNCEMENT OK BUTTON
 // =====================================
@@ -768,25 +766,30 @@ console.log(error);
 const closeAnnouncement =
 document.getElementById("closeAnnouncement");
 
-
 const announcementBox =
 document.getElementById("announcementBox");
 
 
-
 if(closeAnnouncement && announcementBox){
 
+    closeAnnouncement.addEventListener(
+        "click",
+        function(){
 
-    closeAnnouncement.onclick = function(){
+            announcementBox.style.display = "none";
 
+            announcementBox.style.visibility = "hidden";
 
-        announcementBox.style.display = "none";
+            announcementBox.style.opacity = "0";
 
+            announcementBox.style.pointerEvents = "none";
 
-    };
-
+        }
+    );
 
 }
+
+
 
 // =====================================
 // PURCHASE SYSTEM
