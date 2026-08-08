@@ -204,22 +204,151 @@ registrationRecord
 });
 
 
-
-
+// =================================
+// SAVE USER
+// =================================
 
 await newUser.save();
 
 
+// =================================
+// BUILD REFERRAL NETWORK
+// =================================
+
+if (referredBy) {
+
+    const referrer = await User.findOne({
+        myReferralCode: referredBy
+    });
+
+    if (referrer) {
+
+        // =================================
+        // LEVEL 1
+        // =================================
+
+        if (!referrer.teamMembers) {
+            referrer.teamMembers = [];
+        }
+
+        referrer.teamMembers.push({
+
+            userId: newUser._id,
+
+            username: newUser.username,
+
+            level: 1,
+
+            firstDepositAmount: 0,
+
+            depositStatus: "Not yet deposited",
+
+            joinedDate: new Date()
+
+        });
+
+        await referrer.save();
 
 
+        // =================================
+        // LEVEL 2
+        // =================================
+
+        if (referrer.referredBy) {
+
+            const level2Referrer =
+                await User.findOne({
+                    myReferralCode: referrer.referredBy
+                });
+
+            if (level2Referrer) {
+
+                if (!level2Referrer.teamMembers) {
+                    level2Referrer.teamMembers = [];
+                }
+
+                level2Referrer.teamMembers.push({
+
+                    userId: newUser._id,
+
+                    username: newUser.username,
+
+                    level: 2,
+
+                    firstDepositAmount: 0,
+
+                    depositStatus: "Not yet deposited",
+
+                    joinedDate: new Date()
+
+                });
+
+                await level2Referrer.save();
+
+
+                // =================================
+                // LEVEL 3
+                // =================================
+
+                if (level2Referrer.referredBy) {
+
+                    const level3Referrer =
+                        await User.findOne({
+                            myReferralCode:
+                                level2Referrer.referredBy
+                        });
+
+                    if (level3Referrer) {
+
+                        if (!level3Referrer.teamMembers) {
+                            level3Referrer.teamMembers = [];
+                        }
+
+                        level3Referrer.teamMembers.push({
+
+                            userId: newUser._id,
+
+                            username: newUser.username,
+
+                            level: 3,
+
+                            firstDepositAmount: 0,
+
+                            depositStatus: "Not yet deposited",
+
+                            joinedDate: new Date()
+
+                        });
+
+                        await level3Referrer.save();
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+
+// =================================
+// REGISTRATION RESPONSE
+// =================================
 
 res.json({
 
-message:"Registration successful",
+    message:"Registration successful",
 
-user:newUser
+    user:newUser
 
 });
+
+
+
 
 
 
