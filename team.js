@@ -60,9 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
 
             const response =
-                await fetch(
-                    API + "/" + userId
-                );
+    await fetch(API + "/team/" + userId);
 
 
             if (!response.ok) {
