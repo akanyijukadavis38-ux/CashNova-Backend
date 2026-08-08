@@ -1,626 +1,477 @@
 /* =================================
    CASHNOVA TEAM & REFERRAL SYSTEM
+   MONGODB VERSION
 ================================= */
 
+document.addEventListener("DOMContentLoaded", async function () {
 
-document.addEventListener("DOMContentLoaded", function(){
+    // =================================
+    // GET CURRENT USER ID
+    // =================================
 
+    const userId =
+        localStorage.getItem("cashnovaUserId");
 
 
-// GET CURRENT USER DATA
+    if (!userId) {
 
-function getCurrentUserData(){
+        console.log("CashNova user ID missing");
 
+        return;
 
-let users =
-JSON.parse(
-localStorage.getItem("cashnovaUsers")
-) || [];
-
-
-let username =
-localStorage.getItem("cashnovaCurrentUser");
-
-
-
-let index =
-users.findIndex(function(user){
-
-return user.username === username;
-
-});
-
-
-
-return {
-
-users: users,
-
-index:index,
-
-user:users[index]
-
-};
-
-
-}
-
-
-
-
-
-
-
-// CREATE UNIQUE REFERRAL CODE
-
-
-function generateReferralCode(){
-
-
-return "CN" +
-
-Math.floor(
-100000 + Math.random() * 900000
-);
-
-
-}
-
-
-
-
-
-
-
-// INITIALIZE USER TEAM DATA
-
-
-function initializeTeam(){
-
-
-
-let data = getCurrentUserData();
-
-
-
-if(!data.user){
-
-return;
-
-}
-
-
-
-let user = data.user;
-
-
-
-let changed = false;
-
-
-
-if(!user.myReferralCode){
-
-user.myReferralCode =
-generateReferralCode();
-
-changed = true;
-
-}
-
-
-
-
-
-if(!user.teamMembers){
-
-user.teamMembers = [];
-
-changed = true;
-
-}
-
-
-
-
-
-if(!user.referralIncome){
-
-user.referralIncome = 0;
-
-changed = true;
-
-}
-
-
-
-
-
-if(!user.levelOneAmount){
-
-user.levelOneAmount = 0;
-
-changed = true;
-
-}
-
-
-
-if(!user.levelTwoAmount){
-
-user.levelTwoAmount = 0;
-
-changed = true;
-
-}
-
-
-
-if(!user.levelThreeAmount){
-
-user.levelThreeAmount = 0;
-
-changed = true;
-
-}
-
-
-
-
-
-if(changed){
-
-
-data.users[data.index] = user;
-
-
-localStorage.setItem(
-
-"cashnovaUsers",
-
-JSON.stringify(data.users)
-
-);
-
-
-}
-
-
-
-return user;
-
-
-}
-
-
-
-
-
-
-
-
-
-// SHOW REFERRAL INFORMATION
-
-
-function displayReferral(){
-
-
-let user = initializeTeam();
-
-
-
-if(!user){
-
-return;
-
-}
-
-
-
-let code =
-document.getElementById("referralCode");
-
-
-let link =
-document.getElementById("referralLink");
-
-
-let referredBy =
-document.getElementById("referredBy");
-
-
-
-
-
-if(code){
-
-code.innerHTML =
-user.myReferralCode;
-
-}
-
-
-
-
-
-if(link){
-
-link.value =
-
-window.location.origin +
-
-"/register.html?ref=" +
-
-user.myReferralCode;
-
-}
-
-
-
-
-
-if(referredBy){
-
-referredBy.innerHTML =
-user.referredBy || "No referrer";
-
-}
-
-
-}
-
-
-
-
-
-
-
-
-
-// COUNT TEAM LEVELS
-
-
-function displayTeamStats(){
-
-
-let user = initializeTeam();
-
-
-
-if(!user){
-
-return;
-
-}
-
-
-
-let levelOne = 0;
-
-let levelTwo = 0;
-
-let levelThree = 0;
-
-
-
-let members =
-user.teamMembers || [];
-let levelOneAmount = 0;
-let levelTwoAmount = 0;
-let levelThreeAmount = 0;
-
-members.forEach(function(member){
-
-    let deposit = Number(member.firstDepositAmount || 0);
-
-    if(Number(member.level) === 1){
-        levelOne++;
-        levelOneAmount += deposit * 0.20;
     }
 
-    if(Number(member.level) === 2){
-        levelTwo++;
-        levelTwoAmount += deposit * 0.03;
+
+
+    // =================================
+    // LOAD USER FROM MONGODB
+    // =================================
+
+    let user;
+
+
+    try {
+
+        const response = await fetch(
+            "https://cashnova-backend-89lg.onrender.com/api/users/" +
+            userId
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load user"
+            );
+
+        }
+
+
+        user = await response.json();
+
+
+        // Keep latest user data locally
+        localStorage.setItem(
+            "cashnovaUserData",
+            JSON.stringify(user)
+        );
+
+
+    } catch (error) {
+
+        console.log(
+            "Team user loading error:",
+            error
+        );
+
+        return;
+
     }
 
-    if(Number(member.level) === 3){
-        levelThree++;
-        levelThreeAmount += deposit * 0.01;
+
+
+    if (!user) {
+
+        return;
+
     }
 
-});
 
 
+    // =================================
+    // REFERRAL CODE
+    // =================================
 
+    const referralCode =
+        document.getElementById("referralCode");
 
 
-let total =
+    const referralLink =
+        document.getElementById("referralLink");
 
-levelOne +
-levelTwo +
-levelThree;
 
+    const referredBy =
+        document.getElementById("referredBy");
 
 
 
-let totalTeam =
-document.getElementById("totalTeam");
+    if (referralCode) {
 
+        referralCode.textContent =
+            user.myReferralCode || "N/A";
 
-if(totalTeam){
+    }
 
-totalTeam.innerHTML =
-total;
 
-}
 
+    if (referralLink) {
 
+        referralLink.value =
+            window.location.origin +
+            "/register.html?ref=" +
+            (user.myReferralCode || "");
 
+    }
 
 
-let referralIncome =
-document.getElementById("referralIncome");
 
+    if (referredBy) {
 
-if(referralIncome){
+        referredBy.textContent =
+            user.referredBy || "No referrer";
 
-referralIncome.innerHTML =
+    }
 
-"UGX " +
 
-Number(
-user.referralIncome || 0
-)
-.toLocaleString();
 
-}
+    // =================================
+    // TEAM MEMBERS
+    // =================================
 
+    const members =
+        Array.isArray(user.teamMembers)
+            ? user.teamMembers
+            : [];
 
 
 
+    // =================================
+    // LEVEL COUNTS
+    // =================================
 
-let levelOneMembers =
-document.getElementById("levelOneMembers");
+    let levelOneMembers = 0;
 
+    let levelTwoMembers = 0;
 
-if(levelOneMembers){
+    let levelThreeMembers = 0;
 
-levelOneMembers.innerHTML =
-levelOne;
 
-}
 
+    let levelOneAmount = 0;
 
+    let levelTwoAmount = 0;
 
+    let levelThreeAmount = 0;
 
 
-let levelTwoMembers =
-document.getElementById("levelTwoMembers");
 
+    members.forEach(function (member) {
 
-if(levelTwoMembers){
+        const level =
+            Number(member.level || 0);
 
-levelTwoMembers.innerHTML =
-levelTwo;
 
-}
+        const deposit =
+            Number(
+                member.firstDepositAmount || 0
+            );
 
 
 
+        if (level === 1) {
 
+            levelOneMembers++;
 
-let levelThreeMembers =
-document.getElementById("levelThreeMembers");
+            levelOneAmount +=
+                deposit * 0.20;
 
-if(levelThreeMembers){
+        }
 
-levelThreeMembers.innerHTML =
-levelThree;
 
-}
+        else if (level === 2) {
 
+            levelTwoMembers++;
 
-// ADD HERE
+            levelTwoAmount +=
+                deposit * 0.03;
 
-document.getElementById("levelOneAmount").innerHTML =
-"UGX " + levelOneAmount.toLocaleString();
+        }
 
-document.getElementById("levelTwoAmount").innerHTML =
-"UGX " + levelTwoAmount.toLocaleString();
 
-document.getElementById("levelThreeAmount").innerHTML =
-"UGX " + levelThreeAmount.toLocaleString();
+        else if (level === 3) {
 
+            levelThreeMembers++;
 
-}
+            levelThreeAmount +=
+                deposit * 0.01;
 
+        }
 
-// COPY REFERRAL LINK
+    });
 
 
-let copyButton =
-document.getElementById("copyReferral");
 
+    // =================================
+    // TOTAL TEAM
+    // =================================
 
+    const totalTeam =
+        document.getElementById("totalTeam");
 
-if(copyButton){
 
+    if (totalTeam) {
 
-copyButton.onclick=function(){
+        totalTeam.textContent =
+            members.length;
 
+    }
 
-let link =
-document.getElementById("referralLink");
 
 
-navigator.clipboard.writeText(
-link.value
-);
+    // =================================
+    // REFERRAL EARNINGS
+    // =================================
 
+    const referralIncome =
+        document.getElementById("referralIncome");
 
-alert(
-"Referral link copied"
-);
 
+    if (referralIncome) {
 
-};
+        referralIncome.textContent =
+            "UGX " +
+            Number(
+                user.referralIncome || 0
+            ).toLocaleString();
 
+    }
 
-}
 
 
+    // =================================
+    // LEVEL 1
+    // =================================
 
+    const levelOne =
+        document.getElementById("levelOneMembers");
 
 
+    if (levelOne) {
 
+        levelOne.textContent =
+            levelOneMembers;
 
+    }
 
 
-// SHARE REFERRAL
 
+    const levelOneTotal =
+        document.getElementById("levelOneAmount");
 
-let shareButton =
-document.getElementById("shareReferral");
 
+    if (levelOneTotal) {
 
+        levelOneTotal.textContent =
+            "UGX " +
+            levelOneAmount.toLocaleString();
 
-if(shareButton){
+    }
 
 
-shareButton.onclick=function(){
 
+    // =================================
+    // LEVEL 2
+    // =================================
 
-let link =
-document.getElementById("referralLink").value;
+    const levelTwo =
+        document.getElementById("levelTwoMembers");
 
 
+    if (levelTwo) {
 
-if(navigator.share){
+        levelTwo.textContent =
+            levelTwoMembers;
 
+    }
 
-navigator.share({
 
-title:"CashNova",
 
-text:"Join CashNova using my referral link",
+    const levelTwoTotal =
+        document.getElementById("levelTwoAmount");
 
-url:link
 
-});
+    if (levelTwoTotal) {
 
+        levelTwoTotal.textContent =
+            "UGX " +
+            levelTwoAmount.toLocaleString();
 
-}
+    }
 
-else{
 
-alert(link);
 
-}
+    // =================================
+    // LEVEL 3
+    // =================================
 
+    const levelThree =
+        document.getElementById("levelThreeMembers");
 
-};
 
+    if (levelThree) {
 
-}
+        levelThree.textContent =
+            levelThreeMembers;
 
+    }
 
 
 
+    const levelThreeTotal =
+        document.getElementById("levelThreeAmount");
 
 
+    if (levelThreeTotal) {
 
+        levelThreeTotal.textContent =
+            "UGX " +
+            levelThreeAmount.toLocaleString();
 
+    }
 
-// MY TEAM BUTTON
 
 
-let teamButton =
-document.getElementById("viewTeamButton");
+    // =================================
+    // COPY REFERRAL LINK
+    // =================================
 
+    const copyButton =
+        document.getElementById("copyReferral");
 
 
-if(teamButton){
+    if (copyButton) {
 
+        copyButton.onclick = async function () {
 
-teamButton.onclick=function(){
+            const link =
+                document.getElementById(
+                    "referralLink"
+                );
 
 
-window.location.href =
-"my-team.html";
+            if (!link) {
 
+                return;
 
-};
+            }
 
 
-}
+            try {
 
+                await navigator.clipboard.writeText(
+                    link.value
+                );
 
 
+                alert(
+                    "Referral link copied"
+                );
 
 
+            } catch (error) {
 
+                link.select();
 
+                document.execCommand("copy");
 
+                alert(
+                    "Referral link copied"
+                );
 
-// REFERRAL COMMISSION
+            }
 
+        };
 
-function calculateReferralCommission(
-depositAmount,
-level
-){
+    }
 
 
-let percentage = 0;
 
+    // =================================
+    // SHARE REFERRAL LINK
+    // =================================
 
+    const shareButton =
+        document.getElementById("shareReferral");
 
-if(level === 1){
 
-percentage = 0.20;
+    if (shareButton) {
 
-}
+        shareButton.onclick = async function () {
 
+            const link =
+                document.getElementById(
+                    "referralLink"
+                );
 
 
-if(level === 2){
+            if (!link) {
 
-percentage = 0.03;
+                return;
 
-}
+            }
 
 
+            const url =
+                link.value;
 
-if(level === 3){
 
-percentage = 0.01;
+            if (navigator.share) {
 
-}
+                try {
 
+                    await navigator.share({
 
+                        title:
+                            "CashNova",
 
-return depositAmount * percentage;
+                        text:
+                            "Join CashNova using my referral link",
 
+                        url:
+                            url
 
-}
+                    });
 
+                } catch (error) {
 
+                    console.log(
+                        "Share cancelled"
+                    );
 
+                }
 
-window.calculateReferralCommission =
-calculateReferralCommission;
+            } else {
 
+                alert(url);
 
+            }
 
+        };
 
+    }
 
 
 
-displayReferral();
+    // =================================
+    // MY TEAM BUTTON
+    // =================================
 
+    const teamButton =
+        document.getElementById(
+            "viewTeamButton"
+        );
 
-displayTeamStats();
+
+    if (teamButton) {
+
+        teamButton.onclick = function () {
+
+            window.location.href =
+                "my-team.html";
+
+        };
+
+    }
 
 
 
