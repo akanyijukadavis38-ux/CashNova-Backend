@@ -1,6 +1,7 @@
 /* =================================
    CASHNOVA TRANSACTION HISTORY
-   SINGLE-RECORD DISPLAY SYSTEM
+   MONGODB MASTER HISTORY SYSTEM
+   UGANDA / KAMPALA TIME
 ================================= */
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -26,32 +27,92 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
 
-    let user;
-
-
     // =================================
-    // LOAD USER
+    // UGANDA DATE & TIME
     // =================================
 
-    try {
+    function formatUgandaDate(date) {
 
-        const response = await fetch(
-            "https://cashnova-backend-89lg.onrender.com/api/users/" +
-            userId
-        );
-
-
-        if (!response.ok) {
-            throw new Error("Failed to load user");
+        if (!date) {
+            return "";
         }
 
 
-        user = await response.json();
+        const parsedDate =
+            new Date(date);
+
+
+        if (isNaN(parsedDate.getTime())) {
+            return String(date);
+        }
+
+
+        return parsedDate.toLocaleString(
+            "en-UG",
+            {
+                timeZone: "Africa/Kampala",
+
+                day: "numeric",
+
+                month: "short",
+
+                year: "numeric",
+
+                hour: "2-digit",
+
+                minute: "2-digit",
+
+                second: "2-digit",
+
+                hour12: false
+            }
+        );
+
+    }
+
+
+
+    // =================================
+    // LOAD MASTER HISTORY
+    // =================================
+
+    let history = [];
+
+
+    try {
+
+        const response =
+            await fetch(
+                "https://cashnova-backend-89lg.onrender.com/api/users/history/" +
+                userId
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load transaction history"
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        history =
+            Array.isArray(result.history)
+                ? result.history
+                : [];
 
 
     } catch (error) {
 
-        console.log(error);
+        console.log(
+            "History loading error:",
+            error
+        );
 
 
         container.innerHTML =
@@ -61,187 +122,23 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
 
-    if (!user || user.message) {
-
-        container.innerHTML =
-            "<p class='empty-history'>User not found</p>";
-
-        return;
-    }
-
-
 
     // =================================
-    // CREATE ONE MASTER RECORD LIST
+    // REMOVE LOCKED BONUS
     // =================================
 
-    /*
-       transactionHistory is treated as the
-       main history source.
+    history =
+        history.filter(function (record) {
 
-       depositRecords and withdrawalRecords
-       are only used when a transaction does
-       NOT already exist in transactionHistory.
-    */
-
-
-    let allRecords = [];
-
-
-    // ---------------------------------
-    // MAIN TRANSACTION HISTORY
-    // ---------------------------------
-
-    if (Array.isArray(user.transactionHistory)) {
-
-        user.transactionHistory.forEach(function (record) {
-
-            allRecords.push({
-                ...record,
-                _source: "transactionHistory"
-            });
-
-        });
-
-    }
-
-
-
-    // =================================
-    // ADD MISSING DEPOSIT RECORDS ONLY
-    // =================================
-
-    if (Array.isArray(user.depositRecords)) {
-
-        user.depositRecords.forEach(function (deposit) {
-
-
-            /*
-               Try to identify whether this deposit
-               already exists in transactionHistory.
-            */
-
-            const alreadyExists =
-                allRecords.some(function (record) {
-
-                    // Same deposit ID
-                    if (
-                        record.depositId &&
-                        deposit.depositId &&
-                        String(record.depositId) ===
-                        String(deposit.depositId)
-                    ) {
-                        return true;
-                    }
-
-
-                    // Same mobile money transaction ID
-                    if (
-                        record.mobileMoneyTransactionId &&
-                        deposit.mobileMoneyTransactionId &&
-                        record.mobileMoneyTransactionId ===
-                        deposit.mobileMoneyTransactionId
-                    ) {
-                        return true;
-                    }
-
-
-                    return false;
-
-                });
-
-
-
-            /*
-               Only add it if it is genuinely
-               missing from transactionHistory.
-            */
-
-            if (!alreadyExists) {
-
-                allRecords.push({
-                    ...deposit,
-                    type: "Deposit",
-                    _source: "depositRecords"
-                });
-
-            }
-
-        });
-
-    }
-
-
-
-    // =================================
-    // ADD MISSING WITHDRAWAL RECORDS ONLY
-    // =================================
-
-    if (Array.isArray(user.withdrawalRecords)) {
-
-        user.withdrawalRecords.forEach(function (withdrawal) {
-
-
-            const alreadyExists =
-                allRecords.some(function (record) {
-
-
-                    /*
-                       Withdrawal ID is the strongest
-                       way to identify the same transaction.
-                    */
-
-                    if (
-                        record.withdrawalId &&
-                        withdrawal.withdrawalId &&
-                        String(record.withdrawalId) ===
-                        String(withdrawal.withdrawalId)
-                    ) {
-
-                        return true;
-
-                    }
-
-
-                    return false;
-
-                });
-
-
-
-            if (!alreadyExists) {
-
-                allRecords.push({
-                    ...withdrawal,
-                    type: "Withdrawal",
-                    _source: "withdrawalRecords"
-                });
-
-            }
-
-        });
-
-    }
-
-
-
-    // =================================
-    // REMOVE LOCKED REGISTRATION BONUS
-    // =================================
-
-    allRecords =
-        allRecords.filter(function (record) {
-
-            if (
-                record.type === "Registration Bonus" &&
-                record.status === "Locked"
-            ) {
-
-                return false;
-
-            }
-
-            return true;
+            return !(
+                String(record.type || "")
+                    .toLowerCase()
+                    .includes("registration bonus")
+                &&
+                String(record.status || "")
+                    .toLowerCase()
+                    === "locked"
+            );
 
         });
 
@@ -251,33 +148,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     // SORT NEWEST FIRST
     // =================================
 
-    allRecords.sort(function (a, b) {
+    history.sort(function (a, b) {
 
-        const dateA =
-            new Date(a.date || a.createdAt || 0);
-
-        const dateB =
-            new Date(b.date || b.createdAt || 0);
-
-
-        return dateB - dateA;
+        return (
+            new Date(b.date || 0) -
+            new Date(a.date || 0)
+        );
 
     });
-
-
-
-    // =================================
-    // NO RECORDS
-    // =================================
-
-    if (allRecords.length === 0) {
-
-        container.innerHTML =
-            "<p class='empty-history'>No transaction history available</p>";
-
-        return;
-
-    }
 
 
 
@@ -287,23 +165,23 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     function displayHistory(records) {
 
-
         container.innerHTML = "";
 
 
-        if (!records || records.length === 0) {
+        if (
+            !records ||
+            records.length === 0
+        ) {
 
             container.innerHTML =
                 "<p class='empty-history'>No records found</p>";
 
             return;
-
         }
 
 
 
         records.forEach(function (record) {
-
 
             const card =
                 document.createElement("div");
@@ -315,11 +193,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
             // =================================
-            // TRANSACTION TYPE
+            // TYPE
             // =================================
 
             const recordType =
-                String(record.type || "Transaction");
+                String(
+                    record.type ||
+                    "Transaction"
+                );
 
 
             const type =
@@ -342,7 +223,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             }
 
-
             else if (type.includes("withdraw")) {
 
                 icon =
@@ -350,14 +230,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             }
 
-
             else if (type.includes("bonus")) {
 
                 icon =
                     "fa-gift";
 
             }
-
 
             else if (
                 type.includes("daily") ||
@@ -370,14 +248,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             }
 
-
             else if (type.includes("referral")) {
 
                 icon =
                     "fa-users";
 
             }
-
 
             else if (type.includes("purchase")) {
 
@@ -389,11 +265,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
             // =================================
-            // STATUS CLASS
+            // STATUS
             // =================================
 
-            let status =
-                String(record.status || "Pending");
+            const status =
+                String(
+                    record.status ||
+                    "Pending"
+                );
 
 
             let statusClass =
@@ -411,8 +290,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             }
 
-
-            else if (status === "Rejected") {
+            else if (
+                status === "Rejected"
+            ) {
 
                 statusClass =
                     "status-rejected";
@@ -422,30 +302,13 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
             // =================================
-            // DATE
-            // =================================
-
-            let displayDate =
-                record.date || "";
-
-
-            /*
-               Existing records may contain dates
-               saved using toLocaleString().
-
-               We display them as stored so we
-               don't accidentally change historical
-               timestamps.
-            */
-
-
-
-            // =================================
             // AMOUNT
             // =================================
 
             const amount =
-                Number(record.amount || 0);
+                Number(
+                    record.amount || 0
+                );
 
 
 
@@ -480,7 +343,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             let transactionIdHTML = "";
 
 
-            if (record.mobileMoneyTransactionId) {
+            if (
+                record.mobileMoneyTransactionId
+            ) {
 
                 transactionIdHTML = `
 
@@ -498,24 +363,59 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
             // =================================
+            // PAYMENT METHOD
+            // =================================
+
+            let methodHTML = "";
+
+
+            if (
+                record.method &&
+                type.includes("deposit")
+            ) {
+
+                methodHTML = `
+
+                    <p>
+                        Method:
+                        <b>
+                            ${record.method}
+                        </b>
+                    </p>
+
+                `;
+
+            }
+
+
+
+            // =================================
             // WITHDRAWAL DETAILS
             // =================================
 
-            let withdrawalDetailsHTML = "";
+            let withdrawalDetailsHTML =
+                "";
 
 
-            if (type.includes("withdraw")) {
+            if (
+                type.includes("withdraw")
+            ) {
 
-                if (record.fee !== undefined) {
+
+                if (
+                    record.fee !== undefined
+                ) {
 
                     withdrawalDetailsHTML += `
 
                         <p>
                             Fee:
                             <b>
-                                UGX ${Number(
-                                    record.fee || 0
-                                ).toLocaleString()}
+                                UGX ${
+                                    Number(
+                                        record.fee || 0
+                                    ).toLocaleString()
+                                }
                             </b>
                         </p>
 
@@ -524,16 +424,21 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
 
 
-                if (record.receiveAmount !== undefined) {
+                if (
+                    record.receiveAmount !==
+                    undefined
+                ) {
 
                     withdrawalDetailsHTML += `
 
                         <p>
                             Receive:
                             <b>
-                                UGX ${Number(
-                                    record.receiveAmount || 0
-                                ).toLocaleString()}
+                                UGX ${
+                                    Number(
+                                        record.receiveAmount || 0
+                                    ).toLocaleString()
+                                }
                             </b>
                         </p>
 
@@ -546,13 +451,23 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
             // =================================
-            // CARD HTML
+            // DATE
+            // =================================
+
+            const displayDate =
+                formatUgandaDate(
+                    record.date
+                );
+
+
+
+            // =================================
+            // CARD
             // =================================
 
             card.innerHTML = `
 
                 <div class="history-left">
-
 
                     <div class="history-icon">
 
@@ -561,9 +476,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     </div>
 
 
-
                     <div class="history-details">
-
 
                         <h4>
                             ${recordType}
@@ -581,18 +494,17 @@ document.addEventListener("DOMContentLoaded", async function () {
                         ${transactionIdHTML}
 
 
+                        ${methodHTML}
+
+
                         ${withdrawalDetailsHTML}
 
-
                     </div>
-
 
                 </div>
 
 
-
                 <div class="history-right">
-
 
                     <div class="history-amount">
 
@@ -609,11 +521,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
                     </span>
 
-
                 </div>
 
             `;
-
 
 
             container.appendChild(card);
@@ -628,7 +538,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // SHOW ALL
     // =================================
 
-    displayHistory(allRecords);
+    displayHistory(history);
 
 
 
@@ -642,177 +552,202 @@ document.addEventListener("DOMContentLoaded", async function () {
         );
 
 
-    filterButtons.forEach(function (button) {
+    filterButtons.forEach(
+        function (button) {
+
+            button.onclick =
+                function () {
 
 
-        button.onclick =
-            function () {
+                    // REMOVE ACTIVE
+                    filterButtons.forEach(
+                        function (btn) {
+
+                            btn.classList.remove(
+                                "active"
+                            );
+
+                        }
+                    );
 
 
-                // Remove active
-                filterButtons.forEach(
-                    function (btn) {
+                    // SET ACTIVE
+                    button.classList.add(
+                        "active"
+                    );
 
-                        btn.classList.remove(
-                            "active"
-                        );
+
+                    const selected =
+                        button.innerText.trim();
+
+
+                    let filtered =
+                        history;
+
+
+
+                    // =================================
+                    // DEPOSITS
+                    // =================================
+
+                    if (
+                        selected ===
+                        "Deposits"
+                    ) {
+
+                        filtered =
+                            history.filter(
+                                function (record) {
+
+                                    return String(
+                                        record.type || ""
+                                    )
+                                    .toLowerCase()
+                                    .includes(
+                                        "deposit"
+                                    );
+
+                                }
+                            );
 
                     }
-                );
-
-
-                // Activate selected
-                button.classList.add("active");
 
 
 
-                const selected =
-                    button.innerText.trim();
+                    // =================================
+                    // WITHDRAWALS
+                    // =================================
 
+                    else if (
+                        selected ===
+                        "Withdrawals"
+                    ) {
 
+                        filtered =
+                            history.filter(
+                                function (record) {
 
-                let filtered =
-                    allRecords;
-
-
-
-                // =================================
-                // DEPOSITS
-                // =================================
-
-                if (selected === "Deposits") {
-
-                    filtered =
-                        allRecords.filter(
-                            function (record) {
-
-                                return String(
-                                    record.type || ""
-                                )
-                                .toLowerCase()
-                                .includes("deposit");
-
-                            }
-                        );
-
-                }
-
-
-
-                // =================================
-                // WITHDRAWALS
-                // =================================
-
-                else if (
-                    selected === "Withdrawals"
-                ) {
-
-                    filtered =
-                        allRecords.filter(
-                            function (record) {
-
-                                return String(
-                                    record.type || ""
-                                )
-                                .toLowerCase()
-                                .includes("withdraw");
-
-                            }
-                        );
-
-                }
-
-
-
-                // =================================
-                // DAILY INCOME
-                // =================================
-
-                else if (
-                    selected === "Daily Income"
-                ) {
-
-                    filtered =
-                        allRecords.filter(
-                            function (record) {
-
-                                const type =
-                                    String(
+                                    return String(
                                         record.type || ""
-                                    ).toLowerCase();
+                                    )
+                                    .toLowerCase()
+                                    .includes(
+                                        "withdraw"
+                                    );
 
+                                }
+                            );
 
-                                return (
-                                    type.includes("daily") ||
-                                    type.includes("income") ||
-                                    type.includes("profit")
-                                );
-
-                            }
-                        );
-
-                }
+                    }
 
 
 
-                // =================================
-                // BONUS
-                // =================================
+                    // =================================
+                    // DAILY INCOME
+                    // =================================
 
-                else if (
-                    selected === "Bonus"
-                ) {
+                    else if (
+                        selected ===
+                        "Daily Income"
+                    ) {
 
-                    filtered =
-                        allRecords.filter(
-                            function (record) {
+                        filtered =
+                            history.filter(
+                                function (record) {
 
-                                return String(
-                                    record.type || ""
-                                )
-                                .toLowerCase()
-                                .includes("bonus");
-
-                            }
-                        );
-
-                }
+                                    const type =
+                                        String(
+                                            record.type || ""
+                                        )
+                                        .toLowerCase();
 
 
+                                    return (
+                                        type.includes(
+                                            "daily"
+                                        ) ||
+                                        type.includes(
+                                            "income"
+                                        ) ||
+                                        type.includes(
+                                            "profit"
+                                        )
+                                    );
 
-                // =================================
-                // REFERRAL
-                // =================================
+                                }
+                            );
 
-                else if (
-                    selected === "Referral"
-                ) {
-
-                    filtered =
-                        allRecords.filter(
-                            function (record) {
-
-                                return String(
-                                    record.type || ""
-                                )
-                                .toLowerCase()
-                                .includes("referral");
-
-                            }
-                        );
-
-                }
+                    }
 
 
 
-                // =================================
-                // DISPLAY FILTERED
-                // =================================
+                    // =================================
+                    // BONUS
+                    // =================================
 
-                displayHistory(filtered);
+                    else if (
+                        selected ===
+                        "Bonus"
+                    ) {
 
-            };
+                        filtered =
+                            history.filter(
+                                function (record) {
 
-    });
+                                    return String(
+                                        record.type || ""
+                                    )
+                                    .toLowerCase()
+                                    .includes(
+                                        "bonus"
+                                    );
+
+                                }
+                            );
+
+                    }
+
+
+
+                    // =================================
+                    // REFERRAL
+                    // =================================
+
+                    else if (
+                        selected ===
+                        "Referral"
+                    ) {
+
+                        filtered =
+                            history.filter(
+                                function (record) {
+
+                                    return String(
+                                        record.type || ""
+                                    )
+                                    .toLowerCase()
+                                    .includes(
+                                        "referral"
+                                    );
+
+                                }
+                            );
+
+                    }
+
+
+
+                    // =================================
+                    // DISPLAY
+                    // =================================
+
+                    displayHistory(
+                        filtered
+                    );
+
+                };
+
+        }
+    );
 
 });
