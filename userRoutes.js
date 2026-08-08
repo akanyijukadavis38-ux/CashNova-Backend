@@ -2350,7 +2350,230 @@ catch(error) {
 }
 
 });   
+// =================================
+// CASHNOVA DAILY CHECK-IN
+// =================================
 
+router.post("/check-in/:id", async function(req, res){
+
+try{
+
+    // =================================
+    // FIND USER
+    // =================================
+
+    const user =
+        await User.findById(req.params.id);
+
+    if(!user){
+
+        return res.status(404).json({
+            message:"User not found"
+        });
+
+    }
+
+
+    // =================================
+    // CURRENT TIME
+    // =================================
+
+    const now = new Date();
+
+
+    // =================================
+    // CHECK LAST CHECK-IN
+    // =================================
+
+    if(user.lastCheckInDate){
+
+        const lastCheckIn =
+            new Date(user.lastCheckInDate);
+
+        const hoursPassed =
+            (now - lastCheckIn) /
+            (1000 * 60 * 60);
+
+
+        if(hoursPassed < 24){
+
+            const remainingHours =
+                24 - hoursPassed;
+
+            return res.status(400).json({
+
+                message:
+                    "You have already checked in. Please try again after 24 hours.",
+
+                alreadyCheckedIn:true,
+
+                remainingHours:
+                    Number(
+                        remainingHours.toFixed(2)
+                    ),
+
+                user:user
+
+            });
+
+        }
+
+    }
+
+
+    // =================================
+    // CHECK-IN BONUS
+    // =================================
+
+    const bonus = 100;
+
+
+    // =================================
+    // ADD BONUS TO WALLET
+    // =================================
+
+    user.walletBalance =
+        Number(user.walletBalance || 0)
+        +
+        bonus;
+
+
+    // =================================
+    // ADD TO CUMULATIVE INCOME
+    // =================================
+
+    user.cumulativeIncome =
+        Number(user.cumulativeIncome || 0)
+        +
+        bonus;
+
+
+    // =================================
+    // UPDATE TOTAL CHECK-IN BONUS
+    // =================================
+
+    user.totalCheckInBonus =
+        Number(user.totalCheckInBonus || 0)
+        +
+        bonus;
+
+
+    // =================================
+    // SAVE LAST CHECK-IN DATE
+    // =================================
+
+    user.lastCheckInDate = now;
+
+
+    // =================================
+    // MAKE SURE ARRAYS EXIST
+    // =================================
+
+    if(!Array.isArray(user.incomeRecords)){
+
+        user.incomeRecords = [];
+
+    }
+
+
+    if(!Array.isArray(user.transactionHistory)){
+
+        user.transactionHistory = [];
+
+    }
+
+
+    // =================================
+    // INCOME RECORD
+    // =================================
+
+    user.incomeRecords.push({
+
+        type:"Check-in Bonus",
+
+        amount:bonus,
+
+        status:"Completed",
+
+        date:now.toLocaleString()
+
+    });
+
+
+    // =================================
+    // TRANSACTION HISTORY
+    // =================================
+
+    user.transactionHistory.push({
+
+        type:"Check-in Bonus",
+
+        amount:bonus,
+
+        status:"Completed",
+
+        date:now.toLocaleString()
+
+    });
+
+
+    // =================================
+    // SAVE USER
+    // =================================
+
+    await user.save();
+
+
+    // =================================
+    // RESPONSE
+    // =================================
+
+    res.json({
+
+        message:
+            "Check-in successful! You received UGX 100.",
+
+        bonus:bonus,
+
+        walletBalance:
+            Number(user.walletBalance || 0),
+
+        cumulativeIncome:
+            Number(user.cumulativeIncome || 0),
+
+        totalCheckInBonus:
+            Number(user.totalCheckInBonus || 0),
+
+        lastCheckInDate:
+            user.lastCheckInDate,
+
+        user:user
+
+    });
+
+
+}
+catch(error){
+
+    console.log(
+        "Check-in error:",
+        error
+    );
+
+
+    res.status(500).json({
+
+        message:
+            "Unable to complete check-in",
+
+        error:
+            error.message
+
+    });
+
+}
+
+});
 
 
 module.exports = router;
