@@ -260,163 +260,182 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
     }
+/* =================================
+   DISPLAY TEAM STATISTICS
+================================= */
+
+function displayStatistics(user) {
+
+    /* =================================
+       TOTAL TEAM
+    ================================= */
+
+    const totalTeam =
+        document.getElementById(
+            "totalTeam"
+        );
+
+    if(totalTeam){
+
+        totalTeam.textContent =
+            Number(
+                user.totalTeam || 0
+            );
+
+    }
 
 
     /* =================================
-       DISPLAY TEAM STATISTICS
+       REFERRAL EARNINGS
     ================================= */
 
-    function displayStatistics(user) {
+    const referralIncome =
+        document.getElementById(
+            "referralIncome"
+        );
 
-        const members =
-            getTeamMembers(user);
+    if(referralIncome){
 
-
-        /* TOTAL TEAM */
-
-        const totalTeam =
-            document.getElementById(
-                "totalTeam"
+        referralIncome.textContent =
+            money(
+                user.referralIncome || 0
             );
-
-
-        if (totalTeam) {
-
-            totalTeam.textContent =
-                members.length;
-
-        }
-
-
-        /* REFERRAL EARNINGS */
-
-        const referralIncome =
-            document.getElementById(
-                "referralIncome"
-            );
-
-
-        if (referralIncome) {
-
-            referralIncome.textContent =
-                money(
-                    user.referralIncome || 0
-                );
-
-        }
-
-
-        /* LEVEL 1 */
-
-        const level1 =
-            calculateLevel(
-                members,
-                1
-            );
-
-
-        const levelOneMembers =
-            document.getElementById(
-                "levelOneMembers"
-            );
-
-
-        const levelOneAmount =
-            document.getElementById(
-                "levelOneAmount"
-            );
-
-
-        if (levelOneMembers) {
-
-            levelOneMembers.textContent =
-                level1.members;
-
-        }
-
-
-        if (levelOneAmount) {
-
-            levelOneAmount.textContent =
-                money(level1.amount);
-
-        }
-
-
-        /* LEVEL 2 */
-
-        const level2 =
-            calculateLevel(
-                members,
-                2
-            );
-
-
-        const levelTwoMembers =
-            document.getElementById(
-                "levelTwoMembers"
-            );
-
-
-        const levelTwoAmount =
-            document.getElementById(
-                "levelTwoAmount"
-            );
-
-
-        if (levelTwoMembers) {
-
-            levelTwoMembers.textContent =
-                level2.members;
-
-        }
-
-
-        if (levelTwoAmount) {
-
-            levelTwoAmount.textContent =
-                money(level2.amount);
-
-        }
-
-
-        /* LEVEL 3 */
-
-        const level3 =
-            calculateLevel(
-                members,
-                3
-            );
-
-
-        const levelThreeMembers =
-            document.getElementById(
-                "levelThreeMembers"
-            );
-
-
-        const levelThreeAmount =
-            document.getElementById(
-                "levelThreeAmount"
-            );
-
-
-        if (levelThreeMembers) {
-
-            levelThreeMembers.textContent =
-                level3.members;
-
-        }
-
-
-        if (levelThreeAmount) {
-
-            levelThreeAmount.textContent =
-                money(level3.amount);
-
-        }
 
     }
+
+
+    /* =================================
+       LEVEL 1
+    ================================= */
+
+    const level1 =
+        user.levels &&
+        user.levels.level1
+            ? user.levels.level1
+            : {
+                members:0,
+                amount:0
+            };
+
+
+    const levelOneMembers =
+        document.getElementById(
+            "levelOneMembers"
+        );
+
+
+    const levelOneAmount =
+        document.getElementById(
+            "levelOneAmount"
+        );
+
+
+    if(levelOneMembers){
+
+        levelOneMembers.textContent =
+            level1.members;
+
+    }
+
+
+    if(levelOneAmount){
+
+        levelOneAmount.textContent =
+            money(
+                level1.amount
+            );
+
+    }
+
+
+    /* =================================
+       LEVEL 2
+    ================================= */
+
+    const level2 =
+        user.levels &&
+        user.levels.level2
+            ? user.levels.level2
+            : {
+                members:0,
+                amount:0
+            };
+
+
+    const levelTwoMembers =
+        document.getElementById(
+            "levelTwoMembers"
+        );
+
+
+    const levelTwoAmount =
+        document.getElementById(
+            "levelTwoAmount"
+        );
+
+
+    if(levelTwoMembers){
+
+        levelTwoMembers.textContent =
+            level2.members;
+
+    }
+
+
+    if(levelTwoAmount){
+
+        levelTwoAmount.textContent =
+            money(
+                level2.amount
+            );
+
+    }
+
+
+    /* =================================
+       LEVEL 3
+    ================================= */
+
+    const level3 =
+        user.levels &&
+        user.levels.level3
+            ? user.levels.level3
+            : {
+                members:0,
+                amount:0
+            };
+
+
+    const levelThreeMembers =
+        document.getElementById(
+            "levelThreeMembers"
+        );
+
+
+    const levelThreeAmount =
+        document.getElementById(
+            "levelThreeAmount"
+        );
+
+
+    if(levelThreeMembers){
+
+        levelThreeMembers.textContent =
+            level3.members;
+
+    }
+
+
+    if(levelThreeAmount){
+
+        levelThreeAmount.textContent =
+            money(
+                level3.amount
+            );
+
+    }
+
+}
 
 
     /* =================================
@@ -634,11 +653,6 @@ if (user) {
 
     user.teamMembers =
         user.teamMembers || [];
-
-    user.referralIncome =
-        user.owner
-            ? user.owner.referralIncome
-            : 0;
 
 }
 
