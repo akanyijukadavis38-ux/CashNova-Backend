@@ -1,6 +1,7 @@
 /* =================================
    CASHNOVA TEAM SYSTEM
    MONGODB / RENDER VERSION
+   TEAM SUMMARY PAGE ONLY
 ================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -15,109 +16,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function getUserId() {
 
-        return localStorage.getItem("cashnovaUserId");
-
-    }
-
-
-    /* =================================
-       LOAD USER FROM MONGODB
-    ================================= */
-
-    async function loadUser() {
-
-        const userId = getUserId();
-
-        if (!userId) {
-
-            console.error(
-                "cashnovaUserId was not found."
-            );
-
-            showLoadingError();
-
-            return null;
-        }
-
-
-        try {
-
-            const response =
-                await fetch(API + "/" + userId);
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "Server returned " +
-                    response.status
-                );
-
-            }
-
-
-            const user =
-                await response.json();
-
-
-            /* Save latest data locally too */
-
-            localStorage.setItem(
-                "cashnovaUserData",
-                JSON.stringify(user)
-            );
-
-
-            return user;
-
-
-        } catch (error) {
-
-            console.error(
-                "CashNova Team loading error:",
-                error
-            );
-
-            showLoadingError();
-
-            return null;
-
-        }
-
-    }
-
-
-    /* =================================
-       ERROR DISPLAY
-    ================================= */
-
-    function showLoadingError() {
-
-        const referralCode =
-            document.getElementById(
-                "referralCode"
-            );
-
-        const referredBy =
-            document.getElementById(
-                "referredBy"
-            );
-
-
-        if (referralCode) {
-
-            referralCode.textContent =
-                "Unable to load";
-
-        }
-
-
-        if (referredBy) {
-
-            referredBy.textContent =
-                "Unable to load";
-
-        }
+        return localStorage.getItem(
+            "cashnovaUserId"
+        );
 
     }
 
@@ -136,7 +37,75 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =================================
-       CREATE REFERRAL LINK
+       LOAD USER FROM MONGODB
+    ================================= */
+
+    async function loadUser() {
+
+        const userId =
+            getUserId();
+
+
+        if (!userId) {
+
+            console.error(
+                "cashnovaUserId not found."
+            );
+
+            return null;
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    API + "/" + userId
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Server returned " +
+                    response.status
+                );
+
+            }
+
+
+            const user =
+                await response.json();
+
+
+            /* Keep latest user data locally */
+
+            localStorage.setItem(
+                "cashnovaUserData",
+                JSON.stringify(user)
+            );
+
+
+            return user;
+
+
+        } catch (error) {
+
+            console.error(
+                "Team loading error:",
+                error
+            );
+
+            return null;
+
+        }
+
+    }
+
+
+    /* =================================
+       REFERRAL LINK
     ================================= */
 
     function createReferralLink(code) {
@@ -147,11 +116,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
 
-
-        /*
-         Use the current website address
-         and attach the referral code.
-        */
 
         const url =
             new URL(
@@ -179,6 +143,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function displayReferralInformation(user) {
 
+        const code =
+            user.myReferralCode ||
+            user.referralCode ||
+            "";
+
+
         const referralCode =
             document.getElementById(
                 "referralCode"
@@ -197,14 +167,6 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-        const code =
-            user.myReferralCode ||
-            user.referralCode ||
-            "";
-
-
-        /* Referral Code */
-
         if (referralCode) {
 
             referralCode.textContent =
@@ -213,8 +175,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /* Referral Link */
-
         if (referralLink) {
 
             referralLink.value =
@@ -222,8 +182,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
 
-
-        /* Referred By */
 
         if (referredBy) {
 
@@ -260,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =================================
-       LEVEL STATISTICS
+       CALCULATE LEVEL
     ================================= */
 
     function calculateLevel(
@@ -269,10 +227,11 @@ document.addEventListener("DOMContentLoaded", function () {
     ) {
 
         const levelMembers =
-            members.filter(function (member) {
+            members.filter(function(member) {
 
-                return Number(member.level) ===
-                    Number(level);
+                return Number(
+                    member.level
+                ) === Number(level);
 
             });
 
@@ -281,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         levelMembers.forEach(
-            function (member) {
+            function(member) {
 
                 totalAmount +=
                     Number(
@@ -294,7 +253,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         return {
 
-            count:
+            members:
                 levelMembers.length,
 
             amount:
@@ -315,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
             getTeamMembers(user);
 
 
-        /* Total Team */
+        /* TOTAL TEAM */
 
         const totalTeam =
             document.getElementById(
@@ -331,7 +290,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /* Referral Earnings */
+        /* REFERRAL EARNINGS */
 
         const referralIncome =
             document.getElementById(
@@ -349,7 +308,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /* Level 1 */
+        /* LEVEL 1 */
 
         const level1 =
             calculateLevel(
@@ -373,7 +332,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (levelOneMembers) {
 
             levelOneMembers.textContent =
-                level1.count;
+                level1.members;
 
         }
 
@@ -386,7 +345,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /* Level 2 */
+        /* LEVEL 2 */
 
         const level2 =
             calculateLevel(
@@ -410,7 +369,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (levelTwoMembers) {
 
             levelTwoMembers.textContent =
-                level2.count;
+                level2.members;
 
         }
 
@@ -423,7 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /* Level 3 */
+        /* LEVEL 3 */
 
         const level3 =
             calculateLevel(
@@ -447,7 +406,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (levelThreeMembers) {
 
             levelThreeMembers.textContent =
-                level3.count;
+                level3.members;
 
         }
 
@@ -458,298 +417,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 money(level3.amount);
 
         }
-
-    }
-
-
-    /* =================================
-       CREATE MY TEAM SECTION
-    ================================= */
-
-    function createTeamMembersSection() {
-
-        let existing =
-            document.getElementById(
-                "dynamicTeamMembers"
-            );
-
-
-        if (existing) {
-
-            return existing;
-
-        }
-
-
-        const section =
-            document.createElement(
-                "section"
-            );
-
-
-        section.id =
-            "dynamicTeamMembers";
-
-
-        section.style.marginTop =
-            "20px";
-
-
-        section.innerHTML = `
-
-            <div class="my-team-container">
-
-                <h2>
-                    <i class="fa-solid fa-users"></i>
-                    My Team Members
-                </h2>
-
-                <div
-                    id="teamMembersList"
-                ></div>
-
-            </div>
-
-        `;
-
-
-        const buttonSection =
-            document.querySelector(
-                ".my-team-button-section"
-            );
-
-
-        if (buttonSection) {
-
-            buttonSection.after(section);
-
-        }
-        else {
-
-            document
-                .querySelector(".team-page")
-                .appendChild(section);
-
-        }
-
-
-        return section;
-
-    }
-
-
-    /* =================================
-       DISPLAY TEAM MEMBERS
-    ================================= */
-
-    function displayTeamMembers(user) {
-
-        const section =
-            createTeamMembersSection();
-
-
-        const list =
-            section.querySelector(
-                "#teamMembersList"
-            );
-
-
-        if (!list) {
-
-            return;
-
-        }
-
-
-        const members =
-            getTeamMembers(user);
-
-
-        if (members.length === 0) {
-
-            list.innerHTML = `
-
-                <div class="empty-state">
-
-                    <i
-                        class="fa-solid fa-user-group"
-                    ></i>
-
-                    <p>
-                        No team members yet.
-                    </p>
-
-                </div>
-
-            `;
-
-            return;
-
-        }
-
-
-        list.innerHTML = "";
-
-
-        members.forEach(
-            function (member) {
-
-                const card =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                card.className =
-                    "member-card";
-
-
-                const username =
-                    member.username ||
-                    "Team Member";
-
-
-                const level =
-                    Number(
-                        member.level || 0
-                    );
-
-
-                const deposit =
-                    Number(
-                        member.firstDepositAmount || 0
-                    );
-
-
-                const status =
-                    member.depositStatus ||
-                    "Not yet deposited";
-
-
-                let percentage = 0;
-
-
-                if (level === 1) {
-
-                    percentage = 0.20;
-
-                }
-                else if (level === 2) {
-
-                    percentage = 0.03;
-
-                }
-                else if (level === 3) {
-
-                    percentage = 0.01;
-
-                }
-
-
-                const commission =
-                    deposit *
-                    percentage;
-
-
-                const statusClass =
-                    String(status)
-                        .toLowerCase() ===
-                    "active"
-                        ? "active"
-                        : "pending";
-
-
-                card.innerHTML = `
-
-                    <div class="member-top">
-
-                        <h3>
-                            ${username}
-                        </h3>
-
-                        <span class="level-badge">
-                            Level ${level}
-                        </span>
-
-                    </div>
-
-
-                    <div class="member-info">
-
-                        <p>
-
-                            <i
-                                class="fa-solid fa-circle-check"
-                            ></i>
-
-                            Status:
-
-                            <span
-                                class="deposit-badge
-                                ${statusClass}"
-                            >
-                                ${status}
-                            </span>
-
-                        </p>
-
-
-                        <p>
-
-                            <i
-                                class="fa-solid fa-money-bill-wave"
-                            ></i>
-
-                            Deposit:
-
-                            <b>
-                                ${money(deposit)}
-                            </b>
-
-                        </p>
-
-
-                        <p>
-
-                            <i
-                                class="fa-solid fa-percent"
-                            ></i>
-
-                            Commission:
-
-                            <b>
-                                ${money(commission)}
-                            </b>
-
-                        </p>
-
-
-                        <p>
-
-                            <i
-                                class="fa-solid fa-calendar"
-                            ></i>
-
-                            Joined:
-
-                            <span>
-                                ${
-                                    member.joinedDate ||
-                                    "Unknown"
-                                }
-                            </span>
-
-                        </p>
-
-                    </div>
-
-                `;
-
-
-                list.appendChild(card);
-
-            }
-        );
 
     }
 
@@ -780,7 +447,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         button.onclick =
-            async function () {
+            async function() {
 
                 if (!input.value) {
 
@@ -791,9 +458,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 try {
 
-                    await navigator.clipboard.writeText(
-                        input.value
-                    );
+                    await navigator.clipboard
+                        .writeText(
+                            input.value
+                        );
 
 
                     button.innerHTML =
@@ -801,7 +469,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                     setTimeout(
-                        function () {
+                        function() {
 
                             button.innerHTML =
                                 '<i class="fa-solid fa-copy"></i>';
@@ -811,7 +479,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     );
 
 
-                } catch (error) {
+                } catch(error) {
 
                     input.select();
 
@@ -852,7 +520,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         button.onclick =
-            async function () {
+            async function() {
 
                 const link =
                     input.value;
@@ -884,7 +552,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         });
 
-                    } catch (error) {
+                    } catch(error) {
 
                         console.log(
                             "Share cancelled."
@@ -905,11 +573,9 @@ document.addEventListener("DOMContentLoaded", function () {
                             "Referral link copied!"
                         );
 
-                    } catch (error) {
+                    } catch(error) {
 
-                        alert(
-                            link
-                        );
+                        alert(link);
 
                     }
 
@@ -922,9 +588,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* =================================
        MY TEAM BUTTON
+       OPEN SEPARATE PAGE
     ================================= */
 
-    function setupTeamButton(user) {
+    function setupTeamButton() {
 
         const button =
             document.getElementById(
@@ -940,44 +607,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         button.onclick =
-            function () {
+            function() {
 
-                const section =
-                    document.getElementById(
-                        "dynamicTeamMembers"
-                    );
+                /*
+                 IMPORTANT:
+                 Change ONLY this filename if
+                 your separate My Team page
+                 has another filename.
+                */
 
-
-                if (!section) {
-
-                    displayTeamMembers(
-                        user
-                    );
-
-                    return;
-
-                }
-
-
-                if (
-                    section.style.display ===
-                    "none"
-                ) {
-
-                    section.style.display =
-                        "block";
-
-                    section.scrollIntoView({
-                        behavior:"smooth"
-                    });
-
-                }
-                else {
-
-                    section.style.display =
-                        "none";
-
-                }
+                window.location.href =
+                    "my-team.html";
 
             };
 
@@ -996,6 +636,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!user) {
 
+            const referralCode =
+                document.getElementById(
+                    "referralCode"
+                );
+
+
+            const referredBy =
+                document.getElementById(
+                    "referredBy"
+                );
+
+
+            if (referralCode) {
+
+                referralCode.textContent =
+                    "Unable to load";
+
+            }
+
+
+            if (referredBy) {
+
+                referredBy.textContent =
+                    "Unable to load";
+
+            }
+
+
             return;
 
         }
@@ -1008,7 +676,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         console.log(
-            "CashNova Team members:",
+            "CashNova MongoDB team:",
             user.teamMembers
         );
 
@@ -1023,20 +691,13 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
 
-        displayTeamMembers(
-            user
-        );
-
-
         setupCopyButton();
 
 
         setupShareButton();
 
 
-        setupTeamButton(
-            user
-        );
+        setupTeamButton();
 
     }
 
