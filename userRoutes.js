@@ -1873,4 +1873,332 @@ message:error.message
 
 
 });
+// =================================
+// GET REAL TEAM DATA
+// =================================
+
+router.get("/team/:id", async function(req, res){
+
+try{
+
+    const owner =
+        await User.findById(req.params.id).lean();
+
+    if(!owner){
+
+        return res.status(404).json({
+            message:"User not found"
+        });
+
+    }
+
+
+    const allUsers =
+        await User.find({}).lean();
+
+
+    const teamMembers = [];
+
+
+    // =================================
+    // LEVEL 1
+    // =================================
+
+    const level1Users =
+        allUsers.filter(function(user){
+
+            return String(user.referredBy || "") ===
+                String(owner.myReferralCode || "");
+
+        });
+
+
+    // =================================
+    // ADD MEMBER WITH REAL FIRST DEPOSIT
+    // =================================
+
+    async function addMember(user, level){
+
+        const firstDeposit =
+            await Deposit.findOne({
+
+                userId:user._id,
+
+                status:"Credited"
+
+            })
+            .sort({
+                approvedDate:1,
+                date:1
+            })
+            .lean();
+
+
+        const firstDepositAmount =
+            firstDeposit
+                ? Number(firstDeposit.amount || 0)
+                : 0;
+
+
+        teamMembers.push({
+
+            userId:user._id,
+
+            username:user.username,
+
+            fullName:user.fullName,
+
+            level:level,
+
+            firstDepositAmount:
+                firstDepositAmount,
+
+            depositStatus:
+                firstDeposit
+                    ? "Active"
+                    : "Not yet deposited",
+
+            joinedDate:user.createdAt
+
+        });
+
+
+        return user;
+
+    }
+
+
+    // =================================
+    // LEVEL 1
+    // =================================
+
+    for(const level1User of level1Users){
+
+        await addMember(
+            level1User,
+            1
+        );
+
+    }
+
+
+    // =================================
+    // LEVEL 2
+    // =================================
+
+    for(const level1User of level1Users){
+
+        const level2Users =
+            allUsers.filter(function(user){
+
+                return String(user.referredBy || "") ===
+                    String(level1User.myReferralCode || "");
+
+            });
+
+
+        for(const level2User of level2Users){
+
+            await addMember(
+                level2User,
+                2
+            );
+
+        }
+
+    }
+
+
+    // =================================
+    // LEVEL 3
+    // =================================
+
+    for(const level1User of level1Users){
+
+        const level2Users =
+            allUsers.filter(function(user){
+
+                return String(user.referredBy || "") ===
+                    String(level1User.myReferralCode || "");
+
+            });
+
+
+        for(const level2User of level2Users){
+
+            const level3Users =
+                allUsers.filter(function(user){
+
+                    return String(user.referredBy || "") ===
+                        String(level2User.myReferralCode || "");
+
+                });
+
+
+            for(const level3User of level3Users){
+
+                await addMember(
+                    level3User,
+                    3
+                );
+
+            }
+
+        }
+
+    }
+
+
+    // =================================
+    // LEVEL STATISTICS
+    // =================================
+
+    const level1 =
+        teamMembers.filter(function(member){
+
+            return member.level === 1;
+
+        });
+
+
+    const level2 =
+        teamMembers.filter(function(member){
+
+            return member.level === 2;
+
+        });
+
+
+    const level3 =
+        teamMembers.filter(function(member){
+
+            return member.level === 3;
+
+        });
+
+
+    function totalAmount(members){
+
+        return members.reduce(
+            function(total, member){
+
+                return total +
+                    Number(
+                        member.firstDepositAmount || 0
+                    );
+
+            },
+            0
+        );
+
+    }
+
+
+    const level1Amount =
+        totalAmount(level1);
+
+    const level2Amount =
+        totalAmount(level2);
+
+    const level3Amount =
+        totalAmount(level3);
+
+
+    const totalTeamDeposits =
+        level1Amount +
+        level2Amount +
+        level3Amount;
+
+
+    // =================================
+    // RESPONSE
+    // =================================
+
+    res.json({
+
+        owner:{
+
+            username:owner.username,
+
+            fullName:owner.fullName,
+
+            myReferralCode:
+                owner.myReferralCode,
+
+            referredBy:
+                owner.referredBy || "",
+
+            referralIncome:
+                Number(owner.referralIncome || 0)
+
+        },
+
+
+        totalTeam:
+            teamMembers.length,
+
+
+        totalTeamDeposits:
+            totalTeamDeposits,
+
+
+        activeMembers:
+            teamMembers.filter(function(member){
+
+                return member.depositStatus === "Active";
+
+            }).length,
+
+
+        levels:{
+
+            level1:{
+
+                members:level1.length,
+
+                amount:level1Amount
+
+            },
+
+            level2:{
+
+                members:level2.length,
+
+                amount:level2Amount
+
+            },
+
+            level3:{
+
+                members:level3.length,
+
+                amount:level3Amount
+
+            }
+
+        },
+
+
+        teamMembers:teamMembers
+
+    });
+
+
+}catch(error){
+
+    console.log(
+        "Team API error:",
+        error
+    );
+
+
+    res.status(500).json({
+
+        message:error.message
+
+    });
+
+}
+
+});
 module.exports = router;
