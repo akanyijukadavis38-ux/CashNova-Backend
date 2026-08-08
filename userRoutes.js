@@ -1829,7 +1829,186 @@ message:error.message
 }
 
 });
+// =================================
+// GET TEAM SUMMARY
+// =================================
 
+router.get("/team/:id", async function(req,res){
+
+try{
+
+    const user =
+        await User.findById(req.params.id).lean();
+
+    if(!user){
+
+        return res.status(404).json({
+            message:"User not found"
+        });
+
+    }
+
+
+    // =================================
+    // GET TEAM MEMBERS
+    // =================================
+
+    const teamMembers =
+        Array.isArray(user.teamMembers)
+            ? user.teamMembers
+            : [];
+
+
+    // =================================
+    // CALCULATE LEVEL 1
+    // =================================
+
+    const level1 =
+        teamMembers.filter(function(member){
+
+            return Number(member.level) === 1;
+
+        });
+
+
+    // =================================
+    // CALCULATE LEVEL 2
+    // =================================
+
+    const level2 =
+        teamMembers.filter(function(member){
+
+            return Number(member.level) === 2;
+
+        });
+
+
+    // =================================
+    // CALCULATE LEVEL 3
+    // =================================
+
+    const level3 =
+        teamMembers.filter(function(member){
+
+            return Number(member.level) === 3;
+
+        });
+
+
+    // =================================
+    // FIRST DEPOSIT TOTALS
+    // =================================
+
+    const level1Amount =
+        level1.reduce(function(total,member){
+
+            return total +
+                Number(
+                    member.firstDepositAmount || 0
+                );
+
+        },0);
+
+
+    const level2Amount =
+        level2.reduce(function(total,member){
+
+            return total +
+                Number(
+                    member.firstDepositAmount || 0
+                );
+
+        },0);
+
+
+    const level3Amount =
+        level3.reduce(function(total,member){
+
+            return total +
+                Number(
+                    member.firstDepositAmount || 0
+                );
+
+        },0);
+
+
+    // =================================
+    // TOTAL TEAM FIRST DEPOSITS
+    // =================================
+
+    const totalTeamDeposits =
+        level1Amount +
+        level2Amount +
+        level3Amount;
+
+
+    // =================================
+    // RETURN TEAM SUMMARY
+    // =================================
+
+    res.json({
+
+        myReferralCode:
+            user.myReferralCode || "",
+
+        referralCode:
+            user.referralCode || "",
+
+        referredBy:
+            user.referredBy || "",
+
+        referralIncome:
+            Number(
+                user.referralIncome || 0
+            ),
+
+        totalTeam:
+            teamMembers.length,
+
+        totalTeamDeposits:
+            totalTeamDeposits,
+
+        teamMembers:
+            teamMembers,
+
+        levels:{
+
+            level1:{
+                members:level1.length,
+                amount:level1Amount
+            },
+
+            level2:{
+                members:level2.length,
+                amount:level2Amount
+            },
+
+            level3:{
+                members:level3.length,
+                amount:level3Amount
+            }
+
+        }
+
+    });
+
+
+}catch(error){
+
+    console.log(
+        "Team summary error:",
+        error
+    );
+
+    res.status(500).json({
+
+        message:error.message
+
+    });
+
+}
+
+});
 // =================================
 // GET USER BY ID
 // =================================
