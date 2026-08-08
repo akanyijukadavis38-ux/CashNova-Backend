@@ -171,7 +171,29 @@ const UserSchema = new mongoose.Schema({
         type: Array,
         default: []
     },
+// =================================
+// CHECK-IN
+// =================================
 
+lastCheckInDate: {
+    type: Date,
+    default: null
+},
+
+totalCheckInBonus: {
+    type: Number,
+    default: 0
+},
+
+
+// =================================
+// RECORDS
+// =================================
+
+incomeRecords: {
+    type: Array,
+    default: []
+},
 
     // =================================
     // RECORDS
