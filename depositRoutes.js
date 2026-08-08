@@ -54,22 +54,18 @@ message:error.message
 });
 
 
-
-
-// GET ALL PENDING DEPOSITS FOR ADMIN
+// GET ALL DEPOSITS FOR ADMIN
+// OLDEST FIRST
 
 router.get("/", async function(req,res){
 
 try{
 
-
 const deposits =
 await Deposit.find()
-.sort({date:-1});
-
+.sort({date:1});
 
 res.json(deposits);
-
 
 }catch(error){
 
@@ -82,6 +78,8 @@ message:error.message
 }
 
 });
+
+
 
 
 
