@@ -1,9 +1,9 @@
 /* =================================
    CASHNOVA TRANSACTION HISTORY
-   MONGODB VERSION
+   SINGLE-RECORD DISPLAY SYSTEM
 ================================= */
 
-document.addEventListener("DOMContentLoaded", async function(){
+document.addEventListener("DOMContentLoaded", async function () {
 
     const container =
         document.getElementById("historyContainer");
@@ -12,15 +12,12 @@ document.addEventListener("DOMContentLoaded", async function(){
         localStorage.getItem("cashnovaUserId");
 
 
-    // =================================
-    // CHECK USER
-    // =================================
-
-    if(!container){
+    if (!container) {
         return;
     }
 
-    if(!userId){
+
+    if (!userId) {
 
         container.innerHTML =
             "<p class='empty-history'>User not found</p>";
@@ -29,13 +26,14 @@ document.addEventListener("DOMContentLoaded", async function(){
     }
 
 
-    // =================================
-    // LOAD USER FROM MONGODB
-    // =================================
-
     let user;
 
-    try{
+
+    // =================================
+    // LOAD USER
+    // =================================
+
+    try {
 
         const response = await fetch(
             "https://cashnova-backend-89lg.onrender.com/api/users/" +
@@ -43,137 +41,223 @@ document.addEventListener("DOMContentLoaded", async function(){
         );
 
 
-        if(!response.ok){
-
+        if (!response.ok) {
             throw new Error("Failed to load user");
-
         }
 
 
         user = await response.json();
 
 
-    }catch(error){
+    } catch (error) {
 
-        console.log("History loading error:", error);
+        console.log(error);
+
 
         container.innerHTML =
             "<p class='empty-history'>Failed to load history</p>";
 
         return;
-
     }
 
 
-    if(!user || user.message){
+    if (!user || user.message) {
 
         container.innerHTML =
             "<p class='empty-history'>User not found</p>";
 
         return;
-
     }
 
 
+
     // =================================
-    // COLLECT ALL RECORDS
+    // CREATE ONE MASTER RECORD LIST
     // =================================
+
+    /*
+       transactionHistory is treated as the
+       main history source.
+
+       depositRecords and withdrawalRecords
+       are only used when a transaction does
+       NOT already exist in transactionHistory.
+    */
+
 
     let allRecords = [];
 
 
-    // TRANSACTION HISTORY
+    // ---------------------------------
+    // MAIN TRANSACTION HISTORY
+    // ---------------------------------
 
-    if(Array.isArray(user.transactionHistory)){
+    if (Array.isArray(user.transactionHistory)) {
 
-        user.transactionHistory.forEach(function(record){
+        user.transactionHistory.forEach(function (record) {
 
             allRecords.push({
                 ...record,
-                source:"transactionHistory"
+                _source: "transactionHistory"
             });
 
         });
 
     }
 
-
-    // DEPOSIT RECORDS
-
-    if(Array.isArray(user.depositRecords)){
-
-        user.depositRecords.forEach(function(record){
-
-            allRecords.push({
-                ...record,
-                type: record.type || "Deposit",
-                source:"depositRecords"
-            });
-
-        });
-
-    }
-
-
-    // WITHDRAWAL RECORDS
-
-    if(Array.isArray(user.withdrawalRecords)){
-
-        user.withdrawalRecords.forEach(function(record){
-
-            allRecords.push({
-                ...record,
-                type: record.type || "Withdrawal",
-                source:"withdrawalRecords"
-            });
-
-        });
-
-    }
-
-
-    // INCOME RECORDS
-
-    if(Array.isArray(user.incomeRecords)){
-
-        user.incomeRecords.forEach(function(record){
-
-            allRecords.push({
-                ...record,
-                source:"incomeRecords"
-            });
-
-        });
-
-    }
 
 
     // =================================
-    // REMOVE ONLY LOCKED REGISTRATION BONUS
+    // ADD MISSING DEPOSIT RECORDS ONLY
+    // =================================
+
+    if (Array.isArray(user.depositRecords)) {
+
+        user.depositRecords.forEach(function (deposit) {
+
+
+            /*
+               Try to identify whether this deposit
+               already exists in transactionHistory.
+            */
+
+            const alreadyExists =
+                allRecords.some(function (record) {
+
+                    // Same deposit ID
+                    if (
+                        record.depositId &&
+                        deposit.depositId &&
+                        String(record.depositId) ===
+                        String(deposit.depositId)
+                    ) {
+                        return true;
+                    }
+
+
+                    // Same mobile money transaction ID
+                    if (
+                        record.mobileMoneyTransactionId &&
+                        deposit.mobileMoneyTransactionId &&
+                        record.mobileMoneyTransactionId ===
+                        deposit.mobileMoneyTransactionId
+                    ) {
+                        return true;
+                    }
+
+
+                    return false;
+
+                });
+
+
+
+            /*
+               Only add it if it is genuinely
+               missing from transactionHistory.
+            */
+
+            if (!alreadyExists) {
+
+                allRecords.push({
+                    ...deposit,
+                    type: "Deposit",
+                    _source: "depositRecords"
+                });
+
+            }
+
+        });
+
+    }
+
+
+
+    // =================================
+    // ADD MISSING WITHDRAWAL RECORDS ONLY
+    // =================================
+
+    if (Array.isArray(user.withdrawalRecords)) {
+
+        user.withdrawalRecords.forEach(function (withdrawal) {
+
+
+            const alreadyExists =
+                allRecords.some(function (record) {
+
+
+                    /*
+                       Withdrawal ID is the strongest
+                       way to identify the same transaction.
+                    */
+
+                    if (
+                        record.withdrawalId &&
+                        withdrawal.withdrawalId &&
+                        String(record.withdrawalId) ===
+                        String(withdrawal.withdrawalId)
+                    ) {
+
+                        return true;
+
+                    }
+
+
+                    return false;
+
+                });
+
+
+
+            if (!alreadyExists) {
+
+                allRecords.push({
+                    ...withdrawal,
+                    type: "Withdrawal",
+                    _source: "withdrawalRecords"
+                });
+
+            }
+
+        });
+
+    }
+
+
+
+    // =================================
+    // REMOVE LOCKED REGISTRATION BONUS
     // =================================
 
     allRecords =
-        allRecords.filter(function(record){
+        allRecords.filter(function (record) {
 
-            return !(
+            if (
                 record.type === "Registration Bonus" &&
                 record.status === "Locked"
-            );
+            ) {
+
+                return false;
+
+            }
+
+            return true;
 
         });
+
 
 
     // =================================
     // SORT NEWEST FIRST
     // =================================
 
-    allRecords.sort(function(a,b){
+    allRecords.sort(function (a, b) {
 
         const dateA =
-            new Date(a.date).getTime() || 0;
+            new Date(a.date || a.createdAt || 0);
 
         const dateB =
-            new Date(b.date).getTime() || 0;
+            new Date(b.date || b.createdAt || 0);
 
 
         return dateB - dateA;
@@ -181,173 +265,45 @@ document.addEventListener("DOMContentLoaded", async function(){
     });
 
 
+
     // =================================
-    // UGANDA DATE & TIME
+    // NO RECORDS
     // =================================
 
-    function formatUgandaDate(date){
+    if (allRecords.length === 0) {
 
-        if(!date){
-            return "Date unavailable";
-        }
+        container.innerHTML =
+            "<p class='empty-history'>No transaction history available</p>";
 
-
-        const parsedDate =
-            new Date(date);
-
-
-        if(isNaN(parsedDate.getTime())){
-
-            return String(date);
-
-        }
-
-
-        return parsedDate.toLocaleString(
-            "en-UG",
-            {
-                timeZone:"Africa/Kampala",
-
-                year:"numeric",
-
-                month:"short",
-
-                day:"numeric",
-
-                hour:"2-digit",
-
-                minute:"2-digit",
-
-                second:"2-digit",
-
-                hour12:false
-            }
-        );
+        return;
 
     }
 
-
-    // =================================
-    // GET RECORD TYPE
-    // =================================
-
-    function getRecordType(record){
-
-        return String(
-            record.type || "Transaction"
-        );
-
-    }
-
-
-    // =================================
-    // GET ICON
-    // =================================
-
-    function getIcon(type){
-
-        const lowerType =
-            type.toLowerCase();
-
-
-        if(lowerType.includes("deposit")){
-            return "fa-arrow-down";
-        }
-
-
-        if(lowerType.includes("withdraw")){
-            return "fa-arrow-up";
-        }
-
-
-        if(lowerType.includes("bonus")){
-            return "fa-gift";
-        }
-
-
-        if(
-            lowerType.includes("daily") ||
-            lowerType.includes("income") ||
-            lowerType.includes("profit")
-        ){
-
-            return "fa-chart-line";
-
-        }
-
-
-        if(lowerType.includes("referral")){
-
-            return "fa-users";
-
-        }
-
-
-        if(lowerType.includes("purchase")){
-
-            return "fa-box-open";
-
-        }
-
-
-        return "fa-money-bill-transfer";
-
-    }
-
-
-    // =================================
-    // GET STATUS CLASS
-    // =================================
-
-    function getStatusClass(status){
-
-        const currentStatus =
-            String(status || "").toLowerCase();
-
-
-        if(
-            currentStatus === "approved" ||
-            currentStatus === "credited" ||
-            currentStatus === "completed"
-        ){
-
-            return "status-approved";
-
-        }
-
-
-        if(currentStatus === "rejected"){
-
-            return "status-rejected";
-
-        }
-
-
-        return "status-pending";
-
-    }
 
 
     // =================================
     // DISPLAY HISTORY
     // =================================
 
-    function displayHistory(records){
+    function displayHistory(records) {
+
 
         container.innerHTML = "";
 
 
-        if(!records || records.length === 0){
+        if (!records || records.length === 0) {
 
             container.innerHTML =
-                "<p class='empty-history'>No transaction history available</p>";
+                "<p class='empty-history'>No records found</p>";
 
             return;
 
         }
 
 
-        records.forEach(function(record){
+
+        records.forEach(function (record) {
+
 
             const card =
                 document.createElement("div");
@@ -357,65 +313,150 @@ document.addEventListener("DOMContentLoaded", async function(){
                 "history-card";
 
 
+
+            // =================================
+            // TRANSACTION TYPE
+            // =================================
+
+            const recordType =
+                String(record.type || "Transaction");
+
+
             const type =
-                getRecordType(record);
+                recordType.toLowerCase();
 
 
-            const icon =
-                getIcon(type);
+
+            // =================================
+            // ICON
+            // =================================
+
+            let icon =
+                "fa-money-bill-transfer";
 
 
-            const status =
-                record.status || "Pending";
+            if (type.includes("deposit")) {
+
+                icon =
+                    "fa-arrow-down";
+
+            }
 
 
-            const statusClass =
-                getStatusClass(status);
+            else if (type.includes("withdraw")) {
 
+                icon =
+                    "fa-arrow-up";
+
+            }
+
+
+            else if (type.includes("bonus")) {
+
+                icon =
+                    "fa-gift";
+
+            }
+
+
+            else if (
+                type.includes("daily") ||
+                type.includes("income") ||
+                type.includes("profit")
+            ) {
+
+                icon =
+                    "fa-chart-line";
+
+            }
+
+
+            else if (type.includes("referral")) {
+
+                icon =
+                    "fa-users";
+
+            }
+
+
+            else if (type.includes("purchase")) {
+
+                icon =
+                    "fa-box";
+
+            }
+
+
+
+            // =================================
+            // STATUS CLASS
+            // =================================
+
+            let status =
+                String(record.status || "Pending");
+
+
+            let statusClass =
+                "status-pending";
+
+
+            if (
+                status === "Approved" ||
+                status === "Credited" ||
+                status === "Completed"
+            ) {
+
+                statusClass =
+                    "status-approved";
+
+            }
+
+
+            else if (status === "Rejected") {
+
+                statusClass =
+                    "status-rejected";
+
+            }
+
+
+
+            // =================================
+            // DATE
+            // =================================
+
+            let displayDate =
+                record.date || "";
+
+
+            /*
+               Existing records may contain dates
+               saved using toLocaleString().
+
+               We display them as stored so we
+               don't accidentally change historical
+               timestamps.
+            */
+
+
+
+            // =================================
+            // AMOUNT
+            // =================================
 
             const amount =
                 Number(record.amount || 0);
 
 
-            const formattedAmount =
-                amount.toLocaleString("en-UG");
-
-
-            const formattedDate =
-                formatUgandaDate(record.date);
-
 
             // =================================
-            // TRANSACTION ID
-            // =================================
-
-            let transactionIdHTML = "";
-
-
-            if(record.mobileMoneyTransactionId){
-
-                transactionIdHTML = `
-
-                    <p>
-                        Transaction ID:
-                        <b>
-                            ${record.mobileMoneyTransactionId}
-                        </b>
-                    </p>
-
-                `;
-
-            }
-
-
-            // =================================
-            // PRODUCT NAME
+            // PRODUCT
             // =================================
 
             let productHTML = "";
 
 
-            if(record.product){
+            if (record.product) {
 
                 productHTML = `
 
@@ -431,13 +472,87 @@ document.addEventListener("DOMContentLoaded", async function(){
             }
 
 
+
             // =================================
-            // CARD
+            // TRANSACTION ID
+            // =================================
+
+            let transactionIdHTML = "";
+
+
+            if (record.mobileMoneyTransactionId) {
+
+                transactionIdHTML = `
+
+                    <p>
+                        Transaction ID:
+                        <b>
+                            ${record.mobileMoneyTransactionId}
+                        </b>
+                    </p>
+
+                `;
+
+            }
+
+
+
+            // =================================
+            // WITHDRAWAL DETAILS
+            // =================================
+
+            let withdrawalDetailsHTML = "";
+
+
+            if (type.includes("withdraw")) {
+
+                if (record.fee !== undefined) {
+
+                    withdrawalDetailsHTML += `
+
+                        <p>
+                            Fee:
+                            <b>
+                                UGX ${Number(
+                                    record.fee || 0
+                                ).toLocaleString()}
+                            </b>
+                        </p>
+
+                    `;
+
+                }
+
+
+                if (record.receiveAmount !== undefined) {
+
+                    withdrawalDetailsHTML += `
+
+                        <p>
+                            Receive:
+                            <b>
+                                UGX ${Number(
+                                    record.receiveAmount || 0
+                                ).toLocaleString()}
+                            </b>
+                        </p>
+
+                    `;
+
+                }
+
+            }
+
+
+
+            // =================================
+            // CARD HTML
             // =================================
 
             card.innerHTML = `
 
                 <div class="history-left">
+
 
                     <div class="history-icon">
 
@@ -446,44 +561,59 @@ document.addEventListener("DOMContentLoaded", async function(){
                     </div>
 
 
+
                     <div class="history-details">
 
+
                         <h4>
-                            ${type}
+                            ${recordType}
                         </h4>
 
 
                         <p>
-                            ${formattedDate}
+                            ${displayDate}
                         </p>
+
 
                         ${productHTML}
 
+
                         ${transactionIdHTML}
 
+
+                        ${withdrawalDetailsHTML}
+
+
                     </div>
 
 
-                    <div class="history-right">
-
-                        <div class="history-amount">
-
-                            UGX ${formattedAmount}
-
-                        </div>
+                </div>
 
 
-                        <span class="history-status ${statusClass}">
 
-                            ${status}
+                <div class="history-right">
 
-                        </span>
+
+                    <div class="history-amount">
+
+                        UGX ${amount.toLocaleString()}
 
                     </div>
+
+
+                    <span
+                        class="history-status ${statusClass}"
+                    >
+
+                        ${status}
+
+                    </span>
+
 
                 </div>
 
             `;
+
 
 
             container.appendChild(card);
@@ -493,11 +623,13 @@ document.addEventListener("DOMContentLoaded", async function(){
     }
 
 
+
     // =================================
-    // SHOW ALL HISTORY
+    // SHOW ALL
     // =================================
 
     displayHistory(allRecords);
+
 
 
     // =================================
@@ -510,142 +642,177 @@ document.addEventListener("DOMContentLoaded", async function(){
         );
 
 
-    filterButtons.forEach(function(button){
-
-        button.onclick = function(){
-
-            filterButtons.forEach(function(btn){
-
-                btn.classList.remove("active");
-
-            });
+    filterButtons.forEach(function (button) {
 
 
-            button.classList.add("active");
+        button.onclick =
+            function () {
 
 
-            const selected =
-                button.innerText.trim();
+                // Remove active
+                filterButtons.forEach(
+                    function (btn) {
 
-
-            let filtered =
-                allRecords;
-
-
-            // =================================
-            // ALL
-            // =================================
-
-            if(selected === "All"){
-
-                filtered =
-                    allRecords;
-
-            }
-
-
-            // =================================
-            // DEPOSITS
-            // =================================
-
-            else if(selected === "Deposits"){
-
-                filtered =
-                    allRecords.filter(function(record){
-
-                        return getRecordType(record)
-                            .toLowerCase()
-                            .includes("deposit");
-
-                    });
-
-            }
-
-
-            // =================================
-            // WITHDRAWALS
-            // =================================
-
-            else if(selected === "Withdrawals"){
-
-                filtered =
-                    allRecords.filter(function(record){
-
-                        return getRecordType(record)
-                            .toLowerCase()
-                            .includes("withdraw");
-
-                    });
-
-            }
-
-
-            // =================================
-            // DAILY INCOME
-            // =================================
-
-            else if(selected === "Daily Income"){
-
-                filtered =
-                    allRecords.filter(function(record){
-
-                        const type =
-                            getRecordType(record)
-                                .toLowerCase();
-
-
-                        return (
-                            type.includes("daily") ||
-                            type.includes("income") ||
-                            type.includes("profit")
+                        btn.classList.remove(
+                            "active"
                         );
 
-                    });
-
-            }
-
-
-            // =================================
-            // BONUS
-            // =================================
-
-            else if(selected === "Bonus"){
-
-                filtered =
-                    allRecords.filter(function(record){
-
-                        return getRecordType(record)
-                            .toLowerCase()
-                            .includes("bonus");
-
-                    });
-
-            }
+                    }
+                );
 
 
-            // =================================
-            // REFERRAL
-            // =================================
-
-            else if(selected === "Referral"){
-
-                filtered =
-                    allRecords.filter(function(record){
-
-                        return getRecordType(record)
-                            .toLowerCase()
-                            .includes("referral");
-
-                    });
-
-            }
+                // Activate selected
+                button.classList.add("active");
 
 
-            displayHistory(filtered);
 
-        };
+                const selected =
+                    button.innerText.trim();
+
+
+
+                let filtered =
+                    allRecords;
+
+
+
+                // =================================
+                // DEPOSITS
+                // =================================
+
+                if (selected === "Deposits") {
+
+                    filtered =
+                        allRecords.filter(
+                            function (record) {
+
+                                return String(
+                                    record.type || ""
+                                )
+                                .toLowerCase()
+                                .includes("deposit");
+
+                            }
+                        );
+
+                }
+
+
+
+                // =================================
+                // WITHDRAWALS
+                // =================================
+
+                else if (
+                    selected === "Withdrawals"
+                ) {
+
+                    filtered =
+                        allRecords.filter(
+                            function (record) {
+
+                                return String(
+                                    record.type || ""
+                                )
+                                .toLowerCase()
+                                .includes("withdraw");
+
+                            }
+                        );
+
+                }
+
+
+
+                // =================================
+                // DAILY INCOME
+                // =================================
+
+                else if (
+                    selected === "Daily Income"
+                ) {
+
+                    filtered =
+                        allRecords.filter(
+                            function (record) {
+
+                                const type =
+                                    String(
+                                        record.type || ""
+                                    ).toLowerCase();
+
+
+                                return (
+                                    type.includes("daily") ||
+                                    type.includes("income") ||
+                                    type.includes("profit")
+                                );
+
+                            }
+                        );
+
+                }
+
+
+
+                // =================================
+                // BONUS
+                // =================================
+
+                else if (
+                    selected === "Bonus"
+                ) {
+
+                    filtered =
+                        allRecords.filter(
+                            function (record) {
+
+                                return String(
+                                    record.type || ""
+                                )
+                                .toLowerCase()
+                                .includes("bonus");
+
+                            }
+                        );
+
+                }
+
+
+
+                // =================================
+                // REFERRAL
+                // =================================
+
+                else if (
+                    selected === "Referral"
+                ) {
+
+                    filtered =
+                        allRecords.filter(
+                            function (record) {
+
+                                return String(
+                                    record.type || ""
+                                )
+                                .toLowerCase()
+                                .includes("referral");
+
+                            }
+                        );
+
+                }
+
+
+
+                // =================================
+                // DISPLAY FILTERED
+                // =================================
+
+                displayHistory(filtered);
+
+            };
 
     });
-
 
 });
