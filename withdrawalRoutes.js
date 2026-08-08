@@ -253,29 +253,20 @@ message:error.message
 
 
 
-
-
-
-// =====================================
-// GET ALL WITHDRAWALS (ADMIN)
-// =====================================
+// GET ALL WITHDRAWALS FOR ADMIN
+// OLDEST FIRST
 
 router.get("/", async function(req,res){
 
 try{
 
-
 const withdrawals =
 await Withdrawal.find()
-.sort({date:-1});
-
+.sort({date:1});
 
 res.json(withdrawals);
 
-
-
 }catch(error){
-
 
 res.status(500).json({
 
@@ -283,10 +274,10 @@ message:error.message
 
 });
 
-
 }
 
 });
+
 
 
 
