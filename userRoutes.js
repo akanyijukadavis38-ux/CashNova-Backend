@@ -934,14 +934,13 @@ message:error.message
 
 });
 
-
 // =================================
 // ADMIN APPROVE DEPOSIT
 // =================================
 
 router.put("/admin/deposit/approve/:id", async function(req, res){
 
-try{
+try {
 
     // =================================
     // FIND DEPOSIT
@@ -992,45 +991,50 @@ try{
     // MAKE SURE ARRAYS EXIST
     // =================================
 
-    if(!user.incomeRecords){
+    if(!Array.isArray(user.incomeRecords)){
         user.incomeRecords = [];
     }
 
-    if(!user.transactionHistory){
+    if(!Array.isArray(user.transactionHistory)){
         user.transactionHistory = [];
     }
 
-    if(!user.depositRecords){
+    if(!Array.isArray(user.depositRecords)){
         user.depositRecords = [];
     }
 
 
     // =================================
-    // CHECK IF THIS IS FIRST DEPOSIT
+    // IMPORTANT:
+    // CHECK FIRST APPROVED DEPOSIT
     // =================================
 
     const isFirstDeposit =
         user.firstDepositCompleted !== true;
 
 
+    const depositAmount =
+        Number(deposit.amount || 0);
+
+
     // =================================
-    // ADD DEPOSIT TO WALLET
+    // CREDIT USER WALLET
     // =================================
 
     user.walletBalance =
         Number(user.walletBalance || 0)
         +
-        Number(deposit.amount);
+        depositAmount;
 
 
     // =================================
-    // UPDATE TOTAL DEPOSITS
+    // UPDATE USER TOTAL DEPOSITS
     // =================================
 
     user.totalDeposits =
         Number(user.totalDeposits || 0)
         +
-        Number(deposit.amount);
+        depositAmount;
 
 
     // =================================
@@ -1095,16 +1099,8 @@ try{
 
 
         // =================================
-        // REFERRAL COMMISSION
-        // FIRST DEPOSIT ONLY
+        // FIND ALL REFERRERS
         // =================================
-
-        const depositAmount =
-            Number(deposit.amount);
-
-
-        // FIND EVERY REFERRER WHO HAS THIS USER
-        // IN THEIR TEAM
 
         const referrers =
             await User.find({
@@ -1116,7 +1112,7 @@ try{
 
 
         // =================================
-        // PROCESS REFERRAL LEVELS
+        // UPDATE REFERRAL NETWORK
         // =================================
 
         for(const referrer of referrers){
@@ -1126,18 +1122,16 @@ try{
             }
 
 
-            for(const member of referrer.teamMembers){
+            let referrerChanged = false;
 
-                // MAKE SURE THIS IS THE CORRECT
-                // REFERRED USER
+
+            for(const member of referrer.teamMembers){
 
                 if(
                     String(member.userId) !==
                     String(user._id)
                 ){
-
                     continue;
-
                 }
 
 
@@ -1146,7 +1140,20 @@ try{
 
 
                 // =================================
-                // COMMISSION PERCENTAGE
+                // FIRST DEPOSIT AMOUNT
+                // =================================
+
+                member.firstDepositAmount =
+                    depositAmount;
+
+                member.depositStatus =
+                    "Active";
+
+                referrerChanged = true;
+
+
+                // =================================
+                // COMMISSION RATE
                 // =================================
 
                 let percentage = 0;
@@ -1169,13 +1176,14 @@ try{
                 }
 
 
-                if(percentage === 0){
+                if(percentage <= 0){
                     continue;
                 }
 
 
                 // =================================
-                // CALCULATE COMMISSION
+                // CALCULATE FIRST-DEPOSIT
+                // COMMISSION
                 // =================================
 
                 const commission =
@@ -1183,18 +1191,7 @@ try{
 
 
                 // =================================
-                // UPDATE TEAM MEMBER
-                // =================================
-
-                member.firstDepositAmount =
-                    depositAmount;
-
-                member.depositStatus =
-                    "Active";
-
-
-                // =================================
-                // UPDATE REFERRER WALLET
+                // REFERRER WALLET
                 // =================================
 
                 referrer.walletBalance =
@@ -1204,7 +1201,7 @@ try{
 
 
                 // =================================
-                // UPDATE REFERRAL INCOME
+                // REFERRAL INCOME
                 // =================================
 
                 referrer.referralIncome =
@@ -1214,7 +1211,7 @@ try{
 
 
                 // =================================
-                // UPDATE CUMULATIVE INCOME
+                // CUMULATIVE INCOME
                 // =================================
 
                 referrer.cumulativeIncome =
@@ -1227,7 +1224,7 @@ try{
                 // INCOME RECORD
                 // =================================
 
-                if(!referrer.incomeRecords){
+                if(!Array.isArray(referrer.incomeRecords)){
                     referrer.incomeRecords = [];
                 }
 
@@ -1240,7 +1237,11 @@ try{
 
                     level:level,
 
-                    referredUsername:user.username,
+                    referredUsername:
+                        user.username,
+
+                    firstDepositAmount:
+                        depositAmount,
 
                     status:"Completed",
 
@@ -1253,7 +1254,7 @@ try{
                 // TRANSACTION HISTORY
                 // =================================
 
-                if(!referrer.transactionHistory){
+                if(!Array.isArray(referrer.transactionHistory)){
                     referrer.transactionHistory = [];
                 }
 
@@ -1266,7 +1267,11 @@ try{
 
                     level:level,
 
-                    referredUsername:user.username,
+                    referredUsername:
+                        user.username,
+
+                    firstDepositAmount:
+                        depositAmount,
 
                     status:"Completed",
 
@@ -1274,10 +1279,14 @@ try{
 
                 });
 
+            }
 
-                // =================================
-                // SAVE REFERRER
-                // =================================
+
+            // =================================
+            // SAVE REFERRER
+            // =================================
+
+            if(referrerChanged){
 
                 referrer.markModified(
                     "teamMembers"
@@ -1293,14 +1302,14 @@ try{
 
 
     // =================================
-    // DEPOSIT RECORD
+    // USER DEPOSIT RECORD
     // =================================
 
     user.depositRecords.push({
 
         type:"Deposit",
 
-        amount:Number(deposit.amount),
+        amount:depositAmount,
 
         status:"Credited",
 
@@ -1310,14 +1319,14 @@ try{
 
 
     // =================================
-    // TRANSACTION HISTORY
+    // USER TRANSACTION HISTORY
     // =================================
 
     user.transactionHistory.push({
 
         type:"Deposit",
 
-        amount:Number(deposit.amount),
+        amount:depositAmount,
 
         status:"Credited",
 
@@ -1330,7 +1339,7 @@ try{
 
 
     // =================================
-    // UPDATE DEPOSIT
+    // MARK DEPOSIT AS CREDITED
     // =================================
 
     deposit.status =
@@ -1341,10 +1350,15 @@ try{
 
 
     // =================================
-    // SAVE USER + DEPOSIT
+    // SAVE USER
     // =================================
 
     await user.save();
+
+
+    // =================================
+    // SAVE DEPOSIT
+    // =================================
 
     await deposit.save();
 
@@ -1355,7 +1369,16 @@ try{
 
     res.json({
 
-        message:"Deposit approved successfully",
+        message:
+            "Deposit approved successfully",
+
+        firstDeposit:
+            isFirstDeposit,
+
+        firstDepositAmount:
+            isFirstDeposit
+                ? depositAmount
+                : 0,
 
         user:user,
 
@@ -1364,7 +1387,8 @@ try{
     });
 
 
-}catch(error){
+}
+catch(error){
 
     console.log(
         "Approve deposit error:",
@@ -1380,8 +1404,6 @@ try{
 }
 
 });
-
-
 
 
 // =================================
