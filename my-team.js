@@ -33,10 +33,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 .toLocaleString();
 
     }
-
-
-    /* =================================
-       LOAD USER FROM MONGODB
+/* =================================
+       LOAD REAL TEAM DATA FROM MONGODB
     ================================= */
 
     async function loadUser() {
@@ -62,9 +60,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
 
+            /*
+             * IMPORTANT:
+             * We use the TEAM endpoint here.
+             *
+             * This endpoint calculates:
+             * - Level 1
+             * - Level 2
+             * - Level 3
+             * - Real approved deposits
+             * - Active members
+             * - Commission amounts
+             */
+
             const response =
                 await fetch(
-                    API + "/" + userId
+                    API + "/team/" + userId
                 );
 
 
@@ -78,14 +89,40 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
 
-            const user =
+            const teamData =
                 await response.json();
 
 
-            /* Keep latest data locally */
+            /*
+             * The Team API returns the real
+             * teamMembers array.
+             */
+
+            const user = {
+
+                ...teamData,
+
+                teamMembers:
+                    Array.isArray(
+                        teamData.teamMembers
+                    )
+                    ? teamData.teamMembers
+                    : [],
+
+                referralIncome:
+                    Number(
+                        teamData.referralIncome || 0
+                    )
+
+            };
+
+
+            /*
+             * Save the latest real team data.
+             */
 
             localStorage.setItem(
-                "cashnovaUserData",
+                "cashnovaTeamData",
                 JSON.stringify(user)
             );
 
@@ -100,15 +137,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 error
             );
 
+
             showError(
                 "Unable to load team information."
             );
+
 
             return null;
 
         }
 
     }
+
+   
 
 
     /* =================================
