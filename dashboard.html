@@ -759,27 +759,7 @@ console.log(error);
 
 }
  
-// =====================================
-// ANNOUNCEMENT OK BUTTON
-// =====================================
 
-const closeAnnouncement =
-document.getElementById("closeAnnouncement");
-
-
-const announcementBox =
-document.getElementById("announcementBox");
-
-
-if(closeAnnouncement && announcementBox){
-
-    closeAnnouncement.onclick = function(){
-
-        announcementBox.style.display = "none";
-
-    };
-
-}
 
 
 // =====================================
@@ -1226,12 +1206,32 @@ if(mineNav){
 
 }
 
-
-
 // END DOM CONTENT LOADED
+    });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const closeAnnouncement =
+        document.getElementById("closeAnnouncement");
+
+    const announcementBox =
+        document.getElementById("announcementBox");
+
+    if (!closeAnnouncement || !announcementBox) {
+        return;
+    }
+
+    closeAnnouncement.onclick = function () {
+
+        announcementBox.style.display = "none";
+
+    };
 
 });
 </script>
+
 <script src="wallet.js"></script>
 <script src="income.js"></script>
 
