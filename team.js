@@ -1,19 +1,19 @@
 /* =================================
-   CASHNOVA MY TEAM SYSTEM
-   MONGODB VERSION
+   CASHNOVA TEAM SYSTEM
+   MONGODB / RENDER VERSION
 ================================= */
 
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", function () {
 
     const API =
         "https://cashnova-backend-89lg.onrender.com/api/users";
 
 
     /* =================================
-       GET CURRENT USER
+       GET CURRENT USER ID
     ================================= */
 
-    function getCurrentUserId() {
+    function getUserId() {
 
         return localStorage.getItem("cashnovaUserId");
 
@@ -21,19 +21,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
     /* =================================
-       LOAD CURRENT USER FROM MONGODB
+       LOAD USER FROM MONGODB
     ================================= */
 
-    async function getCurrentUserData() {
+    async function loadUser() {
 
-        const userId = getCurrentUserId();
+        const userId = getUserId();
 
         if (!userId) {
 
-            console.error("CashNova user ID not found.");
+            console.error(
+                "cashnovaUserId was not found."
+            );
+
+            showLoadingError();
 
             return null;
-
         }
 
 
@@ -46,7 +49,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (!response.ok) {
 
                 throw new Error(
-                    "Unable to load user"
+                    "Server returned " +
+                    response.status
                 );
 
             }
@@ -56,11 +60,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 await response.json();
 
 
-            /*
-             SAVE FRESH USER DATA LOCALLY
-             SO OTHER CASHNOVA PAGES CAN
-             ALSO USE THE LATEST DATA.
-            */
+            /* Save latest data locally too */
 
             localStorage.setItem(
                 "cashnovaUserData",
@@ -74,9 +74,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         } catch (error) {
 
             console.error(
-                "Team user loading error:",
+                "CashNova Team loading error:",
                 error
             );
+
+            showLoadingError();
 
             return null;
 
@@ -86,216 +88,495 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
     /* =================================
-       SHOW TEAM MEMBERS
+       ERROR DISPLAY
     ================================= */
 
-    async function showMembers(level) {
+    function showLoadingError() {
 
-        const user =
-            await getCurrentUserData();
-
-
-        if (!user) {
-
-            const container =
-                document.getElementById(
-                    "membersContainer"
-                );
-
-
-            if (container) {
-
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fa-solid fa-circle-exclamation"></i>
-                        <p>
-                            Unable to load team members.
-                        </p>
-                    </div>
-                `;
-
-            }
-
-            return;
-
-        }
-
-
-        /* =================================
-           GET TEAM MEMBERS FROM MONGODB
-        ================================= */
-
-        let members =
-            Array.isArray(user.teamMembers)
-                ? user.teamMembers
-                : [];
-
-
-        /* =================================
-           FILTER LEVEL
-        ================================= */
-
-        if (level !== undefined) {
-
-            members =
-                members.filter(function (member) {
-
-                    return Number(member.level) ===
-                        Number(level);
-
-                });
-
-        }
-
-
-        /* =================================
-           TOTAL TEAM MEMBERS
-        ================================= */
-
-        const totalMembers =
+        const referralCode =
             document.getElementById(
-                "totalMembers"
+                "referralCode"
+            );
+
+        const referredBy =
+            document.getElementById(
+                "referredBy"
             );
 
 
-        if (totalMembers) {
+        if (referralCode) {
 
-            totalMembers.innerHTML =
-                Array.isArray(user.teamMembers)
-                    ? user.teamMembers.length
-                    : 0;
+            referralCode.textContent =
+                "Unable to load";
 
         }
 
 
-        /* =================================
-           ACTIVE TEAM MEMBERS
-        ================================= */
+        if (referredBy) {
 
-        const activeMembers =
-            document.getElementById(
-                "activeMembers"
-            );
+            referredBy.textContent =
+                "Unable to load";
 
+        }
 
-        if (activeMembers) {
-
-            const allMembers =
-                Array.isArray(user.teamMembers)
-                    ? user.teamMembers
-                    : [];
+    }
 
 
-            const active =
-                allMembers.filter(function (member) {
+    /* =================================
+       FORMAT MONEY
+    ================================= */
 
-                    return String(
-                        member.depositStatus || ""
-                    ).toLowerCase() === "active";
+    function money(amount) {
 
-                });
+        return "UGX " +
+            Number(amount || 0)
+                .toLocaleString();
+
+    }
 
 
-            activeMembers.innerHTML =
-                active.length;
+    /* =================================
+       CREATE REFERRAL LINK
+    ================================= */
+
+    function createReferralLink(code) {
+
+        if (!code) {
+
+            return "";
 
         }
 
 
-        /* =================================
-           REFERRAL EARNINGS
-        ================================= */
+        /*
+         Use the current website address
+         and attach the referral code.
+        */
 
-        const referralEarnings =
-            document.getElementById(
-                "referralEarnings"
+        const url =
+            new URL(
+                window.location.href
             );
 
 
-        if (referralEarnings) {
+        url.search = "";
 
-            referralEarnings.innerHTML =
-                "UGX " +
-                Number(
-                    user.referralIncome || 0
-                ).toLocaleString();
+
+        url.searchParams.set(
+            "ref",
+            code
+        );
+
+
+        return url.toString();
+
+    }
+
+
+    /* =================================
+       DISPLAY REFERRAL INFORMATION
+    ================================= */
+
+    function displayReferralInformation(user) {
+
+        const referralCode =
+            document.getElementById(
+                "referralCode"
+            );
+
+
+        const referralLink =
+            document.getElementById(
+                "referralLink"
+            );
+
+
+        const referredBy =
+            document.getElementById(
+                "referredBy"
+            );
+
+
+        const code =
+            user.myReferralCode ||
+            user.referralCode ||
+            "";
+
+
+        /* Referral Code */
+
+        if (referralCode) {
+
+            referralCode.textContent =
+                code || "Not available";
 
         }
 
 
-        /* =================================
-           TOTAL TEAM DEPOSITS
-        ================================= */
+        /* Referral Link */
 
-        const teamDeposits =
-            document.getElementById(
-                "teamDeposits"
-            );
+        if (referralLink) {
 
+            referralLink.value =
+                createReferralLink(code);
 
-        if (teamDeposits) {
-
-            let totalFirstDeposits = 0;
+        }
 
 
-            const allMembers =
-                Array.isArray(user.teamMembers)
-                    ? user.teamMembers
-                    : [];
+        /* Referred By */
+
+        if (referredBy) {
+
+            referredBy.textContent =
+                user.referredBy
+                    ? user.referredBy
+                    : "Direct registration";
+
+        }
+
+    }
 
 
-            allMembers.forEach(function (member) {
+    /* =================================
+       GET TEAM MEMBERS
+    ================================= */
 
-                totalFirstDeposits +=
+    function getTeamMembers(user) {
+
+        if (
+            Array.isArray(
+                user.teamMembers
+            )
+        ) {
+
+            return user.teamMembers;
+
+        }
+
+
+        return [];
+
+    }
+
+
+    /* =================================
+       LEVEL STATISTICS
+    ================================= */
+
+    function calculateLevel(
+        members,
+        level
+    ) {
+
+        const levelMembers =
+            members.filter(function (member) {
+
+                return Number(member.level) ===
+                    Number(level);
+
+            });
+
+
+        let totalAmount = 0;
+
+
+        levelMembers.forEach(
+            function (member) {
+
+                totalAmount +=
                     Number(
                         member.firstDepositAmount || 0
                     );
 
-            });
+            }
+        );
 
 
-            teamDeposits.innerHTML =
-                "UGX " +
-                totalFirstDeposits.toLocaleString();
+        return {
+
+            count:
+                levelMembers.length,
+
+            amount:
+                totalAmount
+
+        };
+
+    }
+
+
+    /* =================================
+       DISPLAY TEAM STATISTICS
+    ================================= */
+
+    function displayStatistics(user) {
+
+        const members =
+            getTeamMembers(user);
+
+
+        /* Total Team */
+
+        const totalTeam =
+            document.getElementById(
+                "totalTeam"
+            );
+
+
+        if (totalTeam) {
+
+            totalTeam.textContent =
+                members.length;
 
         }
 
 
-        /* =================================
-           MEMBERS CONTAINER
-        ================================= */
+        /* Referral Earnings */
 
-        const container =
+        const referralIncome =
             document.getElementById(
-                "membersContainer"
+                "referralIncome"
             );
 
 
-        if (!container) {
+        if (referralIncome) {
 
-            console.error(
-                "membersContainer not found."
+            referralIncome.textContent =
+                money(
+                    user.referralIncome || 0
+                );
+
+        }
+
+
+        /* Level 1 */
+
+        const level1 =
+            calculateLevel(
+                members,
+                1
             );
+
+
+        const levelOneMembers =
+            document.getElementById(
+                "levelOneMembers"
+            );
+
+
+        const levelOneAmount =
+            document.getElementById(
+                "levelOneAmount"
+            );
+
+
+        if (levelOneMembers) {
+
+            levelOneMembers.textContent =
+                level1.count;
+
+        }
+
+
+        if (levelOneAmount) {
+
+            levelOneAmount.textContent =
+                money(level1.amount);
+
+        }
+
+
+        /* Level 2 */
+
+        const level2 =
+            calculateLevel(
+                members,
+                2
+            );
+
+
+        const levelTwoMembers =
+            document.getElementById(
+                "levelTwoMembers"
+            );
+
+
+        const levelTwoAmount =
+            document.getElementById(
+                "levelTwoAmount"
+            );
+
+
+        if (levelTwoMembers) {
+
+            levelTwoMembers.textContent =
+                level2.count;
+
+        }
+
+
+        if (levelTwoAmount) {
+
+            levelTwoAmount.textContent =
+                money(level2.amount);
+
+        }
+
+
+        /* Level 3 */
+
+        const level3 =
+            calculateLevel(
+                members,
+                3
+            );
+
+
+        const levelThreeMembers =
+            document.getElementById(
+                "levelThreeMembers"
+            );
+
+
+        const levelThreeAmount =
+            document.getElementById(
+                "levelThreeAmount"
+            );
+
+
+        if (levelThreeMembers) {
+
+            levelThreeMembers.textContent =
+                level3.count;
+
+        }
+
+
+        if (levelThreeAmount) {
+
+            levelThreeAmount.textContent =
+                money(level3.amount);
+
+        }
+
+    }
+
+
+    /* =================================
+       CREATE MY TEAM SECTION
+    ================================= */
+
+    function createTeamMembersSection() {
+
+        let existing =
+            document.getElementById(
+                "dynamicTeamMembers"
+            );
+
+
+        if (existing) {
+
+            return existing;
+
+        }
+
+
+        const section =
+            document.createElement(
+                "section"
+            );
+
+
+        section.id =
+            "dynamicTeamMembers";
+
+
+        section.style.marginTop =
+            "20px";
+
+
+        section.innerHTML = `
+
+            <div class="my-team-container">
+
+                <h2>
+                    <i class="fa-solid fa-users"></i>
+                    My Team Members
+                </h2>
+
+                <div
+                    id="teamMembersList"
+                ></div>
+
+            </div>
+
+        `;
+
+
+        const buttonSection =
+            document.querySelector(
+                ".my-team-button-section"
+            );
+
+
+        if (buttonSection) {
+
+            buttonSection.after(section);
+
+        }
+        else {
+
+            document
+                .querySelector(".team-page")
+                .appendChild(section);
+
+        }
+
+
+        return section;
+
+    }
+
+
+    /* =================================
+       DISPLAY TEAM MEMBERS
+    ================================= */
+
+    function displayTeamMembers(user) {
+
+        const section =
+            createTeamMembersSection();
+
+
+        const list =
+            section.querySelector(
+                "#teamMembersList"
+            );
+
+
+        if (!list) {
 
             return;
 
         }
 
 
-        /* =================================
-           NO MEMBERS
-        ================================= */
+        const members =
+            getTeamMembers(user);
+
 
         if (members.length === 0) {
 
-            container.innerHTML = `
+            list.innerHTML = `
 
                 <div class="empty-state">
 
-                    <i class="fa-solid fa-user-group"></i>
+                    <i
+                        class="fa-solid fa-user-group"
+                    ></i>
 
                     <p>
-                        No members in this level yet
+                        No team members yet.
                     </p>
 
                 </div>
@@ -307,267 +588,238 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
 
-        container.innerHTML = "";
+        list.innerHTML = "";
 
 
-        /* =================================
-           DISPLAY MEMBERS
-        ================================= */
+        members.forEach(
+            function (member) {
 
-        members.forEach(function (member) {
-
-
-            const card =
-                document.createElement("div");
+                const card =
+                    document.createElement(
+                        "div"
+                    );
 
 
-            card.className =
-                "member-card";
+                card.className =
+                    "member-card";
 
 
-            /* =================================
-               MEMBER NAME
-            ================================= */
-
-            let memberName =
-                member.username ||
-                member.fullName ||
-                "Team Member";
+                const username =
+                    member.username ||
+                    "Team Member";
 
 
-            /*
-             DO NOT HIDE THE WHOLE NAME.
-
-             Show the username normally so
-             the owner can identify the member.
-            */
+                const level =
+                    Number(
+                        member.level || 0
+                    );
 
 
-            /* =================================
-               DEPOSIT AMOUNT
-            ================================= */
-
-            const depositAmount =
-                Number(
-                    member.firstDepositAmount || 0
-                );
+                const deposit =
+                    Number(
+                        member.firstDepositAmount || 0
+                    );
 
 
-            /* =================================
-               DEPOSIT STATUS
-            ================================= */
-
-            const depositStatus =
-                member.depositStatus ||
-                "Not yet deposited";
+                const status =
+                    member.depositStatus ||
+                    "Not yet deposited";
 
 
-            /* =================================
-               COMMISSION
-            ================================= */
-
-            let percentage = 0;
+                let percentage = 0;
 
 
-            if (Number(member.level) === 1) {
+                if (level === 1) {
 
-                percentage = 0.20;
+                    percentage = 0.20;
 
-            }
+                }
+                else if (level === 2) {
 
-            else if (Number(member.level) === 2) {
+                    percentage = 0.03;
 
-                percentage = 0.03;
+                }
+                else if (level === 3) {
 
-            }
+                    percentage = 0.01;
 
-            else if (Number(member.level) === 3) {
-
-                percentage = 0.01;
-
-            }
+                }
 
 
-            const commission =
-                depositAmount * percentage;
+                const commission =
+                    deposit *
+                    percentage;
 
 
-            /* =================================
-               MEMBER CARD
-            ================================= */
-
-            card.innerHTML = `
-
-                <div class="member-top">
-
-                    <h3>
-                        ${memberName}
-                    </h3>
-
-                    <span class="level-badge">
-                        Level ${member.level}
-                    </span>
-
-                </div>
+                const statusClass =
+                    String(status)
+                        .toLowerCase() ===
+                    "active"
+                        ? "active"
+                        : "pending";
 
 
-                <div class="member-info">
+                card.innerHTML = `
 
-                    <p>
+                    <div class="member-top">
 
-                        <i class="fa-solid fa-wallet"></i>
+                        <h3>
+                            ${username}
+                        </h3>
 
-                        Deposit Status:
-
-                        <span class="deposit-badge">
-
-                            ${depositStatus}
-
+                        <span class="level-badge">
+                            Level ${level}
                         </span>
 
-                    </p>
+                    </div>
 
 
-                    <p>
+                    <div class="member-info">
 
-                        <i class="fa-solid fa-money-bill-wave"></i>
+                        <p>
 
-                        Deposit:
+                            <i
+                                class="fa-solid fa-circle-check"
+                            ></i>
 
-                        <b>
-                            UGX
-                            ${depositAmount.toLocaleString()}
-                        </b>
+                            Status:
 
-                    </p>
+                            <span
+                                class="deposit-badge
+                                ${statusClass}"
+                            >
+                                ${status}
+                            </span>
 
-
-                    <p>
-
-                        <i class="fa-solid fa-percent"></i>
-
-                        Commission:
-
-                        <b>
-                            UGX
-                            ${commission.toLocaleString()}
-                        </b>
-
-                    </p>
+                        </p>
 
 
-                    <p>
+                        <p>
 
-                        <i class="fa-solid fa-calendar"></i>
+                            <i
+                                class="fa-solid fa-money-bill-wave"
+                            ></i>
 
-                        Joined:
+                            Deposit:
 
-                        ${member.joinedDate || "Unknown"}
+                            <b>
+                                ${money(deposit)}
+                            </b>
 
-                    </p>
-
-                </div>
-
-            `;
+                        </p>
 
 
-            container.appendChild(card);
+                        <p>
 
-        });
+                            <i
+                                class="fa-solid fa-percent"
+                            ></i>
+
+                            Commission:
+
+                            <b>
+                                ${money(commission)}
+                            </b>
+
+                        </p>
+
+
+                        <p>
+
+                            <i
+                                class="fa-solid fa-calendar"
+                            ></i>
+
+                            Joined:
+
+                            <span>
+                                ${
+                                    member.joinedDate ||
+                                    "Unknown"
+                                }
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                `;
+
+
+                list.appendChild(card);
+
+            }
+        );
 
     }
 
 
     /* =================================
-       ACTIVE BUTTON
+       COPY REFERRAL LINK
     ================================= */
 
-    function setActiveButton(button) {
+    function setupCopyButton() {
 
-        document
-            .querySelectorAll(
-                ".level-buttons button"
-            )
-            .forEach(function (btn) {
-
-                btn.classList.remove("active");
-
-            });
+        const button =
+            document.getElementById(
+                "copyReferral"
+            );
 
 
-        if (button) {
+        const input =
+            document.getElementById(
+                "referralLink"
+            );
 
-            button.classList.add("active");
+
+        if (!button || !input) {
+
+            return;
 
         }
 
-    }
 
-
-    /* =================================
-       LEVEL BUTTONS
-    ================================= */
-
-    const levelOneButton =
-        document.getElementById(
-            "levelOneButton"
-        );
-
-
-    const levelTwoButton =
-        document.getElementById(
-            "levelTwoButton"
-        );
-
-
-    const levelThreeButton =
-        document.getElementById(
-            "levelThreeButton"
-        );
-
-
-    if (levelOneButton) {
-
-        levelOneButton.onclick =
+        button.onclick =
             async function () {
 
-                setActiveButton(
-                    levelOneButton
-                );
+                if (!input.value) {
 
-                await showMembers(1);
+                    return;
 
-            };
-
-    }
+                }
 
 
-    if (levelTwoButton) {
+                try {
 
-        levelTwoButton.onclick =
-            async function () {
-
-                setActiveButton(
-                    levelTwoButton
-                );
-
-                await showMembers(2);
-
-            };
-
-    }
+                    await navigator.clipboard.writeText(
+                        input.value
+                    );
 
 
-    if (levelThreeButton) {
+                    button.innerHTML =
+                        '<i class="fa-solid fa-check"></i>';
 
-        levelThreeButton.onclick =
-            async function () {
 
-                setActiveButton(
-                    levelThreeButton
-                );
+                    setTimeout(
+                        function () {
 
-                await showMembers(3);
+                            button.innerHTML =
+                                '<i class="fa-solid fa-copy"></i>';
+
+                        },
+                        1500
+                    );
+
+
+                } catch (error) {
+
+                    input.select();
+
+                    document.execCommand(
+                        "copy"
+                    );
+
+                }
 
             };
 
@@ -575,19 +827,220 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
     /* =================================
-       INITIAL LOAD
-       LEVEL 1
+       SHARE REFERRAL LINK
     ================================= */
 
-    if (levelOneButton) {
+    function setupShareButton() {
 
-        setActiveButton(
-            levelOneButton
+        const button =
+            document.getElementById(
+                "shareReferral"
+            );
+
+
+        const input =
+            document.getElementById(
+                "referralLink"
+            );
+
+
+        if (!button || !input) {
+
+            return;
+
+        }
+
+
+        button.onclick =
+            async function () {
+
+                const link =
+                    input.value;
+
+
+                if (!link) {
+
+                    return;
+
+                }
+
+
+                if (
+                    navigator.share
+                ) {
+
+                    try {
+
+                        await navigator.share({
+
+                            title:
+                                "Join CashNova",
+
+                            text:
+                                "Join CashNova using my referral link.",
+
+                            url:
+                                link
+
+                        });
+
+                    } catch (error) {
+
+                        console.log(
+                            "Share cancelled."
+                        );
+
+                    }
+
+                }
+                else {
+
+                    try {
+
+                        await navigator.clipboard
+                            .writeText(link);
+
+
+                        alert(
+                            "Referral link copied!"
+                        );
+
+                    } catch (error) {
+
+                        alert(
+                            link
+                        );
+
+                    }
+
+                }
+
+            };
+
+    }
+
+
+    /* =================================
+       MY TEAM BUTTON
+    ================================= */
+
+    function setupTeamButton(user) {
+
+        const button =
+            document.getElementById(
+                "viewTeamButton"
+            );
+
+
+        if (!button) {
+
+            return;
+
+        }
+
+
+        button.onclick =
+            function () {
+
+                const section =
+                    document.getElementById(
+                        "dynamicTeamMembers"
+                    );
+
+
+                if (!section) {
+
+                    displayTeamMembers(
+                        user
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    section.style.display ===
+                    "none"
+                ) {
+
+                    section.style.display =
+                        "block";
+
+                    section.scrollIntoView({
+                        behavior:"smooth"
+                    });
+
+                }
+                else {
+
+                    section.style.display =
+                        "none";
+
+                }
+
+            };
+
+    }
+
+
+    /* =================================
+       START TEAM PAGE
+    ================================= */
+
+    async function startTeamPage() {
+
+        const user =
+            await loadUser();
+
+
+        if (!user) {
+
+            return;
+
+        }
+
+
+        console.log(
+            "CashNova Team user:",
+            user
+        );
+
+
+        console.log(
+            "CashNova Team members:",
+            user.teamMembers
+        );
+
+
+        displayReferralInformation(
+            user
+        );
+
+
+        displayStatistics(
+            user
+        );
+
+
+        displayTeamMembers(
+            user
+        );
+
+
+        setupCopyButton();
+
+
+        setupShareButton();
+
+
+        setupTeamButton(
+            user
         );
 
     }
 
 
-    await showMembers(1);
+    startTeamPage();
 
 });
