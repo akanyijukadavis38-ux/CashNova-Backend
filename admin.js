@@ -189,18 +189,31 @@ document.addEventListener(
 
 
 // ===============================
-// LOAD DATA
+// LOAD USERS
 // ===============================
 
 let users = [];
 
-let response =
+
+let userResponse =
     await adminFetch(
         "https://cashnova-backend-89lg.onrender.com/api/admin/users"
     );
 
 
-if(!response){
+if(!userResponse){
+
+    return;
+
+}
+
+
+if(!userResponse.ok){
+
+    console.log(
+        "Failed to load users:",
+        userResponse.status
+    );
 
     return;
 
@@ -208,14 +221,19 @@ if(!response){
 
 
 users =
-    await response.json();
+    await userResponse.json();
 
+
+// ===============================
+// LOAD ADMIN DEPOSIT RECORDS
+// ===============================
 
 let deposits = [];
 
+
 let depositResponse =
     await adminFetch(
-        "https://cashnova-backend-89lg.onrender.com/api/deposits"
+        "https://cashnova-backend-89lg.onrender.com/api/admin/deposit-records"
     );
 
 
@@ -226,19 +244,48 @@ if(!depositResponse){
 }
 
 
+if(!depositResponse.ok){
+
+    console.log(
+        "Failed to load deposit records:",
+        depositResponse.status
+    );
+
+    return;
+
+}
+
+
 deposits =
     await depositResponse.json();
 
 
+// ===============================
+// LOAD ADMIN WITHDRAWAL RECORDS
+// ===============================
+
 let withdrawals = [];
+
 
 let withdrawalResponse =
     await adminFetch(
-        "https://cashnova-backend-89lg.onrender.com/api/withdrawals"
+        "https://cashnova-backend-89lg.onrender.com/api/admin/withdrawal-records"
     );
 
 
 if(!withdrawalResponse){
+
+    return;
+
+}
+
+
+if(!withdrawalResponse.ok){
+
+    console.log(
+        "Failed to load withdrawal records:",
+        withdrawalResponse.status
+    );
 
     return;
 
@@ -254,7 +301,9 @@ withdrawals =
 // ===============================
 
 let totalUsers =
-    document.getElementById("totalUsers");
+    document.getElementById(
+        "totalUsers"
+    );
 
 
 if(totalUsers){
@@ -279,7 +328,9 @@ let activeUsers =
 
 
 let activeUsersBox =
-    document.getElementById("activeUsers");
+    document.getElementById(
+        "activeUsers"
+    );
 
 
 if(activeUsersBox){
@@ -300,7 +351,10 @@ let totalDepositsAmount = 0;
 deposits.forEach(function(deposit){
 
     if(
-        deposit.status === "Credited"
+        String(
+            deposit.status || ""
+        ).toLowerCase().trim()
+        === "credited"
     ){
 
         totalDepositsAmount +=
@@ -314,7 +368,9 @@ deposits.forEach(function(deposit){
 
 
 let totalDeposits =
-    document.getElementById("totalDeposits");
+    document.getElementById(
+        "totalDeposits"
+    );
 
 
 if(totalDeposits){
@@ -336,7 +392,10 @@ let totalWithdrawalsAmount = 0;
 withdrawals.forEach(function(withdrawal){
 
     if(
-        withdrawal.status === "Approved"
+        String(
+            withdrawal.status || ""
+        ).toLowerCase().trim()
+        === "approved"
     ){
 
         totalWithdrawalsAmount +=
@@ -350,7 +409,9 @@ withdrawals.forEach(function(withdrawal){
 
 
 let totalWithdrawals =
-    document.getElementById("totalWithdrawals");
+    document.getElementById(
+        "totalWithdrawals"
+    );
 
 
 if(totalWithdrawals){
@@ -363,25 +424,29 @@ if(totalWithdrawals){
 
 
 // ===============================
-// PENDING COUNTS
+// PENDING DEPOSITS
 // ===============================
 
 let pendingDeposits =
     deposits.filter(function(item){
 
         return String(
-            item.status
+            item.status || ""
         ).toLowerCase().trim()
         === "pending";
 
     }).length;
 
 
+// ===============================
+// PENDING WITHDRAWALS
+// ===============================
+
 let pendingWithdrawals =
     withdrawals.filter(function(item){
 
         return String(
-            item.status
+            item.status || ""
         ).toLowerCase().trim()
         === "pending";
 
@@ -593,7 +658,10 @@ let totalMoneyFlow = 0;
 deposits.forEach(function(deposit){
 
     if(
-        deposit.status === "Credited"
+        String(
+            deposit.status || ""
+        ).toLowerCase().trim()
+        === "credited"
     ){
 
         totalMoneyFlow +=
