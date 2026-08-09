@@ -392,6 +392,126 @@ Confirm
 <script>
 document.addEventListener("DOMContentLoaded", async function(){
 
+// =====================================
+// CASHNOVA MAINTENANCE GATE
+// SERVER CONTROLLED
+// =====================================
+
+try {
+
+    const maintenanceResponse = await fetch(
+        "https://cashnova-backend-89lg.onrender.com/api/admin/maintenance",
+        {
+            cache: "no-store"
+        }
+    );
+
+    if (!maintenanceResponse.ok) {
+        throw new Error("Unable to check maintenance status");
+    }
+
+    const maintenance =
+        await maintenanceResponse.json();
+
+    console.log(
+        "CashNova maintenance status:",
+        maintenance.status
+    );
+
+    // =====================================
+    // PLATFORM IS UNDER MAINTENANCE
+    // =====================================
+
+    if (maintenance.status === "maintenance") {
+
+        document.body.innerHTML = `
+
+        <div style="
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#f5f7fb;
+            padding:25px;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
+            text-align:center;
+        ">
+
+            <div style="
+                width:100%;
+                max-width:430px;
+                background:#ffffff;
+                padding:35px 25px;
+                border-radius:20px;
+                box-shadow:0 10px 30px rgba(0,0,0,0.10);
+                box-sizing:border-box;
+            ">
+
+                <div style="
+                    width:75px;
+                    height:75px;
+                    margin:0 auto 20px;
+                    border-radius:50%;
+                    background:#fff3cd;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:35px;
+                ">
+                    🔧
+                </div>
+
+                <h1 style="
+                    margin:0 0 15px;
+                    color:#222;
+                    font-size:25px;
+                ">
+                    CashNova Maintenance
+                </h1>
+
+                <p style="
+                    margin:0 0 10px;
+                    color:#555;
+                    font-size:16px;
+                    line-height:1.6;
+                ">
+                    CashNova is currently under maintenance.
+                </p>
+
+                <p style="
+                    margin:0;
+                    color:#777;
+                    font-size:14px;
+                    line-height:1.6;
+                ">
+                    We are working to improve the platform.
+                    Please try again later.
+                </p>
+
+            </div>
+
+        </div>
+
+        `;
+
+        return;
+    }
+
+} catch (error) {
+
+    console.error(
+        "CashNova maintenance check failed:",
+        error
+    );
+
+}
+
+
+// =====================================
+// NORMAL DASHBOARD STARTS HERE
+// =====================================
+
 const userId = localStorage.getItem("cashnovaUserId");
 
 if(!userId){
@@ -1178,7 +1298,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="wallet.js"></script>
 <script src="income.js"></script>
-<script src="maintenance.js"></script>
+
 </body>
 
 </html>
