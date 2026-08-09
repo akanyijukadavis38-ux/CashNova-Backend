@@ -1,7 +1,7 @@
 /* =================================
    CASHNOVA TEAM SYSTEM
    MONGODB / RENDER VERSION
-   TEAM SUMMARY PAGE ONLY
+   TEAM SUMMARY PAGE
 ================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -30,8 +30,45 @@ document.addEventListener("DOMContentLoaded", function () {
     function money(amount) {
 
         return "UGX " +
-            Number(amount || 0)
-                .toLocaleString();
+            Number(amount || 0).toLocaleString();
+
+    }
+
+
+    /* =================================
+       CREATE REGISTRATION REFERRAL LINK
+    ================================= */
+
+    function createReferralLink(code) {
+
+        if (!code) {
+
+            return "";
+
+        }
+
+        /*
+         IMPORTANT:
+         This automatically uses the same
+         GitHub Pages location where the
+         registration page exists.
+
+         Example:
+         https://username.github.io/CashNova/register.html?ref=CN741828
+        */
+
+        const registerURL =
+            new URL(
+                "register.html",
+                window.location.href
+            );
+
+        registerURL.searchParams.set(
+            "ref",
+            code
+        );
+
+        return registerURL.href;
 
     }
 
@@ -60,7 +97,9 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
 
             const response =
-    await fetch(API + "/team/" + userId);
+                await fetch(
+                    API + "/team/" + userId
+                );
 
 
             if (!response.ok) {
@@ -98,25 +137,8 @@ document.addEventListener("DOMContentLoaded", function () {
             return null;
 
         }
-/* =================================
-   CREATE REGISTRATION REFERRAL LINK
-================================= */
-
-function createReferralLink(code) {
-
-    if (!code) {
-
-        return "";
 
     }
-
-    return window.location.origin +
-        "/register.html?ref=" +
-        encodeURIComponent(code);
-
-}
-    }
-
 
 
     /* =================================
@@ -168,9 +190,8 @@ function createReferralLink(code) {
         if (referredBy) {
 
             referredBy.textContent =
-                user.referredBy
-                    ? user.referredBy
-                    : "Direct registration";
+                user.referredBy ||
+                "Direct registration";
 
         }
 
@@ -178,289 +199,244 @@ function createReferralLink(code) {
 
 
     /* =================================
-       GET TEAM MEMBERS
+       DISPLAY TEAM STATISTICS
     ================================= */
 
-    function getTeamMembers(user) {
+    function displayStatistics(user) {
 
-        if (
-            Array.isArray(
-                user.teamMembers
-            )
-        ) {
+        /* TOTAL TEAM */
 
-            return user.teamMembers;
+        const totalTeam =
+            document.getElementById(
+                "totalTeam"
+            );
+
+
+        if (totalTeam) {
+
+            totalTeam.textContent =
+                Number(
+                    user.totalTeam || 0
+                );
 
         }
 
 
-        return [];
+        /* REFERRAL EARNINGS */
+
+        const referralIncome =
+            document.getElementById(
+                "referralIncome"
+            );
+
+
+        if (referralIncome) {
+
+            referralIncome.textContent =
+                money(
+                    user.referralIncome || 0
+                );
+
+        }
+
+
+        /* LEVEL 1 */
+
+        const level1 =
+            user.levels &&
+            user.levels.level1
+                ? user.levels.level1
+                : {
+                    members: 0,
+                    amount: 0
+                };
+
+
+        const levelOneMembers =
+            document.getElementById(
+                "levelOneMembers"
+            );
+
+
+        const levelOneAmount =
+            document.getElementById(
+                "levelOneAmount"
+            );
+
+
+        if (levelOneMembers) {
+
+            levelOneMembers.textContent =
+                Number(
+                    level1.members || 0
+                );
+
+        }
+
+
+        if (levelOneAmount) {
+
+            levelOneAmount.textContent =
+                money(
+                    level1.amount || 0
+                );
+
+        }
+
+
+        /* LEVEL 2 */
+
+        const level2 =
+            user.levels &&
+            user.levels.level2
+                ? user.levels.level2
+                : {
+                    members: 0,
+                    amount: 0
+                };
+
+
+        const levelTwoMembers =
+            document.getElementById(
+                "levelTwoMembers"
+            );
+
+
+        const levelTwoAmount =
+            document.getElementById(
+                "levelTwoAmount"
+            );
+
+
+        if (levelTwoMembers) {
+
+            levelTwoMembers.textContent =
+                Number(
+                    level2.members || 0
+                );
+
+        }
+
+
+        if (levelTwoAmount) {
+
+            levelTwoAmount.textContent =
+                money(
+                    level2.amount || 0
+                );
+
+        }
+
+
+        /* LEVEL 3 */
+
+        const level3 =
+            user.levels &&
+            user.levels.level3
+                ? user.levels.level3
+                : {
+                    members: 0,
+                    amount: 0
+                };
+
+
+        const levelThreeMembers =
+            document.getElementById(
+                "levelThreeMembers"
+            );
+
+
+        const levelThreeAmount =
+            document.getElementById(
+                "levelThreeAmount"
+            );
+
+
+        if (levelThreeMembers) {
+
+            levelThreeMembers.textContent =
+                Number(
+                    level3.members || 0
+                );
+
+        }
+
+
+        if (levelThreeAmount) {
+
+            levelThreeAmount.textContent =
+                money(
+                    level3.amount || 0
+                );
+
+        }
 
     }
 
 
     /* =================================
-       CALCULATE LEVEL
+       COPY REFERRAL LINK
     ================================= */
 
-    function calculateLevel(
-        members,
-        level
-    ) {
+    function setupCopyButton() {
 
-        const levelMembers =
-            members.filter(function(member) {
-
-                return Number(
-                    member.level
-                ) === Number(level);
-
-            });
+        const button =
+            document.getElementById(
+                "copyReferral"
+            );
 
 
-        let totalAmount = 0;
+        const input =
+            document.getElementById(
+                "referralLink"
+            );
 
 
-        levelMembers.forEach(
-            function(member) {
+        if (!button || !input) {
 
-                totalAmount +=
-                    Number(
-                        member.firstDepositAmount || 0
+            return;
+
+        }
+
+
+        button.onclick =
+            async function () {
+
+                if (!input.value) {
+
+                    return;
+
+                }
+
+
+                try {
+
+                    await navigator.clipboard.writeText(
+                        input.value
                     );
 
-            }
-        );
 
+                    button.innerHTML =
+                        '<i class="fa-solid fa-check"></i> Copied!';
 
-        return {
 
-            members:
-                levelMembers.length,
+                } catch (error) {
 
-            amount:
-                totalAmount
+                    input.select();
 
-        };
+                    document.execCommand(
+                        "copy"
+                    );
 
-    }
-/* =================================
-   DISPLAY TEAM STATISTICS
-================================= */
 
-function displayStatistics(user) {
+                    button.innerHTML =
+                        '<i class="fa-solid fa-check"></i> Copied!';
 
-    /* =================================
-       TOTAL TEAM
-    ================================= */
+                }
 
-    const totalTeam =
-        document.getElementById(
-            "totalTeam"
-        );
-
-    if(totalTeam){
-
-        totalTeam.textContent =
-            Number(
-                user.totalTeam || 0
-            );
-
-    }
-
-
-    /* =================================
-       REFERRAL EARNINGS
-    ================================= */
-
-    const referralIncome =
-        document.getElementById(
-            "referralIncome"
-        );
-
-    if(referralIncome){
-
-        referralIncome.textContent =
-            money(
-                user.referralIncome || 0
-            );
-
-    }
-
-
-    /* =================================
-       LEVEL 1
-    ================================= */
-
-    const level1 =
-        user.levels &&
-        user.levels.level1
-            ? user.levels.level1
-            : {
-                members:0,
-                amount:0
-            };
-
-
-    const levelOneMembers =
-        document.getElementById(
-            "levelOneMembers"
-        );
-
-
-    const levelOneAmount =
-        document.getElementById(
-            "levelOneAmount"
-        );
-
-
-    if(levelOneMembers){
-
-        levelOneMembers.textContent =
-            level1.members;
-
-    }
-
-
-    if(levelOneAmount){
-
-        levelOneAmount.textContent =
-            money(
-                level1.amount
-            );
-
-    }
-
-
-    /* =================================
-       LEVEL 2
-    ================================= */
-
-    const level2 =
-        user.levels &&
-        user.levels.level2
-            ? user.levels.level2
-            : {
-                members:0,
-                amount:0
-            };
-
-
-    const levelTwoMembers =
-        document.getElementById(
-            "levelTwoMembers"
-        );
-
-
-    const levelTwoAmount =
-        document.getElementById(
-            "levelTwoAmount"
-        );
-
-
-    if(levelTwoMembers){
-
-        levelTwoMembers.textContent =
-            level2.members;
-
-    }
-
-
-    if(levelTwoAmount){
-
-        levelTwoAmount.textContent =
-            money(
-                level2.amount
-            );
-
-    }
-
-
-    /* =================================
-       LEVEL 3
-    ================================= */
-
-    const level3 =
-        user.levels &&
-        user.levels.level3
-            ? user.levels.level3
-            : {
-                members:0,
-                amount:0
-            };
-
-
-    const levelThreeMembers =
-        document.getElementById(
-            "levelThreeMembers"
-        );
-
-
-    const levelThreeAmount =
-        document.getElementById(
-            "levelThreeAmount"
-        );
-
-
-    if(levelThreeMembers){
-
-        levelThreeMembers.textContent =
-            level3.members;
-
-    }
-
-
-    if(levelThreeAmount){
-
-        levelThreeAmount.textContent =
-            money(
-                level3.amount
-            );
-
-    }
-
-}/* =================================
-   COPY REFERRAL LINK
-================================= */
-
-function setupCopyButton() {
-
-    const button =
-        document.getElementById(
-            "copyReferral"
-        );
-
-    const input =
-        document.getElementById(
-            "referralLink"
-        );
-
-    if (!button || !input) {
-
-        return;
-
-    }
-
-    button.onclick =
-        async function() {
-
-            if (!input.value) {
-
-                return;
-
-            }
-
-            try {
-
-                await navigator.clipboard.writeText(
-                    input.value
-                );
-
-                button.innerHTML =
-                    '<i class="fa-solid fa-check"></i> Copied!';
 
                 setTimeout(
-                    function() {
+                    function () {
 
                         button.innerHTML =
                             '<i class="fa-solid fa-copy"></i>';
@@ -469,32 +445,9 @@ function setupCopyButton() {
                     2000
                 );
 
-            } catch(error) {
+            };
 
-                input.select();
-
-                document.execCommand("copy");
-
-                button.innerHTML =
-                    '<i class="fa-solid fa-check"></i> Copied!';
-
-                setTimeout(
-                    function() {
-
-                        button.innerHTML =
-                            '<i class="fa-solid fa-copy"></i>';
-
-                    },
-                    2000
-                );
-
-            }
-
-        };
-
-}
-
-
+    }
 
 
     /* =================================
@@ -523,7 +476,7 @@ function setupCopyButton() {
 
 
         button.onclick =
-            async function() {
+            async function () {
 
                 const link =
                     input.value;
@@ -555,7 +508,7 @@ function setupCopyButton() {
 
                         });
 
-                    } catch(error) {
+                    } catch (error) {
 
                         console.log(
                             "Share cancelled."
@@ -563,20 +516,21 @@ function setupCopyButton() {
 
                     }
 
-                }
-                else {
+                } else {
 
                     try {
 
-                        await navigator.clipboard
-                            .writeText(link);
+                        await navigator.clipboard.writeText(
+                            link
+                        );
 
 
                         alert(
                             "Referral link copied!"
                         );
 
-                    } catch(error) {
+
+                    } catch (error) {
 
                         alert(link);
 
@@ -591,7 +545,6 @@ function setupCopyButton() {
 
     /* =================================
        MY TEAM BUTTON
-       OPEN SEPARATE PAGE
     ================================= */
 
     function setupTeamButton() {
@@ -610,14 +563,7 @@ function setupCopyButton() {
 
 
         button.onclick =
-            function() {
-
-                /*
-                 IMPORTANT:
-                 Change ONLY this filename if
-                 your separate My Team page
-                 has another filename.
-                */
+            function () {
 
                 window.location.href =
                     "my-team.html";
@@ -635,12 +581,7 @@ function setupCopyButton() {
 
         const user =
             await loadUser();
-if (user) {
 
-    user.teamMembers =
-        user.teamMembers || [];
-
-}
 
         if (!user) {
 
@@ -680,12 +621,6 @@ if (user) {
         console.log(
             "CashNova Team user:",
             user
-        );
-
-
-        console.log(
-            "CashNova MongoDB team:",
-            user.teamMembers
         );
 
 
