@@ -1,4 +1,3 @@
-
 const Announcement = require("./Announcement");
 const Settings = require("./Settings");
 const express = require("express");
@@ -6,7 +5,7 @@ const router = express.Router();
 const Withdrawal = require("./Withdrawal");
 const User = require("./User");
 const jwt = require("jsonwebtoken");
-
+const adminAuth = require("./adminAuth");
 
 // =====================================
 // ADMIN LOGIN
@@ -100,7 +99,11 @@ router.post("/login", async function(req, res){
     }
 
 });
+// =====================================
+// PROTECT ALL ADMIN ROUTES BELOW
+// =====================================
 
+router.use(adminAuth);
 // =====================================
 // GET ACTIVE USERS
 // =====================================
