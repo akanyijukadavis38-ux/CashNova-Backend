@@ -6,6 +6,7 @@ const depositRoutes = require("./depositRoutes");
 const withdrawalRoutes = require("./withdrawalRoutes");
 const userRoutes = require("./userRoutes");
 const adminRoutes = require("./adminRoutes");
+const adminAuth = require("./adminAuth");
 
 const app = express();
 // Allow frontend connection
@@ -24,7 +25,7 @@ connectDB();
 app.use("/api/users", userRoutes);
 app.use("/api/deposits", depositRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/admin", adminAuth, adminRoutes);
 // Test route
 app.get("/", function(req, res){
 
