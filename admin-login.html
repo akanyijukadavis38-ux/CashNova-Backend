@@ -241,52 +241,96 @@ Login
 
 </div>
 
-
-
 <script>
 
+document.getElementById("loginBtn").onclick = async function(){
 
-document.getElementById("loginBtn").onclick=function(){
-
-
-let password =
-document.getElementById("adminPassword").value;
+    const password =
+        document.getElementById("adminPassword").value.trim();
 
 
+    if(!password){
 
-let savedPassword =
-localStorage.getItem("cashnovaAdminPassword")
-|| "admin123";
+        alert("Please enter the admin password.");
 
+        return;
 
-
-if(password === savedPassword){
-
-
-localStorage.setItem(
-"cashnovaAdminSession",
-"true"
-);
+    }
 
 
-window.location.href = "admin.html";
+    try{
+
+        const response = await fetch(
+            "https://cashnova-backend-89lg.onrender.com/api/admin/login",
+            {
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+                    password:password
+                })
+            }
+        );
 
 
-
-}else{
-
-
-alert("Wrong admin password");
+        const result = await response.json();
 
 
-}
+        if(!response.ok){
+
+            alert(
+                result.message ||
+                "Admin login failed."
+            );
+
+            return;
+
+        }
 
 
+        // SAVE REAL ADMIN TOKEN
+
+        localStorage.setItem(
+            "cashnovaAdminToken",
+            result.token
+        );
+
+
+        // REMOVE OLD FAKE SESSION
+
+        localStorage.removeItem(
+            "cashnovaAdminSession"
+        );
+
+
+        // OPEN ADMIN DASHBOARD
+
+        window.location.href =
+            "admin.html";
+
+
+    }catch(error){
+
+        console.log(
+            "Admin login error:",
+            error
+        );
+
+
+        alert(
+            "Unable to connect to CashNova server."
+        );
+
+    }
 
 };
 
-
 </script>
+
+
 
 
 
