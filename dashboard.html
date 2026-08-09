@@ -391,51 +391,7 @@ Confirm
 
 <script>
 document.addEventListener("DOMContentLoaded", async function(){
-  // =================================
-// CHECK MAINTENANCE MODE
-// =================================
 
-let maintenance =
-JSON.parse(
-localStorage.getItem("cashnovaMaintenance")
-) || {status:"active"};
-
-
-if(maintenance.status === "maintenance"){
-
-
-document.body.innerHTML = `
-
-<div style="
-text-align:center;
-padding:50px;
-font-family:Arial;
-">
-
-<h1>
-CashNova Maintenance
-</h1>
-
-
-<p>
-Our platform is currently under maintenance.
-</p>
-
-
-<p>
-Please try again later.
-</p>
-
-
-</div>
-
-`;
-
-
-return;
-
-
-}
 const userId = localStorage.getItem("cashnovaUserId");
 
 if(!userId){
@@ -1222,7 +1178,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="wallet.js"></script>
 <script src="income.js"></script>
-
+<script src="maintenance.js"></script>
 </body>
 
 </html>
