@@ -1,10 +1,105 @@
+
 const Announcement = require("./Announcement");
 const Settings = require("./Settings");
 const express = require("express");
 const router = express.Router();
 const Withdrawal = require("./Withdrawal");
 const User = require("./User");
+const jwt = require("jsonwebtoken");
 
+
+// =====================================
+// ADMIN LOGIN
+// =====================================
+
+router.post("/login", async function(req, res){
+
+    try{
+
+        const password =
+            String(req.body.password || "").trim();
+
+
+        // ADMIN PASSWORD
+        const adminPassword =
+            process.env.ADMIN_PASSWORD;
+
+
+        if(!adminPassword){
+
+            return res.status(500).json({
+
+                message:
+                    "Admin password is not configured on the server."
+
+            });
+
+        }
+
+
+        // CHECK PASSWORD
+
+        if(password !== adminPassword){
+
+            return res.status(401).json({
+
+                message:
+                    "Wrong admin password"
+
+            });
+
+        }
+
+
+        // CREATE ADMIN TOKEN
+
+        const token =
+            jwt.sign(
+
+                {
+                    isAdmin:true,
+                    role:"admin"
+                },
+
+                process.env.JWT_SECRET,
+
+                {
+                    expiresIn:"24h"
+                }
+
+            );
+
+
+        // SEND TOKEN
+
+        res.json({
+
+            message:
+                "Admin login successful",
+
+            token:token
+
+        });
+
+
+    }catch(error){
+
+        console.log(
+            "Admin login error:",
+            error
+        );
+
+
+        res.status(500).json({
+
+            message:
+                "Unable to complete admin login"
+
+        });
+
+    }
+
+});
 
 // =====================================
 // GET ACTIVE USERS
