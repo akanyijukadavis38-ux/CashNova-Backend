@@ -1,3 +1,8 @@
+const adminToken = localStorage.getItem("cashnovaAdminToken");
+
+if (!adminToken) {
+    window.location.href = "admin-login.html";
+}
 document.addEventListener("DOMContentLoaded", async function(){
 
 
