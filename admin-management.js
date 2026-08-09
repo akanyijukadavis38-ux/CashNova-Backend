@@ -1,6 +1,41 @@
 document.addEventListener("DOMContentLoaded", function(){
 
+const adminToken =
+localStorage.getItem("cashnovaAdminToken");
 
+if(!adminToken){
+
+    window.location.href = "admin-login.html";
+
+    return;
+}
+
+async function adminFetch(url, options = {}){
+
+    options.headers = {
+        ...(options.headers || {}),
+        "Authorization": "Bearer " + adminToken,
+        "Content-Type": "application/json"
+    };
+
+    const response =
+        await fetch(url, options);
+
+    if(
+        response.status === 401 ||
+        response.status === 403
+    ){
+
+        localStorage.removeItem("cashnovaAdminToken");
+        localStorage.removeItem("cashnovaAdminSession");
+
+        window.location.href = "admin-login.html";
+
+        return null;
+    }
+
+    return response;
+}
 const API =
 "https://cashnova-backend-89lg.onrender.com";
 
@@ -855,11 +890,13 @@ try{
 
 
 const response =
-await fetch(
-
+await adminFetch(
 API + "/api/admin/users"
-
 );
+
+if(!response){
+    return;
+}
 
 
 
@@ -1067,13 +1104,9 @@ Loading active users...
 try{
 
 
-const response =
-await fetch(
-
-API + "/api/admin/active-users"
-
-);
-
+if(!response){
+    return;
+}
 
 
 const users =
@@ -1278,9 +1311,13 @@ try{
 
 
 const response =
-await fetch(
+await adminFetch(
 API + "/api/admin/" + type
 );
+
+if(!response){
+    return;
+}
 
 
 
@@ -1462,9 +1499,13 @@ Loading announcements...
 try{
 
 const response =
-await fetch(
+await adminFetch(
 API + "/api/admin/announcements"
 );
+
+if(!response){
+    return;
+}
 
 
 if(!response.ok){
@@ -1540,7 +1581,7 @@ try{
 
 
 const response =
-await fetch(
+await adminFetch(
 
 API + "/api/admin/announcements",
 
@@ -1795,13 +1836,13 @@ return;
 
 try{
 
-
 const response =
-await fetch(
+await adminFetch(
 
 API +
 "/api/admin/announcements/" +
 id,
+
 
 {
 
@@ -1886,8 +1927,7 @@ Loading settings...
 try{
 
 
-const response =
-await fetch(
+await adminFetch(
 API + "/api/admin/settings"
 );
 
@@ -2075,11 +2115,10 @@ Number(document.getElementById("dailyWithdrawalLimit").value)
 
 try{
 
-
-const response =
-await fetch(
+await adminFetch(
 
 API + "/api/admin/settings",
+
 
 {
 
@@ -2166,8 +2205,7 @@ Loading maintenance status...
 try{
 
 
-const response =
-await fetch(
+await adminFetch(
 API + "/api/admin/maintenance"
 );
 
@@ -2291,11 +2329,10 @@ async function updateMaintenance(status){
 
 try{
 
-
-const response =
-await fetch(
+await adminFetch(
 
 API + "/api/admin/maintenance",
+
 
 {
 
