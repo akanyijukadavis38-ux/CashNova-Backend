@@ -99,38 +99,46 @@ router.post("/login", async function(req, res){
     }
 
 });
-
 // =====================================
-// MAINTENANCE STATUS
+// PUBLIC MAINTENANCE STATUS
+// USED BY USER PAGES
 // =====================================
-router.get("/maintenance", async function(req,res){
 
-try{
+router.get("/maintenance", async function(req, res) {
 
+    try {
 
-const settings =
-await Settings.findOne();
+        const settings =
+            await Settings.findOne();
 
+        return res.status(200).json({
 
-res.json({
+            status:
+                settings &&
+                settings.maintenanceStatus
+                ? settings.maintenanceStatus
+                : "active"
 
-status:
-settings ?
-settings.maintenanceStatus
-:
-"active"
+        });
 
+    } catch (error) {
 
-});
+        console.log(
+            "Maintenance status error:",
+            error
+        );
 
+        return res.status(500).json({
 
-}catch(error){
+            status: "active",
 
-res.status(500).json({
-message:error.message
-});
+            message:
+                "Unable to check maintenance status"
 
-}
+        });
+
+    }
+
 });
 // =====================================
 // PROTECT ALL ADMIN ROUTES BELOW
