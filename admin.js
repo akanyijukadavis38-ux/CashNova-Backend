@@ -3,6 +3,33 @@ const adminToken = localStorage.getItem("cashnovaAdminToken");
 if (!adminToken) {
     window.location.href = "admin-login.html";
 }
+async function adminFetch(url, options = {}) {
+
+    const headers = options.headers || {};
+
+    headers["Authorization"] =
+        "Bearer " + adminToken;
+
+    headers["Content-Type"] =
+        "application/json";
+
+    options.headers = headers;
+
+    const response =
+        await fetch(url, options);
+
+    if (response.status === 401 || response.status === 403) {
+
+        localStorage.removeItem("cashnovaAdminToken");
+        localStorage.removeItem("cashnovaAdminSession");
+
+        window.location.href = "admin-login.html";
+
+        return null;
+    }
+
+    return response;
+}
 document.addEventListener("DOMContentLoaded", async function(){
 
 
@@ -11,33 +38,34 @@ document.addEventListener("DOMContentLoaded", async function(){
 // ===============================
 
 let users = [];
-
-let response = await fetch(
-"https://cashnova-backend-89lg.onrender.com/api/users"
+let response = await adminFetch(
+"https://cashnova-backend-89lg.onrender.com/api/admin/users"
 );
+
+if (!response) return;
 
 users = await response.json();
 
-
 let deposits = [];
 
-let depositResponse = await fetch(
+let depositResponse = await adminFetch(
 "https://cashnova-backend-89lg.onrender.com/api/deposits"
 );
+
+if (!depositResponse) return;
 
 deposits = await depositResponse.json();
 
 
-
 let withdrawals = [];
 
-let withdrawalResponse = await fetch(
+let withdrawalResponse = await adminFetch(
 "https://cashnova-backend-89lg.onrender.com/api/withdrawals"
 );
 
+if (!withdrawalResponse) return;
+
 withdrawals = await withdrawalResponse.json();
-
-
 
 
 
@@ -376,7 +404,6 @@ totalIncome.toLocaleString();
 
 
 
-
 // ===============================
 // LOGOUT
 // ===============================
@@ -386,15 +413,24 @@ document.getElementById("logoutBtn");
 
 if(logoutBtn){
 
-logoutBtn.onclick = function(){
+    logoutBtn.onclick = function(){
 
-localStorage.removeItem("cashnovaAdminSession");
+        localStorage.removeItem(
+            "cashnovaAdminToken"
+        );
 
-alert("Admin logged out successfully");
+        localStorage.removeItem(
+            "cashnovaAdminSession"
+        );
 
-window.location.href = "admin-login.html";
+        alert(
+            "Admin logged out successfully"
+        );
 
-};
+        window.location.href =
+            "admin-login.html";
+
+    };
 
 }
 
