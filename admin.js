@@ -480,28 +480,36 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         );
 
+// =================================
+// TOTAL INVESTMENTS
+// SUM ALL PURCHASED PRODUCTS
+// =================================
 
-        // =================================
-        // TOTAL INVESTMENTS
-        //
-        // We use totalInvestments if the
-        // user model already contains it.
-        // Otherwise we safely use 0.
-        // =================================
+let totalInvestments = 0;
 
-        let totalInvestments = 0;
+users.forEach(function (user) {
 
+    if (
+        Array.isArray(
+            user.purchasedProducts
+        )
+    ) {
 
-        users.forEach(
-            function (user) {
+        user.purchasedProducts.forEach(
+            function (product) {
 
                 totalInvestments +=
                     number(
-                        user.totalInvestments
+                        product.price
                     );
 
             }
         );
+
+    }
+
+});
+        
 
 
         // =================================
