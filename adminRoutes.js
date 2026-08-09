@@ -18,11 +18,8 @@ router.post("/login", async function(req, res){
         const password =
             String(req.body.password || "").trim();
 
-
-        // ADMIN PASSWORD
         const adminPassword =
             process.env.ADMIN_PASSWORD;
-
 
         if(!adminPassword){
 
@@ -35,9 +32,6 @@ router.post("/login", async function(req, res){
 
         }
 
-
-        // CHECK PASSWORD
-
         if(password !== adminPassword){
 
             return res.status(401).json({
@@ -48,9 +42,6 @@ router.post("/login", async function(req, res){
             });
 
         }
-
-
-        // CREATE ADMIN TOKEN
 
         const token =
             jwt.sign(
@@ -68,9 +59,6 @@ router.post("/login", async function(req, res){
 
             );
 
-
-        // SEND TOKEN
-
         res.json({
 
             message:
@@ -80,14 +68,12 @@ router.post("/login", async function(req, res){
 
         });
 
-
     }catch(error){
 
         console.log(
             "Admin login error:",
             error
         );
-
 
         res.status(500).json({
 
@@ -99,14 +85,16 @@ router.post("/login", async function(req, res){
     }
 
 });
+
+
 // =====================================
 // PUBLIC MAINTENANCE STATUS
 // USED BY USER PAGES
 // =====================================
 
-router.get("/maintenance", async function(req, res) {
+router.get("/maintenance", async function(req, res){
 
-    try {
+    try{
 
         const settings =
             await Settings.findOne();
@@ -121,7 +109,7 @@ router.get("/maintenance", async function(req, res) {
 
         });
 
-    } catch (error) {
+    }catch(error){
 
         console.log(
             "Maintenance status error:",
@@ -130,7 +118,7 @@ router.get("/maintenance", async function(req, res) {
 
         return res.status(500).json({
 
-            status: "active",
+            status:"active",
 
             message:
                 "Unable to check maintenance status"
@@ -140,11 +128,96 @@ router.get("/maintenance", async function(req, res) {
     }
 
 });
+
+
 // =====================================
 // PROTECT ALL ADMIN ROUTES BELOW
 // =====================================
 
 router.use(adminAuth);
+
+
+// =====================================
+// UPDATE MAINTENANCE STATUS
+// ADMIN ONLY
+// =====================================
+
+router.put("/maintenance", async function(req, res){
+
+    try{
+
+        let settings =
+            await Settings.findOne();
+
+        if(!settings){
+
+            settings =
+                new Settings();
+
+        }
+
+        const status =
+            String(req.body.status || "").trim();
+
+        if(
+            status !== "active" &&
+            status !== "maintenance"
+        ){
+
+            return res.status(400).json({
+
+                success:false,
+
+                message:
+                    "Invalid maintenance status"
+
+            });
+
+        }
+
+        settings.maintenanceStatus =
+            status;
+
+        await settings.save();
+
+        return res.status(200).json({
+
+            success:true,
+
+            message:
+                status === "maintenance"
+                ? "Maintenance enabled"
+                : "Maintenance disabled",
+
+            status:
+                settings.maintenanceStatus
+
+        });
+
+    }catch(error){
+
+        console.log(
+            "Maintenance update error:",
+            error
+        );
+
+        return res.status(500).json({
+
+            success:false,
+
+            message:
+                "Failed to update maintenance",
+
+            error:
+                error.message
+
+        });
+
+    }
+
+});
+
+
 // =====================================
 // VERIFY ADMIN AUTHENTICATION
 // =====================================
@@ -155,50 +228,49 @@ router.get("/verify", function(req, res){
 
         authenticated:true,
 
-        message:"Admin authentication valid"
+        message:
+            "Admin authentication valid"
 
     });
 
 });
+
+
 // =====================================
 // GET ACTIVE USERS
 // =====================================
 
 router.get("/active-users", async function(req,res){
 
-try{
+    try{
 
-const users = await User.find({
+        const users =
+            await User.find({
 
-$or:[
-{
-accountActivated:true
-},
-{
-firstDepositCompleted:true
-}
+                $or:[
+                    {
+                        accountActivated:true
+                    },
+                    {
+                        firstDepositCompleted:true
+                    }
+                ]
 
-]
+            });
 
-});
+        res.json(users);
 
+    }catch(error){
 
-res.json(users);
+        res.status(500).json({
 
+            message:error.message
 
-}catch(error){
+        });
 
-res.status(500).json({
-
-message:error.message
-
-});
-
-}
+    }
 
 });
-
-
 
 
 // =====================================
@@ -207,137 +279,111 @@ message:error.message
 
 router.get("/financial-records", async function(req,res){
 
-try{
+    try{
+
+        const users =
+            await User.find();
+
+        let records = [];
+
+        users.forEach(function(user){
+
+            // DEPOSITS
+
+            if(user.depositRecords){
+
+                user.depositRecords.forEach(function(record){
+
+                    records.push({
+
+                        username:user.username,
+
+                        type:"Deposit",
+
+                        amount:record.amount,
+
+                        status:record.status,
+
+                        date:record.date
+
+                    });
+
+                });
+
+            }
 
 
-const users = await User.find();
+            // WITHDRAWALS
+
+            if(user.withdrawalRecords){
+
+                user.withdrawalRecords.forEach(function(record){
+
+                    if(
+                        record.status === "Approved" ||
+                        record.status === "Rejected"
+                    ){
+
+                        records.push({
+
+                            username:user.username,
+
+                            type:"Withdrawal",
+
+                            amount:record.amount,
+
+                            status:record.status,
+
+                            date:record.date
+
+                        });
+
+                    }
+
+                });
+
+            }
 
 
-let records=[];
+            // INCOME
 
+            if(user.incomeRecords){
 
+                user.incomeRecords.forEach(function(record){
 
-users.forEach(function(user){
+                    records.push({
 
+                        username:user.username,
 
+                        type:record.type,
 
-// DEPOSITS
+                        amount:record.amount,
 
-if(user.depositRecords){
+                        status:record.status,
 
-user.depositRecords.forEach(function(record){
+                        date:record.date
 
-records.push({
+                    });
 
-username:user.username,
+                });
 
-type:"Deposit",
+            }
 
-amount:record.amount,
+        });
 
-status:record.status,
+        res.json(records);
 
-date:record.date
+    }catch(error){
+
+        res.status(500).json({
+
+            message:error.message
+
+        });
+
+    }
 
 });
-
-
-});
-
-}
-
-// WITHDRAWALS
-
-if(user.withdrawalRecords){
-
-user.withdrawalRecords.forEach(function(record){
-
-
-if(
-record.status === "Approved" ||
-record.status === "Rejected"
-){
-
-
-records.push({
-
-username:user.username,
-
-type:"Withdrawal",
-
-amount:record.amount,
-
-status:record.status,
-
-date:record.date
-
-});
-
-
-}
-
-
-});
-
-}
-
-
-
-// INCOME
-
-if(user.incomeRecords){
-
-user.incomeRecords.forEach(function(record){
-
-records.push({
-
-username:user.username,
-
-type:record.type,
-
-amount:record.amount,
-
-status:record.status,
-
-date:record.date
-
-});
-
-
-});
-
-}
-
-
-
-});
-
-
-
-
-res.json(records);
-
-
-
-}catch(error){
-
-
-res.status(500).json({
-
-message:error.message
-
-});
-
-
-}
-
-
-});
-
-
-
-
-
 
 
 // =====================================
@@ -346,73 +392,52 @@ message:error.message
 
 router.get("/income-records", async function(req,res){
 
-try{
+    try{
 
+        const users =
+            await User.find();
 
-const users = await User.find();
+        let records = [];
 
+        users.forEach(function(user){
 
-let records=[];
+            if(user.incomeRecords){
 
+                user.incomeRecords.forEach(function(record){
 
+                    records.push({
 
-users.forEach(function(user){
+                        username:user.username,
 
+                        type:record.type,
 
-if(user.incomeRecords){
+                        amount:record.amount,
 
+                        status:record.status,
 
-user.incomeRecords.forEach(function(record){
+                        date:record.date
 
+                    });
 
-records.push({
+                });
 
-username:user.username,
+            }
 
-type:record.type,
+        });
 
-amount:record.amount,
+        res.json(records);
 
-status:record.status,
+    }catch(error){
 
-date:record.date
+        res.status(500).json({
 
+            message:error.message
 
-});
+        });
 
-
-});
-
-
-}
-
-
-});
-
-
-
-res.json(records);
-
-
-
-}catch(error){
-
-
-res.status(500).json({
-
-message:error.message
+    }
 
 });
-
-
-}
-
-
-});
-
-
-
-
 
 
 // =====================================
@@ -421,79 +446,59 @@ message:error.message
 
 router.get("/referral-records", async function(req,res){
 
-try{
+    try{
 
+        const users =
+            await User.find();
 
-const users = await User.find();
+        let records = [];
 
+        users.forEach(function(user){
 
-let records=[];
+            if(user.transactionHistory){
 
+                user.transactionHistory.forEach(function(record){
 
+                    if(
+                        record.type &&
+                        record.type
+                            .toLowerCase()
+                            .includes("referral")
+                    ){
 
-users.forEach(function(user){
+                        records.push({
 
+                            username:user.username,
 
-if(user.transactionHistory){
+                            type:record.type,
 
+                            amount:record.amount,
 
-user.transactionHistory.forEach(function(record){
+                            status:record.status,
 
+                            date:record.date
 
+                        });
 
-if(
-record.type &&
-record.type.toLowerCase().includes("referral")
-){
+                    }
 
+                });
 
-records.push({
+            }
 
-username:user.username,
+        });
 
-type:record.type,
+        res.json(records);
 
-amount:record.amount,
+    }catch(error){
 
-status:record.status,
+        res.status(500).json({
 
-date:record.date
+            message:error.message
 
+        });
 
-});
-
-
-}
-
-
-
-});
-
-
-}
-
-
-
-});
-
-
-
-res.json(records);
-
-
-
-}catch(error){
-
-
-res.status(500).json({
-
-message:error.message
-
-});
-
-
-}
-
+    }
 
 });
 
@@ -504,308 +509,303 @@ message:error.message
 
 router.get("/users", async function(req,res){
 
-try{
+    try{
 
-const users = await User.find();
+        const users =
+            await User.find();
 
-res.json(users);
+        res.json(users);
 
+    }catch(error){
 
-}catch(error){
+        res.status(500).json({
 
-res.status(500).json({
-message:error.message
+            message:error.message
+
+        });
+
+    }
+
 });
 
-}
 
-});
 // =====================================
 // GET DEPOSIT RECORDS
 // =====================================
 
 router.get("/deposit-records", async function(req,res){
 
-try{
+    try{
 
-const users = await User.find();
+        const users =
+            await User.find();
 
-let records=[];
+        let records = [];
 
+        users.forEach(function(user){
 
-users.forEach(function(user){
+            if(user.depositRecords){
 
-if(user.depositRecords){
+                user.depositRecords.forEach(function(record){
 
-user.depositRecords.forEach(function(record){
+                    records.push({
 
-records.push({
+                        username:user.username,
 
-username:user.username,
+                        amount:record.amount,
 
-amount:record.amount,
+                        status:record.status,
 
-status:record.status,
+                        date:record.date
 
-date:record.date
+                    });
+
+                });
+
+            }
+
+        });
+
+        res.json(records);
+
+    }catch(error){
+
+        res.status(500).json({
+
+            message:error.message
+
+        });
+
+    }
 
 });
 
-});
 
-}
-
-});
-
-
-res.json(records);
-
-
-}catch(error){
-
-res.status(500).json({
-message:error.message
-});
-
-}
-
-});
 // =====================================
 // GET WITHDRAWAL RECORDS
 // =====================================
 
 router.get("/withdrawal-records", async function(req,res){
 
-try{
+    try{
 
-const records =
-await Withdrawal.find({
-status:{
-$in:["Approved","Rejected"]
-}
-}).sort({date:-1});
+        const records =
+            await Withdrawal.find({
 
+                status:{
+                    $in:[
+                        "Approved",
+                        "Rejected"
+                    ]
+                }
 
-res.json(records);
+            }).sort({
+                date:-1
+            });
 
+        res.json(records);
 
-}catch(error){
+    }catch(error){
 
-res.status(500).json({
+        res.status(500).json({
 
-message:error.message
+            message:error.message
+
+        });
+
+    }
 
 });
 
-}
 
-});
 // =====================================
 // ANNOUNCEMENTS
 // =====================================
-
-
 
 // GET ANNOUNCEMENTS
 
 router.get("/announcements", async function(req,res){
 
-try{
+    try{
 
-const announcements =
-await Announcement.find()
-.sort({date:-1});
+        const announcements =
+            await Announcement.find()
+            .sort({
+                date:-1
+            });
 
+        res.json(announcements);
 
-res.json(announcements);
+    }catch(error){
 
+        res.status(500).json({
 
-}catch(error){
+            message:error.message
 
-res.status(500).json({
-message:error.message
+        });
+
+    }
+
 });
-
-}
-
-});
-
 
 
 // CREATE ANNOUNCEMENT
 
 router.post("/announcements", async function(req,res){
 
-try{
+    try{
 
+        const announcement =
+            new Announcement({
 
-const announcement =
-new Announcement({
+                title:req.body.title,
 
-title:req.body.title,
+                message:req.body.message,
 
-message:req.body.message,
+                date:new Date()
 
-date:new Date()
+            });
+
+        await announcement.save();
+
+        res.json({
+
+            message:
+                "Announcement created successfully",
+
+            announcement:announcement
+
+        });
+
+    }catch(error){
+
+        res.status(500).json({
+
+            message:error.message
+
+        });
+
+    }
 
 });
-
-
-await announcement.save();
-
-
-res.json({
-
-message:"Announcement created successfully",
-
-announcement:announcement
-
-});
-
-
-}catch(error){
-
-res.status(500).json({
-message:error.message
-});
-
-}
-
-});
-
-
 
 
 // DELETE ANNOUNCEMENT
 
 router.delete("/announcements/:id", async function(req,res){
 
-try{
+    try{
 
+        await Announcement.findByIdAndDelete(
+            req.params.id
+        );
 
-await Announcement.findByIdAndDelete(
-req.params.id
-);
+        res.json({
 
+            message:
+                "Announcement deleted"
 
-res.json({
+        });
 
-message:"Announcement deleted"
+    }catch(error){
+
+        res.status(500).json({
+
+            message:error.message
+
+        });
+
+    }
 
 });
 
 
-}catch(error){
-
-res.status(500).json({
-message:error.message
-});
-
-}
-
-});
 // =====================================
 // ADMIN SETTINGS
 // =====================================
-
-
-
 
 // GET SETTINGS
 
 router.get("/settings", async function(req,res){
 
-try{
+    try{
 
+        let settings =
+            await Settings.findOne();
 
-let settings =
-await Settings.findOne();
+        res.json(
+            settings || {}
+        );
 
+    }catch(error){
 
-res.json(settings || {});
+        res.status(500).json({
 
+            message:error.message
 
-}catch(error){
+        });
 
-res.status(500).json({
-message:error.message
+    }
+
 });
-
-}
-
-});
-
-
 
 
 // UPDATE SETTINGS
 
 router.put("/settings", async function(req,res){
 
-try{
+    try{
 
+        let settings =
+            await Settings.findOne();
 
-let settings =
-await Settings.findOne();
+        if(!settings){
 
+            settings =
+                new Settings(req.body);
 
+        }else{
 
-if(!settings){
+            settings.platformName =
+                req.body.platformName;
 
-settings =
-new Settings(req.body);
+            settings.supportContact =
+                req.body.supportContact;
 
-}else{
+            settings.minimumDeposit =
+                req.body.minimumDeposit;
 
+            settings.minimumWithdrawal =
+                req.body.minimumWithdrawal;
 
-settings.platformName =
-req.body.platformName;
+            settings.withdrawalFee =
+                req.body.withdrawalFee;
 
+            settings.dailyWithdrawalLimit =
+                req.body.dailyWithdrawalLimit;
 
-settings.supportContact =
-req.body.supportContact;
+        }
 
+        await settings.save();
 
-settings.minimumDeposit =
-req.body.minimumDeposit;
+        res.json({
 
+            message:
+                "Settings updated",
 
-settings.minimumWithdrawal =
-req.body.minimumWithdrawal;
+            settings:settings
 
+        });
 
-settings.withdrawalFee =
-req.body.withdrawalFee;
+    }catch(error){
 
+        res.status(500).json({
 
-settings.dailyWithdrawalLimit =
-req.body.dailyWithdrawalLimit;
+            message:error.message
 
+        });
 
-}
-
-
-
-await settings.save();
-
-
-
-res.json({
-
-message:"Settings updated",
-
-settings:settings
-
-});
-
-
-}catch(error){
-
-res.status(500).json({
-message:error.message
-});
-
-}
+    }
 
 });
 
