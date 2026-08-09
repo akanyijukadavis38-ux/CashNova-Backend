@@ -99,6 +99,39 @@ router.post("/login", async function(req, res){
     }
 
 });
+
+// =====================================
+// MAINTENANCE STATUS
+// =====================================
+router.get("/maintenance", async function(req,res){
+
+try{
+
+
+const settings =
+await Settings.findOne();
+
+
+res.json({
+
+status:
+settings ?
+settings.maintenanceStatus
+:
+"active"
+
+
+});
+
+
+}catch(error){
+
+res.status(500).json({
+message:error.message
+});
+
+}
+});
 // =====================================
 // PROTECT ALL ADMIN ROUTES BELOW
 // =====================================
@@ -767,90 +800,6 @@ message:error.message
 }
 
 });
-// =====================================
-// MAINTENANCE STATUS
-// =====================================
 
-router.get("/maintenance", async function(req,res){
-
-try{
-
-
-const settings =
-await Settings.findOne();
-
-
-res.json({
-
-status:
-settings ?
-settings.maintenanceStatus
-:
-"active"
-
-
-});
-
-
-}catch(error){
-
-res.status(500).json({
-message:error.message
-});
-
-}
-
-});
-
-
-
-
-
-router.put("/maintenance", async function(req,res){
-
-try{
-
-
-let settings =
-await Settings.findOne();
-
-
-
-if(!settings){
-
-settings =
-new Settings();
-
-}
-
-
-
-settings.maintenanceStatus =
-req.body.status;
-
-
-
-await settings.save();
-
-
-
-res.json({
-
-message:"Maintenance updated",
-
-status:settings.maintenanceStatus
-
-});
-
-
-}catch(error){
-
-res.status(500).json({
-message:error.message
-});
-
-}
-
-});
 
 module.exports = router;
