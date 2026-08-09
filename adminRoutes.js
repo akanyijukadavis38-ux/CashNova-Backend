@@ -105,6 +105,21 @@ router.post("/login", async function(req, res){
 
 router.use(adminAuth);
 // =====================================
+// VERIFY ADMIN AUTHENTICATION
+// =====================================
+
+router.get("/verify", function(req, res){
+
+    res.json({
+
+        authenticated:true,
+
+        message:"Admin authentication valid"
+
+    });
+
+});
+// =====================================
 // GET ACTIVE USERS
 // =====================================
 
