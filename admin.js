@@ -1,9 +1,172 @@
-const adminToken = localStorage.getItem("cashnovaAdminToken");
+const adminToken =
+    localStorage.getItem("cashnovaAdminToken");
+
 
 if (!adminToken) {
-    window.location.href = "admin-login.html";
+
+    window.location.href =
+        "admin-login.html";
+
+    throw new Error(
+        "Admin authentication required"
+    );
+
 }
-async function adminFetch(url, options = {}) {
+
+
+// =====================================
+// VERIFY ADMIN SESSION
+// =====================================
+
+async function verifyAdminSession(){
+
+    try{
+
+        const response =
+            await fetch(
+                "https://cashnova-backend-89lg.onrender.com/api/admin/verify",
+                {
+                    method:"GET",
+
+                    headers:{
+                        "Authorization":
+                            "Bearer " + adminToken
+                    }
+                }
+            );
+
+
+        if(
+            response.status === 401 ||
+            response.status === 403
+        ){
+
+            localStorage.removeItem(
+                "cashnovaAdminToken"
+            );
+
+            localStorage.removeItem(
+                "cashnovaAdminSession"
+            );
+
+            window.location.href =
+                "admin-login.html";
+
+            return false;
+
+        }
+
+
+        if(!response.ok){
+
+            window.location.href =
+                "admin-login.html";
+
+            return false;
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if(
+            data.authenticated !== true
+        ){
+
+            localStorage.removeItem(
+                "cashnovaAdminToken"
+            );
+
+            localStorage.removeItem(
+                "cashnovaAdminSession"
+            );
+
+            window.location.href =
+                "admin-login.html";
+
+            return false;
+
+        }
+
+
+        return true;
+
+
+    }catch(error){
+
+        console.log(
+            "Admin verification error:",
+            error
+        );
+
+        window.location.href =
+            "admin-login.html";
+
+        return false;
+
+    }
+
+}
+
+
+// =====================================
+// ADMIN API REQUEST
+// =====================================
+
+async function adminFetch(
+    url,
+    options = {}
+){
+
+    const headers =
+        options.headers || {};
+
+
+    headers["Authorization"] =
+        "Bearer " + adminToken;
+
+
+    headers["Content-Type"] =
+        "application/json";
+
+
+    options.headers =
+        headers;
+
+
+    const response =
+        await fetch(
+            url,
+            options
+        );
+
+
+    if(
+        response.status === 401 ||
+        response.status === 403
+    ){
+
+        localStorage.removeItem(
+            "cashnovaAdminToken"
+        );
+
+        localStorage.removeItem(
+            "cashnovaAdminSession"
+        );
+
+        window.location.href =
+            "admin-login.html";
+
+        return null;
+
+    }
+
+
+    return response;
+
+}
 
     const headers = options.headers || {};
 
@@ -31,6 +194,15 @@ async function adminFetch(url, options = {}) {
     return response;
 }
 document.addEventListener("DOMContentLoaded", async function(){
+
+    const authenticated =
+        await verifyAdminSession();
+
+    if(!authenticated){
+
+        return;
+
+    }
 
 
 // ===============================
