@@ -6,7 +6,7 @@ const depositRoutes = require("./depositRoutes");
 const withdrawalRoutes = require("./withdrawalRoutes");
 const userRoutes = require("./userRoutes");
 const adminRoutes = require("./adminRoutes");
-const adminAuth = require("./adminAuth");
+
 
 const app = express();
 // Allow frontend connection
