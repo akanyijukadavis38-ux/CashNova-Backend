@@ -1,2389 +1,2159 @@
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function () {
 
-const adminToken =
-localStorage.getItem("cashnovaAdminToken");
+    // =====================================
+    // CASHNOVA ADMIN MANAGEMENT
+    // =====================================
 
-if(!adminToken){
+    const API =
+        "https://cashnova-backend-89lg.onrender.com";
 
-    window.location.href = "admin-login.html";
 
-    return;
-}
+    // =====================================
+    // ADMIN AUTHENTICATION
+    // =====================================
 
-async function adminFetch(url, options = {}){
+    const adminToken =
+        localStorage.getItem("cashnovaAdminToken");
 
-    options.headers = {
-        ...(options.headers || {}),
-        "Authorization": "Bearer " + adminToken,
-        "Content-Type": "application/json"
-    };
 
-    const response =
-        await fetch(url, options);
+    if (!adminToken) {
 
-    if(
-        response.status === 401 ||
-        response.status === 403
-    ){
+        window.location.href =
+            "admin-login.html";
 
-        localStorage.removeItem("cashnovaAdminToken");
-        localStorage.removeItem("cashnovaAdminSession");
+        return;
 
-        window.location.href = "admin-login.html";
-
-        return null;
     }
 
-    return response;
-}
-const API =
-"https://cashnova-backend-89lg.onrender.com";
 
-function formatDate(date){
+    // =====================================
+    // ADMIN FETCH
+    // =====================================
 
-if(!date){
-return "";
-}
+    async function adminFetch(url, options = {}) {
 
-return new Date(date).toLocaleString("en-UG",{
+        options.headers = {
 
-timeZone:"Africa/Kampala",
+            ...(options.headers || {}),
 
-year:"numeric",
+            "Authorization":
+                "Bearer " + adminToken,
 
-month:"short",
+            "Content-Type":
+                "application/json"
 
-day:"numeric",
+        };
 
-hour:"2-digit",
 
-minute:"2-digit",
+        const response =
+            await fetch(url, options);
 
-second:"2-digit"
 
-});
+        if (
+            response.status === 401 ||
+            response.status === 403
+        ) {
 
-}
+            localStorage.removeItem(
+                "cashnovaAdminToken"
+            );
 
-const title =
-document.getElementById("managementTitle");
+            localStorage.removeItem(
+                "cashnovaAdminSession"
+            );
 
+            window.location.href =
+                "admin-login.html";
 
-const container =
-document.getElementById("managementContainer");
+            return null;
 
+        }
 
 
-const params =
-new URLSearchParams(window.location.search);
+        return response;
 
+    }
 
-const section =
-params.get("section");
 
+    // =====================================
+    // FORMAT DATE
+    // =====================================
 
+    function formatDate(date) {
 
+        if (!date) {
+            return "";
+        }
 
-// ===============================
-// PART 1: DEPOSIT MANAGEMENT
-// ===============================
+        return new Date(date).toLocaleString(
+            "en-UG",
+            {
+                timeZone: "Africa/Kampala",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        );
 
+    }
 
-if(section === "deposit" || !section){
 
+    // =====================================
+    // PAGE ELEMENTS
+    // =====================================
 
-title.innerHTML =
-"Pending Deposits";
+    const title =
+        document.getElementById(
+            "managementTitle"
+        );
 
 
-loadDeposits();
+    const container =
+        document.getElementById(
+            "managementContainer"
+        );
 
 
-}
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
-// ===============================
-// OPEN WITHDRAWAL MANAGEMENT
-// ===============================
 
-if(section === "withdrawal"){
+    const section =
+        params.get("section");
 
 
-title.innerHTML =
-"Pending Withdrawals";
+    // =====================================
+    // PART 1
+    // PENDING DEPOSITS
+    // =====================================
 
+    if (
+        section === "deposit" ||
+        !section
+    ) {
 
-loadWithdrawals();
+        title.innerHTML =
+            "Pending Deposits";
 
+        loadDeposits();
 
-}
+    }
 
 
+    async function loadDeposits() {
 
+        container.innerHTML = `
+            <div class="empty-state">
+                Loading deposits...
+            </div>
+        `;
 
-async function loadDeposits(){
 
+        try {
 
-container.innerHTML = `
+            const response =
+                await adminFetch(
+                    API + "/api/deposits"
+                );
 
-<div class="empty-state">
 
-Loading deposits...
+            if (!response) {
+                return;
+            }
 
-</div>
 
-`;
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to load deposits"
+                );
+            }
 
 
+            const deposits =
+                await response.json();
 
-try{
 
+            showPendingDeposits(
+                deposits
+            );
 
-const response =
-await fetch(
-API + "/api/deposits"
-);
 
+        } catch (error) {
 
+            console.log(error);
 
-const deposits =
-await response.json();
+            container.innerHTML = `
+                <div class="empty-state">
+                    Failed to load deposits
+                </div>
+            `;
 
+        }
 
+    }
 
-showPendingDeposits(deposits);
 
+    function showPendingDeposits(
+        deposits
+    ) {
 
+        container.innerHTML = "";
 
-}
 
-catch(error){
+        const pendingDeposits =
+            Array.isArray(deposits)
+                ? deposits.filter(
+                    function (deposit) {
+                        return (
+                            deposit.status ===
+                            "Pending"
+                        );
+                    }
+                )
+                : [];
 
 
-console.log(error);
+        if (
+            pendingDeposits.length === 0
+        ) {
 
+            container.innerHTML = `
+                <div class="empty-state">
+                    No pending deposits
+                </div>
+            `;
 
+            return;
 
-container.innerHTML = `
+        }
 
-<div class="empty-state">
 
-Failed to load deposits
+        pendingDeposits.forEach(
+            function (deposit) {
 
-</div>
+                const card =
+                    document.createElement(
+                        "div"
+                    );
 
-`;
 
-}
+                card.className =
+                    "deposit-card";
 
 
-}
+                card.innerHTML = `
 
+                    <h3>
+                        Deposit Request
+                    </h3>
 
+                    <p>
+                        Username:
+                        <b>
+                            ${deposit.username || "Unknown"}
+                        </b>
+                    </p>
 
+                    <p>
+                        Amount:
+                        <b>
+                            UGX ${Number(
+                                deposit.amount || 0
+                            ).toLocaleString()}
+                        </b>
+                    </p>
 
+                    <p>
+                        Network:
+                        ${deposit.method || ""}
+                    </p>
 
+                    <p>
+                        Transaction ID:
+                        ${deposit.mobileMoneyTransactionId || ""}
+                    </p>
 
+                    <p>
+                        Date:
+                        ${formatDate(
+                            deposit.date
+                        )}
+                    </p>
 
+                    <span class="pending">
+                        Pending
+                    </span>
 
-function showPendingDeposits(deposits){
+                    <div class="admin-actions">
 
+                        <button class="approve-btn">
+                            Approve
+                        </button>
 
-container.innerHTML = "";
+                        <button class="reject-btn">
+                            Reject
+                        </button>
 
+                    </div>
+                `;
 
 
-const pendingDeposits =
-deposits.filter(function(deposit){
+                card.querySelector(
+                    ".approve-btn"
+                ).onclick =
+                    function () {
 
+                        approveDeposit(
+                            deposit._id
+                        );
 
-return deposit.status === "Pending";
+                    };
 
 
-});
+                card.querySelector(
+                    ".reject-btn"
+                ).onclick =
+                    function () {
 
+                        rejectDeposit(
+                            deposit._id
+                        );
 
+                    };
 
 
-if(pendingDeposits.length === 0){
+                container.appendChild(card);
 
+            }
+        );
 
-container.innerHTML = `
+    }
 
-<div class="empty-state">
 
-No pending deposits
+    async function approveDeposit(id) {
 
-</div>
+        try {
 
-`;
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/deposits/approve/" +
+                    id,
+                    {
+                        method: "POST"
+                    }
+                );
 
-return;
 
-}
+            if (!response) {
+                return;
+            }
 
 
+            const result =
+                await response.json();
 
 
+            if (!response.ok) {
 
+                throw new Error(
+                    result.message ||
+                    "Deposit approval failed"
+                );
 
+            }
 
-pendingDeposits.forEach(function(deposit){
 
+            alert(
+                result.message ||
+                "Deposit approved"
+            );
 
 
-const card =
-document.createElement("div");
+            loadDeposits();
 
 
+        } catch (error) {
 
-card.className =
-"deposit-card";
+            console.log(error);
 
+            alert(
+                error.message ||
+                "Deposit approval failed"
+            );
 
+        }
 
-card.innerHTML = `
+    }
 
-<h3>
-Deposit Request
-</h3>
 
+    async function rejectDeposit(id) {
 
-<p>
-Username:
-<b>
-${deposit.username || "Unknown"}
-</b>
-</p>
+        try {
 
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/deposits/reject/" +
+                    id,
+                    {
+                        method: "POST"
+                    }
+                );
 
 
-<p>
-Amount:
-<b>
-UGX ${Number(deposit.amount || 0).toLocaleString()}
-</b>
-</p>
+            if (!response) {
+                return;
+            }
 
 
+            const result =
+                await response.json();
 
-<p>
-Network:
-${deposit.method || ""}
-</p>
 
+            if (!response.ok) {
 
+                throw new Error(
+                    result.message ||
+                    "Deposit rejection failed"
+                );
 
-<p>
-Transaction ID:
-${deposit.mobileMoneyTransactionId || ""}
-</p>
+            }
 
 
+            alert(
+                result.message ||
+                "Deposit rejected"
+            );
 
-<p>
-Date:
-${formatDate(deposit.date)}
-</p>
 
+            loadDeposits();
 
 
-<span class="pending">
-Pending
-</span>
+        } catch (error) {
 
-<div class="admin-actions">
+            console.log(error);
 
-<button class="approve-btn">
-Approve
-</button>
+            alert(
+                error.message ||
+                "Deposit rejection failed"
+            );
 
+        }
 
-<button class="reject-btn">
-Reject
-</button>
+    }
 
-</div>
 
+    // =====================================
+    // PART 2
+    // PENDING WITHDRAWALS
+    // =====================================
 
+    if (
+        section === "withdrawal"
+    ) {
 
+        title.innerHTML =
+            "Pending Withdrawals";
 
-`;
+        loadWithdrawals();
 
+    }
 
 
+    async function loadWithdrawals() {
 
+        container.innerHTML = `
+            <div class="empty-state">
+                Loading withdrawals...
+            </div>
+        `;
 
-const approveButton =
-card.querySelector(".approve-btn");
 
+        try {
 
+            const response =
+                await adminFetch(
+                    API + "/api/withdrawals"
+                );
 
-approveButton.onclick = function(){
 
+            if (!response) {
+                return;
+            }
 
-approveDeposit(deposit._id);
 
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to load withdrawals"
+                );
+            }
 
-};
 
-const rejectButton =
-card.querySelector(".reject-btn");
+            const withdrawals =
+                await response.json();
 
 
+            displayWithdrawals(
+                withdrawals
+            );
 
-rejectButton.onclick = function(){
 
+        } catch (error) {
 
-rejectDeposit(deposit._id);
+            console.log(error);
 
+            container.innerHTML = `
+                <div class="empty-state">
+                    Failed to load withdrawals
+                </div>
+            `;
 
-};
+        }
 
+    }
 
-container.appendChild(card);
 
+    function displayWithdrawals(
+        withdrawals
+    ) {
 
+        container.innerHTML = "";
 
-});
 
+        const pendingWithdrawals =
+            Array.isArray(withdrawals)
+                ? withdrawals.filter(
+                    function (item) {
+                        return (
+                            item.status ===
+                            "Pending"
+                        );
+                    }
+                )
+                : [];
 
 
-}
+        if (
+            pendingWithdrawals.length === 0
+        ) {
 
+            container.innerHTML = `
+                <div class="empty-state">
+                    No pending withdrawals
+                </div>
+            `;
 
+            return;
 
+        }
 
 
+        pendingWithdrawals.forEach(
+            function (withdrawal) {
 
+                const card =
+                    document.createElement(
+                        "div"
+                    );
 
 
+                card.className =
+                    "withdraw-card";
 
-async function approveDeposit(id){
 
+                card.innerHTML = `
 
-try{
+                    <h3>
+                        Withdrawal Request
+                    </h3>
 
+                    <p>
+                        Username:
+                        <b>
+                            ${withdrawal.username || ""}
+                        </b>
+                    </p>
 
-const response =
-await fetch(
+                    <p>
+                        Phone:
+                        ${withdrawal.phone || ""}
+                    </p>
 
-API +
-"/api/deposits/approve/" +
-id,
+                    <p>
+                        Amount:
+                        <b>
+                            UGX ${Number(
+                                withdrawal.amount || 0
+                            ).toLocaleString()}
+                        </b>
+                    </p>
 
-{
+                    <p>
+                        Fee:
+                        UGX ${Number(
+                            withdrawal.fee || 0
+                        ).toLocaleString()}
+                    </p>
 
-method:"POST",
+                    <p>
+                        Receive:
+                        <b>
+                            UGX ${Number(
+                                withdrawal.receiveAmount || 0
+                            ).toLocaleString()}
+                        </b>
+                    </p>
 
-headers:{
+                    <p>
+                        Date:
+                        ${formatDate(
+                            withdrawal.date
+                        )}
+                    </p>
 
-"Content-Type":"application/json"
+                    <span class="pending">
+                        Pending
+                    </span>
 
-}
+                    <div class="admin-actions">
 
-}
+                        <button class="approve-btn">
+                            Approve
+                        </button>
 
-);
+                        <button class="reject-btn">
+                            Reject
+                        </button>
 
+                    </div>
+                `;
 
 
-const result =
-await response.json();
+                card.querySelector(
+                    ".approve-btn"
+                ).onclick =
+                    function () {
 
+                        approveWithdrawal(
+                            withdrawal._id
+                        );
 
+                    };
 
-alert(result.message);
 
+                card.querySelector(
+                    ".reject-btn"
+                ).onclick =
+                    function () {
 
+                        rejectWithdrawal(
+                            withdrawal._id
+                        );
 
-loadDeposits();
+                    };
 
 
+                container.appendChild(card);
 
-}
+            }
+        );
 
+    }
 
-catch(error){
 
+    async function approveWithdrawal(id) {
 
-console.log(error);
+        try {
 
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/withdrawals/approve/" +
+                    id,
+                    {
+                        method: "POST"
+                    }
+                );
 
-alert("Deposit approval failed");
 
+            if (!response) {
+                return;
+            }
 
-}
 
+            const result =
+                await response.json();
 
-}
 
-async function rejectDeposit(id){
+            if (!response.ok) {
 
+                throw new Error(
+                    result.message ||
+                    "Failed to approve withdrawal"
+                );
 
-try{
+            }
 
 
-const response =
-await fetch(
+            alert(
+                result.message ||
+                "Withdrawal approved"
+            );
 
-API +
-"/api/deposits/reject/" +
-id,
 
-{
+            loadWithdrawals();
 
-method:"POST",
 
-headers:{
+        } catch (error) {
 
-"Content-Type":"application/json"
+            console.log(error);
 
-}
+            alert(
+                error.message ||
+                "Failed to approve withdrawal"
+            );
 
-}
+        }
 
-);
+    }
 
 
+    async function rejectWithdrawal(id) {
 
-const result =
-await response.json();
+        try {
 
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/withdrawals/reject/" +
+                    id,
+                    {
+                        method: "POST"
+                    }
+                );
 
 
-alert(result.message);
+            if (!response) {
+                return;
+            }
 
 
+            const result =
+                await response.json();
 
-loadDeposits();
 
+            if (!response.ok) {
 
+                throw new Error(
+                    result.message ||
+                    "Failed to reject withdrawal"
+                );
 
-}
+            }
 
 
-catch(error){
+            alert(
+                result.message ||
+                "Withdrawal rejected"
+            );
 
 
-console.log(error);
+            loadWithdrawals();
 
 
-alert("Deposit rejection failed");
+        } catch (error) {
 
+            console.log(error);
 
-}
+            alert(
+                error.message ||
+                "Failed to reject withdrawal"
+            );
 
+        }
 
-}
-  
+    }
 
 
-  // =====================================
-// PART 2 - WITHDRAWALS
-// =====================================
+    // =====================================
+    // PART 3
+    // ALL USERS
+    // =====================================
 
+    if (section === "users") {
 
-let withdrawals = [];
+        title.innerHTML =
+            "All Users";
 
+        loadAllUsers();
 
-// LOAD WITHDRAWALS
+    }
 
-async function loadWithdrawals(){
 
+    async function loadAllUsers() {
 
-container.innerHTML = `
+        container.innerHTML = `
+            <div class="empty-state">
+                Loading users...
+            </div>
+        `;
 
-<div class="empty-state">
 
-Loading withdrawals...
+        try {
 
-</div>
+            const response =
+                await adminFetch(
+                    API + "/api/admin/users"
+                );
 
-`;
 
+            if (!response) {
+                return;
+            }
 
 
-try{
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to load users"
+                );
+            }
 
 
-let response = await fetch(
-API + "/api/withdrawals"
-);
+            const users =
+                await response.json();
 
 
+            displayUsers(users);
 
-withdrawals = await response.json();
 
+        } catch (error) {
 
+            console.log(error);
 
-displayWithdrawals();
+            container.innerHTML = `
+                <div class="empty-state">
+                    Failed to load users
+                </div>
+            `;
 
+        }
 
+    }
 
-}catch(error){
 
+    function displayUsers(users) {
 
-console.log(error);
+        container.innerHTML = "";
 
 
-container.innerHTML = `
+        if (
+            !Array.isArray(users) ||
+            users.length === 0
+        ) {
 
-<div class="empty-state">
+            container.innerHTML = `
+                <div class="empty-state">
+                    No users found
+                </div>
+            `;
 
-Failed to load withdrawals
+            return;
 
-</div>
+        }
 
-`;
 
-}
+        users.forEach(
+            function (user) {
 
+                const card =
+                    document.createElement(
+                        "div"
+                    );
 
-}
 
+                card.className =
+                    "user-card";
 
 
+                card.innerHTML = `
 
+                    <h3>
+                        ${user.fullName || "Unknown User"}
+                    </h3>
 
-// DISPLAY PENDING WITHDRAWALS
+                    <p>
+                        Username:
+                        <b>
+                            ${user.username || ""}
+                        </b>
+                    </p>
 
-function displayWithdrawals(){
+                    <p>
+                        Phone:
+                        ${user.phone || ""}
+                    </p>
 
+                    <p>
+                        Account Number:
+                        ${user.accountNumber || ""}
+                    </p>
 
-container.innerHTML = "";
+                    <p>
+                        Total Deposits:
+                        <b>
+                            UGX ${Number(
+                                user.totalDeposits || 0
+                            ).toLocaleString()}
+                        </b>
+                    </p>
 
+                    <p>
+                        Status:
+                        <span class="user-status">
+                            ${
+                                user.accountActivated
+                                    ? "Active"
+                                    : "Inactive"
+                            }
+                        </span>
+                    </p>
 
+                    <p>
+                        Registered:
+                        ${formatDate(
+                            user.createdAt
+                        )}
+                    </p>
+                `;
 
-let pendingWithdrawals =
-withdrawals.filter(function(item){
 
+                container.appendChild(card);
 
-return item.status === "Pending";
+            }
+        );
 
+    }
 
-});
 
+    // =====================================
+    // PART 4
+    // ACTIVE USERS
+    // =====================================
 
+    if (
+        section === "active-users"
+    ) {
 
+        title.innerHTML =
+            "Active Users";
 
+        loadActiveUsers();
 
-if(pendingWithdrawals.length === 0){
+    }
 
 
-container.innerHTML = `
+    async function loadActiveUsers() {
 
-<div class="empty-state">
+        container.innerHTML = `
+            <div class="empty-state">
+                Loading active users...
+            </div>
+        `;
 
-No pending withdrawals
 
-</div>
+        try {
 
-`;
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/admin/active-users"
+                );
 
 
-return;
+            if (!response) {
+                return;
+            }
 
-}
 
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to load active users"
+                );
+            }
 
 
+            const users =
+                await response.json();
 
 
+            displayActiveUsers(
+                users
+            );
 
 
-pendingWithdrawals.forEach(function(withdrawal){
+        } catch (error) {
 
+            console.log(error);
 
+            container.innerHTML = `
+                <div class="empty-state">
+                    Failed to load active users
+                </div>
+            `;
 
-let card =
-document.createElement("div");
+        }
 
+    }
 
 
-card.className =
-"withdraw-card";
+    function displayActiveUsers(
+        users
+    ) {
 
+        container.innerHTML = "";
 
 
-card.innerHTML = `
+        if (
+            !Array.isArray(users) ||
+            users.length === 0
+        ) {
 
+            container.innerHTML = `
+                <div class="empty-state">
+                    No active users found
+                </div>
+            `;
 
-<h3>
-Withdrawal Request
-</h3>
+            return;
 
+        }
 
-<p>
-Username:
-<b>${withdrawal.username || ""}</b>
-</p>
 
+        users.forEach(
+            function (user) {
 
+                const card =
+                    document.createElement(
+                        "div"
+                    );
 
-<p>
-Phone:
-${withdrawal.phone || ""}
-</p>
 
+                card.className =
+                    "user-card";
 
 
-<p>
-Amount:
+                card.innerHTML = `
 
-<b>
-UGX ${Number(withdrawal.amount || 0).toLocaleString()}
-</b>
+                    <h3>
+                        ${user.fullName || "Unknown User"}
+                    </h3>
 
-</p>
+                    <p>
+                        Username:
+                        <b>
+                            ${user.username || ""}
+                        </b>
+                    </p>
 
+                    <p>
+                        Phone:
+                        ${user.phone || ""}
+                    </p>
 
+                    <p>
+                        Account Number:
+                        ${user.accountNumber || ""}
+                    </p>
 
-<p>
-Fee:
+                    <p>
+                        Total Deposits:
+                        <b>
+                            UGX ${Number(
+                                user.totalDeposits || 0
+                            ).toLocaleString()}
+                        </b>
+                    </p>
 
-UGX ${Number(withdrawal.fee || 0).toLocaleString()}
+                    <p>
+                        Wallet Balance:
+                        <b>
+                            UGX ${Number(
+                                user.walletBalance || 0
+                            ).toLocaleString()}
+                        </b>
+                    </p>
 
-</p>
+                    <p>
+                        Registered:
+                        ${formatDate(
+                            user.createdAt
+                        )}
+                    </p>
 
+                    <span class="user-status">
+                        Active
+                    </span>
+                `;
 
 
-<p>
-Receive:
+                container.appendChild(card);
 
-<b>
-UGX ${Number(withdrawal.receiveAmount || 0).toLocaleString()}
-</b>
+            }
+        );
 
-</p>
+    }
 
 
+    // =====================================
+    // PART 5
+    // FINANCIAL RECORDS
+    // =====================================
 
-<p>
-Date:
-${formatDate(withdrawal.date)}
+    if (
+        section === "deposit-records" ||
+        section === "withdrawal-records" ||
+        section === "income-records" ||
+        section === "referral-records"
+    ) {
 
-</p>
+        title.innerHTML =
+            "Financial Records";
 
+        loadFinancialRecords(
+            section
+        );
 
+    }
 
-<span class="pending">
-Pending
-</span>
 
+    async function loadFinancialRecords(
+        type
+    ) {
 
+        container.innerHTML = `
+            <div class="empty-state">
+                Loading records...
+            </div>
+        `;
 
-<div class="admin-actions">
 
+        try {
 
-<button class="approve-btn">
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/admin/" +
+                    type
+                );
 
-Approve
 
-</button>
+            if (!response) {
+                return;
+            }
 
 
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to load records"
+                );
+            }
 
-<button class="reject-btn">
 
-Reject
+            const records =
+                await response.json();
 
-</button>
 
+            displayFinancialRecords(
+                records
+            );
 
-</div>
 
+        } catch (error) {
 
-`;
+            console.log(error);
 
+            container.innerHTML = `
+                <div class="empty-state">
+                    Failed to load records
+                </div>
+            `;
 
+        }
 
+    }
 
 
-card.querySelector(".approve-btn").onclick =
-function(){
+    function displayFinancialRecords(
+        records
+    ) {
 
-approveWithdrawal(withdrawal._id);
+        container.innerHTML = "";
 
-};
 
+        if (
+            !Array.isArray(records) ||
+            records.length === 0
+        ) {
 
+            container.innerHTML = `
+                <div class="empty-state">
+                    No records found
+                </div>
+            `;
 
+            return;
 
+        }
 
-card.querySelector(".reject-btn").onclick =
-function(){
 
-rejectWithdrawal(withdrawal._id);
+        records.forEach(
+            function (record) {
 
-};
+                const card =
+                    document.createElement(
+                        "div"
+                    );
 
 
+                card.className =
+                    "financial-card";
 
 
+                card.innerHTML = `
 
-container.appendChild(card);
+                    <h3>
+                        ${record.type || "Record"}
+                    </h3>
 
+                    <p>
+                        Username:
+                        <b>
+                            ${record.username || ""}
+                        </b>
+                    </p>
 
+                    <p>
+                        Amount:
+                        <b>
+                            UGX ${Number(
+                                record.amount || 0
+                            ).toLocaleString()}
+                        </b>
+                    </p>
 
-});
+                    <p>
+                        Status:
+                        ${record.status || ""}
+                    </p>
 
+                    <p>
+                        Date:
+                        ${formatDate(
+                            record.date
+                        )}
+                    </p>
+                `;
 
 
-}
+                container.appendChild(card);
 
+            }
+        );
 
+    }
 
 
+    // =====================================
+    // PART 6
+    // ANNOUNCEMENTS
+    // =====================================
 
+    if (
+        section === "announcements"
+    ) {
 
+        title.innerHTML =
+            "Announcements";
 
-// APPROVE WITHDRAWAL
+        loadAnnouncements();
 
-async function approveWithdrawal(id){
+    }
 
 
-try{
+    async function loadAnnouncements() {
 
+        const announcementSection =
+            document.getElementById(
+                "announcementSection"
+            );
 
-let response =
-await fetch(
 
-API + "/api/withdrawals/approve/" + id,
+        const announcementContainer =
+            document.getElementById(
+                "announcementContainer"
+            );
 
-{
 
-method:"POST",
+        const addAnnouncementBtn =
+            document.getElementById(
+                "addAnnouncementBtn"
+            );
 
-headers:{
 
-"Content-Type":"application/json"
+        const announcementText =
+            document.getElementById(
+                "announcementText"
+            );
 
-}
 
-}
+        if (announcementSection) {
 
-);
+            announcementSection.style.display =
+                "block";
 
+        }
 
 
-let result =
-await response.json();
+        if (announcementContainer) {
 
+            announcementContainer.innerHTML = `
+                <div class="empty-state">
+                    Loading announcements...
+                </div>
+            `;
 
+        }
 
-alert(result.message);
 
+        try {
 
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/admin/announcements"
+                );
 
-loadWithdrawals();
 
+            if (!response) {
+                return;
+            }
 
 
-}catch(error){
+            if (!response.ok) {
 
+                throw new Error(
+                    "Failed to load announcements"
+                );
 
-console.log(error);
+            }
 
 
-alert("Failed to approve withdrawal");
+            const announcements =
+                await response.json();
 
 
-}
+            displayAnnouncements(
+                announcements
+            );
 
 
-}
+        } catch (error) {
 
+            console.log(error);
 
 
+            if (
+                announcementContainer
+            ) {
 
+                announcementContainer.innerHTML = `
+                    <div class="empty-state">
+                        Failed to load announcements
+                    </div>
+                `;
 
+            }
 
+        }
 
-// REJECT WITHDRAWAL
 
-async function rejectWithdrawal(id){
+        if (addAnnouncementBtn) {
 
+            addAnnouncementBtn.onclick =
+                async function () {
 
-try{
+                    const message =
+                        announcementText.value.trim();
 
 
-let response =
-await fetch(
+                    if (!message) {
 
-API + "/api/withdrawals/reject/" + id,
+                        alert(
+                            "Please write an announcement."
+                        );
 
-{
+                        return;
 
-method:"POST",
+                    }
 
-headers:{
 
-"Content-Type":"application/json"
+                    addAnnouncementBtn.disabled =
+                        true;
 
-}
 
-}
+                    addAnnouncementBtn.innerHTML =
+                        "Posting...";
 
-);
 
+                    try {
 
+                        const response =
+                            await adminFetch(
+                                API +
+                                "/api/admin/announcements",
+                                {
+                                    method: "POST",
+                                    body:
+                                        JSON.stringify({
+                                            title:
+                                                "CashNova Announcement",
+                                            message:
+                                                message
+                                        })
+                                }
+                            );
 
-let result =
-await response.json();
 
+                        if (!response) {
+                            return;
+                        }
 
 
-alert(result.message);
+                        const result =
+                            await response.json();
 
 
+                        if (!response.ok) {
 
-loadWithdrawals();
+                            throw new Error(
+                                result.message ||
+                                "Failed to post announcement"
+                            );
 
+                        }
 
 
-}catch(error){
+                        alert(
+                            result.message ||
+                            "Announcement posted successfully"
+                        );
 
 
-console.log(error);
+                        announcementText.value =
+                            "";
 
 
-alert("Failed to reject withdrawal");
+                        await loadAnnouncements();
 
 
-}
+                    } catch (error) {
 
+                        console.log(error);
 
-}
- // OPEN ALL USERS
+                        alert(
+                            error.message ||
+                            "Failed to post announcement"
+                        );
 
-if(section === "users"){
+                    } finally {
 
+                        addAnnouncementBtn.disabled =
+                            false;
 
-title.innerHTML =
-"All Users";
+                        addAnnouncementBtn.innerHTML =
+                            "Post Announcement";
 
+                    }
 
-loadAllUsers();
+                };
 
+        }
 
-}
+    }
 
 
+    function displayAnnouncements(
+        announcements
+    ) {
 
+        const announcementContainer =
+            document.getElementById(
+                "announcementContainer"
+            );
 
-async function loadAllUsers(){
 
+        if (!announcementContainer) {
+            return;
+        }
 
-container.innerHTML = `
 
-<div class="empty-state">
+        announcementContainer.innerHTML =
+            "";
 
-Loading users...
 
-</div>
+        if (
+            !Array.isArray(announcements) ||
+            announcements.length === 0
+        ) {
 
-`;
+            announcementContainer.innerHTML = `
+                <div class="empty-state">
+                    No announcements yet.
+                </div>
+            `;
 
+            return;
 
+        }
 
-try{
 
+        announcements.forEach(
+            function (announcement) {
 
-const response =
-await adminFetch(
-API + "/api/admin/users"
-);
+                const card =
+                    document.createElement(
+                        "div"
+                    );
 
-if(!response){
-    return;
-}
 
+                card.className =
+                    "announcement-card";
 
 
-const users =
-await response.json();
+                const date =
+                    announcement.date
+                        ? formatDate(
+                            announcement.date
+                        )
+                        : "";
 
 
+                card.innerHTML = `
 
-displayUsers(users);
+                    <h3>
+                        ${
+                            announcement.title ||
+                            "CashNova Announcement"
+                        }
+                    </h3>
 
+                    <p>
+                        ${
+                            announcement.message ||
+                            ""
+                        }
+                    </p>
 
+                    <small>
+                        ${date}
+                    </small>
 
-}catch(error){
+                    <div class="admin-actions">
 
+                        <button
+                            class="delete-announcement-btn"
+                            data-id="${announcement._id}"
+                        >
+                            Delete
+                        </button>
 
-console.log(error);
+                    </div>
+                `;
 
 
+                card.querySelector(
+                    ".delete-announcement-btn"
+                ).onclick =
+                    function () {
 
-container.innerHTML = `
+                        deleteAnnouncement(
+                            announcement._id
+                        );
 
-<div class="empty-state">
+                    };
 
-Failed to load users
 
-</div>
+                announcementContainer.appendChild(
+                    card
+                );
 
-`;
+            }
+        );
 
-}
+    }
 
 
-}
+    async function deleteAnnouncement(
+        id
+    ) {
 
+        if (!id) {
+            return;
+        }
 
 
+        const confirmDelete =
+            confirm(
+                "Are you sure you want to delete this announcement?"
+            );
 
 
+        if (!confirmDelete) {
+            return;
+        }
 
 
-function displayUsers(users){
+        try {
 
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/admin/announcements/" +
+                    id,
+                    {
+                        method: "DELETE"
+                    }
+                );
 
-container.innerHTML = "";
 
+            if (!response) {
+                return;
+            }
 
 
-if(users.length === 0){
+            const result =
+                await response.json();
 
 
-container.innerHTML = `
+            if (!response.ok) {
 
-<div class="empty-state">
+                throw new Error(
+                    result.message ||
+                    "Failed to delete announcement"
+                );
 
-No users found
+            }
 
-</div>
 
-`;
+            alert(
+                result.message ||
+                "Announcement deleted"
+            );
 
-return;
 
-}
+            loadAnnouncements();
 
 
+        } catch (error) {
 
+            console.log(error);
 
+            alert(
+                error.message ||
+                "Failed to delete announcement"
+            );
 
+        }
 
-users.forEach(function(user){
+    }
 
 
+    // =====================================
+    // PART 7
+    // ADMIN SETTINGS
+    // =====================================
 
-const card =
-document.createElement("div");
+    if (
+        section === "settings"
+    ) {
 
+        title.innerHTML =
+            "Admin Settings";
 
+        loadSettings();
 
-card.className =
-"user-card";
+    }
 
 
+    async function loadSettings() {
 
-card.innerHTML = `
+        container.innerHTML = `
+            <div class="empty-state">
+                Loading settings...
+            </div>
+        `;
 
 
-<h3>
+        try {
 
-${user.fullName || "Unknown User"}
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/admin/settings"
+                );
 
-</h3>
 
+            if (!response) {
+                return;
+            }
 
 
-<p>
-Username:
-<b>
-${user.username || ""}
-</b>
-</p>
+            if (!response.ok) {
 
+                throw new Error(
+                    "Failed to load settings"
+                );
 
+            }
 
-<p>
-Phone:
-${user.phone || ""}
-</p>
 
+            const settings =
+                await response.json();
 
 
-<p>
-Account Number:
-${user.accountNumber || ""}
-</p>
+            displaySettings(
+                settings
+            );
 
 
+        } catch (error) {
 
-<p>
-Total Deposits:
+            console.log(error);
 
-<b>
-UGX ${Number(user.totalDeposits || 0).toLocaleString()}
-</b>
+            container.innerHTML = `
+                <div class="empty-state">
+                    Failed to load settings
+                </div>
+            `;
 
-</p>
+        }
 
+    }
 
 
-<p>
-Status:
+    function displaySettings(
+        settings
+    ) {
 
-<span class="user-status">
+        settings =
+            settings || {};
 
-${
-user.accountActivated
-?
-"Active"
-:
-"Inactive"
-}
 
-</span>
+        container.innerHTML = `
 
-</p>
+            <div class="settings-card">
 
+                <h3>
+                    Platform Settings
+                </h3>
 
+                <label>
+                    Platform Name
+                </label>
 
-<p>
-Registered:
+                <input
+                    id="platformName"
+                    value="${
+                        settings.platformName ||
+                        "CashNova"
+                    }"
+                >
 
-${formatDate(user.createdAt)}
+                <label>
+                    Support Contact
+                </label>
 
-</p>
+                <input
+                    id="supportContact"
+                    value="${
+                        settings.supportContact ||
+                        ""
+                    }"
+                >
 
+                <label>
+                    Minimum Deposit
+                </label>
 
-`;
+                <input
+                    id="minimumDeposit"
+                    type="number"
+                    value="${
+                        settings.minimumDeposit ??
+                        15000
+                    }"
+                >
 
+                <label>
+                    Minimum Withdrawal
+                </label>
 
+                <input
+                    id="minimumWithdrawal"
+                    type="number"
+                    value="${
+                        settings.minimumWithdrawal ??
+                        5000
+                    }"
+                >
 
-container.appendChild(card);
+                <label>
+                    Withdrawal Fee %
+                </label>
 
+                <input
+                    id="withdrawalFee"
+                    type="number"
+                    value="${
+                        settings.withdrawalFee ??
+                        14
+                    }"
+                >
 
+                <label>
+                    Daily Withdrawal Limit
+                </label>
 
-});
+                <input
+                    id="dailyWithdrawalLimit"
+                    type="number"
+                    value="${
+                        settings.dailyWithdrawalLimit ??
+                        2
+                    }"
+                >
 
+                <button id="saveSettingsBtn">
+                    Save Settings
+                </button>
 
-} 
-// =====================================
-// PART 4 - ACTIVE USERS
-// =====================================
+            </div>
+        `;
 
 
-// OPEN ACTIVE USERS
+        document.getElementById(
+            "saveSettingsBtn"
+        ).onclick =
+            updateSettings;
 
-if(section === "active-users"){
+    }
 
 
-title.innerHTML =
-"Active Users";
+    async function updateSettings() {
 
+        const data = {
 
-loadActiveUsers();
+            platformName:
+                document.getElementById(
+                    "platformName"
+                ).value,
 
+            supportContact:
+                document.getElementById(
+                    "supportContact"
+                ).value,
 
-}
+            minimumDeposit:
+                Number(
+                    document.getElementById(
+                        "minimumDeposit"
+                    ).value
+                ),
 
+            minimumWithdrawal:
+                Number(
+                    document.getElementById(
+                        "minimumWithdrawal"
+                    ).value
+                ),
 
+            withdrawalFee:
+                Number(
+                    document.getElementById(
+                        "withdrawalFee"
+                    ).value
+                ),
 
+            dailyWithdrawalLimit:
+                Number(
+                    document.getElementById(
+                        "dailyWithdrawalLimit"
+                    ).value
+                )
 
-async function loadActiveUsers(){
+        };
 
 
-container.innerHTML = `
+        try {
 
-<div class="empty-state">
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/admin/settings",
+                    {
+                        method: "PUT",
+                        body:
+                            JSON.stringify(data)
+                    }
+                );
 
-Loading active users...
 
-</div>
+            if (!response) {
+                return;
+            }
 
-`;
 
+            const result =
+                await response.json();
 
 
-try{
+            if (!response.ok) {
 
+                throw new Error(
+                    result.message ||
+                    "Failed to update settings"
+                );
 
-if(!response){
-    return;
-}
+            }
 
 
-const users =
-await response.json();
+            alert(
+                result.message ||
+                "Settings updated"
+            );
 
 
+            loadSettings();
 
-displayActiveUsers(users);
 
+        } catch (error) {
 
+            console.log(error);
 
-}catch(error){
+            alert(
+                error.message ||
+                "Failed to update settings"
+            );
 
+        }
 
-console.log(error);
+    }
 
 
+    // =====================================
+    // PART 8
+    // MAINTENANCE MODE
+    // =====================================
 
-container.innerHTML = `
+    if (
+        section === "maintenance"
+    ) {
 
-<div class="empty-state">
+        title.innerHTML =
+            "Maintenance Mode";
 
-Failed to load active users
+        loadMaintenance();
 
-</div>
+    }
 
-`;
 
-}
+    async function loadMaintenance() {
 
+        container.innerHTML = `
+            <div class="empty-state">
+                Loading maintenance status...
+            </div>
+        `;
 
-}
 
+        try {
 
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/admin/maintenance"
+                );
 
 
+            if (!response) {
+                return;
+            }
 
 
+            if (!response.ok) {
 
-function displayActiveUsers(users){
+                throw new Error(
+                    "Failed to load maintenance"
+                );
 
+            }
 
-container.innerHTML = "";
 
+            const data =
+                await response.json();
 
 
-if(users.length === 0){
+            displayMaintenance(
+                data
+            );
 
 
-container.innerHTML = `
+        } catch (error) {
 
-<div class="empty-state">
+            console.log(error);
 
-No active users found
+            container.innerHTML = `
+                <div class="empty-state">
+                    Failed to load maintenance
+                </div>
+            `;
 
-</div>
+        }
 
-`;
+    }
 
-return;
 
-}
+    function displayMaintenance(
+        data
+    ) {
 
+        data =
+            data || {};
 
 
+        const status =
+            data.status ||
+            "active";
 
 
+        container.innerHTML = `
 
-users.forEach(function(user){
+            <div class="settings-card">
 
+                <h3>
+                    Platform Maintenance
+                </h3>
 
+                <p>
+                    Current Status:
+                    <b id="maintenanceStatus">
+                        ${status}
+                    </b>
+                </p>
 
-const card =
-document.createElement("div");
+                <button id="activateMaintenance">
+                    Enable Maintenance
+                </button>
 
+                <button id="disableMaintenance">
+                    Disable Maintenance
+                </button>
 
+            </div>
+        `;
 
-card.className =
-"user-card";
 
+        document.getElementById(
+            "activateMaintenance"
+        ).onclick =
+            function () {
 
+                updateMaintenance(
+                    "maintenance"
+                );
 
-card.innerHTML = `
+            };
 
 
-<h3>
+        document.getElementById(
+            "disableMaintenance"
+        ).onclick =
+            function () {
 
-${user.fullName || "Unknown User"}
+                updateMaintenance(
+                    "active"
+                );
 
-</h3>
+            };
 
+    }
 
 
-<p>
-Username:
-<b>
-${user.username || ""}
-</b>
-</p>
+    async function updateMaintenance(
+        status
+    ) {
 
+        try {
 
+            const response =
+                await adminFetch(
+                    API +
+                    "/api/admin/maintenance",
+                    {
+                        method: "PUT",
+                        body:
+                            JSON.stringify({
+                                status: status
+                            })
+                    }
+                );
 
-<p>
-Phone:
-${user.phone || ""}
-</p>
 
+            if (!response) {
+                return;
+            }
 
 
-<p>
-Account Number:
-${user.accountNumber || ""}
-</p>
+            const result =
+                await response.json();
 
 
+            if (!response.ok) {
 
-<p>
-Total Deposits:
+                throw new Error(
+                    result.message ||
+                    "Failed to update maintenance"
+                );
 
-<b>
-UGX ${Number(user.totalDeposits || 0).toLocaleString()}
-</b>
+            }
 
-</p>
 
+            alert(
+                result.message ||
+                "Maintenance status updated"
+            );
 
 
-<p>
-Wallet Balance:
+            loadMaintenance();
 
-<b>
-UGX ${Number(user.walletBalance || 0).toLocaleString()}
-</b>
 
-</p>
+        } catch (error) {
 
+            console.log(error);
 
+            alert(
+                error.message ||
+                "Failed to update maintenance"
+            );
 
-<p>
-Registered:
+        }
 
-${formatDate(user.createdAt)}
+    }
 
-</p>
-
-
-
-<span class="user-status">
-
-Active
-
-</span>
-
-
-`;
-
-
-
-container.appendChild(card);
-
-
-
-});
-
-
-}
- 
-
-// =====================================
-// PART 5 - FINANCIAL RECORDS
-// =====================================
-
-
-if(
-section === "deposit-records" ||
-section === "withdrawal-records" ||
-section === "income-records" ||
-section === "referral-records"
-){
-
-loadFinancialRecords(section);
-
-}
-
-
-
-async function loadFinancialRecords(type){
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-Loading records...
-
-</div>
-
-`;
-
-
-try{
-
-
-const response =
-await adminFetch(
-API + "/api/admin/" + type
-);
-
-if(!response){
-    return;
-}
-
-
-
-const records =
-await response.json();
-
-
-
-displayFinancialRecords(records);
-
-
-
-}catch(error){
-
-
-console.log(error);
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-Failed to load records
-
-</div>
-
-`;
-
-}
-
-
-}
-
-
-
-
-
-function displayFinancialRecords(records){
-
-
-container.innerHTML = "";
-
-
-
-if(!records || records.length === 0){
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-No records found
-
-</div>
-
-`;
-
-return;
-
-}
-
-
-
-records.forEach(function(record){
-
-
-const card =
-document.createElement("div");
-
-
-
-card.className =
-"financial-card";
-
-
-
-card.innerHTML = `
-
-<h3>
-${record.type || "Record"}
-</h3>
-
-
-<p>
-Username:
-<b>
-${record.username || ""}
-</b>
-</p>
-
-
-<p>
-Amount:
-<b>
-UGX ${Number(record.amount || 0).toLocaleString()}
-</b>
-</p>
-
-
-<p>
-Status:
-${record.status || ""}
-</p>
-
-
-<p>
-Date:
-${formatDate(record.date)}
-</p>
-
-`;
-
-
-
-container.appendChild(card);
-
-
-
-});
-
-
-}
-// =====================================
-// PART - ANNOUNCEMENTS
-// =====================================
-
-if(section === "announcements"){
-
-title.innerHTML = "Announcements";
-
-loadAnnouncements();
-
-}
-
-
-// =====================================
-// LOAD ANNOUNCEMENTS
-// =====================================
-
-async function loadAnnouncements(){
-
-const announcementSection =
-document.getElementById("announcementSection");
-
-const announcementContainer =
-document.getElementById("announcementContainer");
-
-const addAnnouncementBtn =
-document.getElementById("addAnnouncementBtn");
-
-const announcementText =
-document.getElementById("announcementText");
-
-
-if(announcementSection){
-
-announcementSection.style.display = "block";
-
-}
-
-
-// SHOW LOADING
-
-if(announcementContainer){
-
-announcementContainer.innerHTML = `
-
-<div class="empty-state">
-
-Loading announcements...
-
-</div>
-
-`;
-
-}
-
-
-try{
-
-const response =
-await adminFetch(
-API + "/api/admin/announcements"
-);
-
-if(!response){
-    return;
-}
-
-
-if(!response.ok){
-
-throw new Error("Failed to load announcements");
-
-}
-
-
-const announcements =
-await response.json();
-
-
-displayAnnouncements(announcements);
-
-
-
-}catch(error){
-
-console.log(error);
-
-
-if(announcementContainer){
-
-announcementContainer.innerHTML = `
-
-<div class="empty-state">
-
-Failed to load announcements
-
-</div>
-
-`;
-
-}
-
-}
-
-
-
-// =====================================
-// POST ANNOUNCEMENT
-// =====================================
-
-if(addAnnouncementBtn){
-
-addAnnouncementBtn.onclick =
-async function(){
-
-
-const message =
-announcementText.value.trim();
-
-
-if(!message){
-
-alert("Please write an announcement.");
-
-return;
-
-}
-
-
-
-addAnnouncementBtn.disabled = true;
-
-addAnnouncementBtn.innerHTML =
-"Posting...";
-
-
-
-try{
-
-
-const response =
-await adminFetch(
-
-API + "/api/admin/announcements",
-
-{
-
-method:"POST",
-
-headers:{
-
-"Content-Type":"application/json"
-
-},
-
-body:JSON.stringify({
-
-title:"CashNova Announcement",
-
-message:message
-
-})
-
-}
-
-);
-
-
-
-const result =
-await response.json();
-
-
-
-if(!response.ok){
-
-throw new Error(
-result.message ||
-"Failed to post announcement"
-);
-
-}
-
-
-
-alert(
-result.message ||
-"Announcement posted successfully"
-);
-
-
-
-announcementText.value = "";
-
-
-
-await loadAnnouncements();
-
-
-
-}catch(error){
-
-
-console.log(error);
-
-
-alert(
-error.message ||
-"Failed to post announcement"
-);
-
-
-
-}finally{
-
-
-addAnnouncementBtn.disabled = false;
-
-addAnnouncementBtn.innerHTML =
-"Post Announcement";
-
-
-}
-
-};
-
-}
-
-}
-
-
-// =====================================
-// DISPLAY ANNOUNCEMENTS
-// =====================================
-
-function displayAnnouncements(announcements){
-
-
-const announcementContainer =
-document.getElementById("announcementContainer");
-
-
-if(!announcementContainer){
-
-return;
-
-}
-
-
-
-announcementContainer.innerHTML = "";
-
-
-
-if(
-!announcements ||
-announcements.length === 0
-){
-
-announcementContainer.innerHTML = `
-
-<div class="empty-state">
-
-No announcements yet.
-
-</div>
-
-`;
-
-return;
-
-}
-
-
-
-announcements.forEach(function(announcement){
-
-
-const card =
-document.createElement("div");
-
-
-card.className =
-"announcement-card";
-
-
-
-const date =
-announcement.date
-?
-formatDate(announcement.date)
-:
-"";
-
-
-card.innerHTML = `
-
-<h3>
-
-${announcement.title ||
-"CashNova Announcement"}
-
-</h3>
-
-
-<p>
-
-${announcement.message || ""}
-
-</p>
-
-
-<small>
-
-${date}
-
-</small>
-
-
-<div class="admin-actions">
-
-
-<button
-class="delete-announcement-btn"
-data-id="${announcement._id}"
->
-
-Delete
-
-</button>
-
-
-</div>
-
-`;
-
-
-
-const deleteButton =
-card.querySelector(
-".delete-announcement-btn"
-);
-
-
-
-deleteButton.onclick =
-function(){
-
-deleteAnnouncement(
-announcement._id
-);
-
-};
-
-
-
-announcementContainer.appendChild(card);
-
-
-});
-
-
-}
-
-
-// =====================================
-// DELETE ANNOUNCEMENT
-// =====================================
-
-async function deleteAnnouncement(id){
-
-
-if(!id){
-
-return;
-
-}
-
-
-
-const confirmDelete =
-confirm(
-"Are you sure you want to delete this announcement?"
-);
-
-
-if(!confirmDelete){
-
-return;
-
-}
-
-
-
-try{
-
-const response =
-await adminFetch(
-
-API +
-"/api/admin/announcements/" +
-id,
-
-
-{
-
-method:"DELETE"
-
-}
-
-);
-
-
-
-const result =
-await response.json();
-
-
-
-if(!response.ok){
-
-throw new Error(
-result.message ||
-"Failed to delete announcement"
-);
-
-}
-
-
-
-alert(
-result.message ||
-"Announcement deleted"
-);
-
-
-
-loadAnnouncements();
-
-
-
-}catch(error){
-
-
-console.log(error);
-
-
-alert(
-error.message ||
-"Failed to delete announcement"
-);
-
-
-}
-
-}
-  // =====================================
-// PART 6 - ADMIN SETTINGS
-// =====================================
-
-if(section === "settings"){
-
-title.innerHTML = "Admin Settings";
-
-loadSettings();
-
-}
-
-
-
-async function loadSettings(){
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-Loading settings...
-
-</div>
-
-`;
-
-
-
-try{
-
-
-await adminFetch(
-API + "/api/admin/settings"
-);
-
-
-
-const settings =
-await response.json();
-
-
-
-displaySettings(settings);
-
-
-
-}catch(error){
-
-
-console.log(error);
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-Failed to load settings
-
-</div>
-
-`;
-
-}
-
-
-}
-
-
-
-
-
-function displaySettings(settings){
-
-
-container.innerHTML = `
-
-
-<div class="settings-card">
-
-
-<h3>
-Platform Settings
-</h3>
-
-
-<label>
-Platform Name
-</label>
-
-<input 
-id="platformName"
-value="${settings.platformName || "CashNova"}"
->
-
-
-
-<label>
-Support Contact
-</label>
-
-<input 
-id="supportContact"
-value="${settings.supportContact || ""}"
->
-
-
-
-<label>
-Minimum Deposit
-</label>
-
-<input 
-id="minimumDeposit"
-type="number"
-value="${settings.minimumDeposit || 15000}"
->
-
-
-
-<label>
-Minimum Withdrawal
-</label>
-
-<input 
-id="minimumWithdrawal"
-type="number"
-value="${settings.minimumWithdrawal || 5000}"
->
-
-
-
-<label>
-Withdrawal Fee %
-</label>
-
-<input 
-id="withdrawalFee"
-type="number"
-value="${settings.withdrawalFee || 14}"
->
-
-
-
-<label>
-Daily Withdrawal Limit
-</label>
-
-<input 
-id="dailyWithdrawalLimit"
-type="number"
-value="${settings.dailyWithdrawalLimit || 2}"
->
-
-
-
-
-<button id="saveSettingsBtn">
-
-Save Settings
-
-</button>
-
-
-
-</div>
-
-
-`;
-
-
-
-document.getElementById("saveSettingsBtn").onclick =
-updateSettings;
-
-
-
-}
-
-
-
-
-async function updateSettings(){
-
-
-
-const data = {
-
-
-platformName:
-document.getElementById("platformName").value,
-
-
-supportContact:
-document.getElementById("supportContact").value,
-
-
-minimumDeposit:
-Number(document.getElementById("minimumDeposit").value),
-
-
-minimumWithdrawal:
-Number(document.getElementById("minimumWithdrawal").value),
-
-
-withdrawalFee:
-Number(document.getElementById("withdrawalFee").value),
-
-
-dailyWithdrawalLimit:
-Number(document.getElementById("dailyWithdrawalLimit").value)
-
-
-};
-
-
-
-
-try{
-
-await adminFetch(
-
-API + "/api/admin/settings",
-
-
-{
-
-method:"PUT",
-
-headers:{
-
-"Content-Type":"application/json"
-
-},
-
-body:JSON.stringify(data)
-
-}
-
-);
-
-
-
-const result =
-await response.json();
-
-
-
-alert(
-result.message ||
-"Settings updated"
-);
-
-
-
-loadSettings();
-
-
-
-}catch(error){
-
-
-console.log(error);
-
-
-alert(
-"Failed to update settings"
-);
-
-
-}
-
-
-}
-  // =====================================
-// PART 7 - MAINTENANCE MODE
-// =====================================
-
-
-if(section === "maintenance"){
-
-title.innerHTML =
-"Maintenance Mode";
-
-
-loadMaintenance();
-
-}
-
-
-
-
-async function loadMaintenance(){
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-Loading maintenance status...
-
-</div>
-
-`;
-
-
-
-try{
-
-
-await adminFetch(
-API + "/api/admin/maintenance"
-);
-
-
-
-const data =
-await response.json();
-
-
-
-displayMaintenance(data);
-
-
-
-}catch(error){
-
-
-console.log(error);
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-Failed to load maintenance
-
-</div>
-
-`;
-
-}
-
-
-}
-
-
-
-
-
-function displayMaintenance(data){
-
-
-container.innerHTML = `
-
-
-<div class="settings-card">
-
-
-<h3>
-Platform Maintenance
-</h3>
-
-
-
-<p>
-Current Status:
-<b id="maintenanceStatus">
-${data.status}
-</b>
-</p>
-
-
-
-<button id="activateMaintenance">
-
-Enable Maintenance
-
-</button>
-
-
-
-<button id="disableMaintenance">
-
-Disable Maintenance
-
-</button>
-
-
-
-</div>
-
-
-`;
-
-
-
-
-document.getElementById(
-"activateMaintenance"
-).onclick = function(){
-
-
-updateMaintenance("maintenance");
-
-
-};
-
-
-
-document.getElementById(
-"disableMaintenance"
-).onclick = function(){
-
-
-updateMaintenance("active");
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-async function updateMaintenance(status){
-
-
-try{
-
-await adminFetch(
-
-API + "/api/admin/maintenance",
-
-
-{
-
-method:"PUT",
-
-headers:{
-
-"Content-Type":"application/json"
-
-},
-
-body:JSON.stringify({
-
-status:status
-
-})
-
-}
-
-);
-
-
-
-const result =
-await response.json();
-
-
-
-alert(
-result.message
-);
-
-
-
-loadMaintenance();
-
-
-
-}catch(error){
-
-
-console.log(error);
-
-
-alert(
-"Failed to update maintenance"
-);
-
-
-}
-
-
-}
 });
