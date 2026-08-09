@@ -1954,25 +1954,38 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
     }
+// =====================================
+// PART 8
+// MAINTENANCE MODE
+// =====================================
+
+if (section === "maintenance") {
+
+    title.innerHTML =
+        "Maintenance Mode";
+
+    loadMaintenance();
+
+}
 
 
-    // =====================================
-    // PART 8
-    // MAINTENANCE MODE
-    // =====================================
-async function updateMaintenance(status) {
+// =====================================
+// LOAD MAINTENANCE STATUS
+// =====================================
+
+async function loadMaintenance() {
+
+    container.innerHTML = `
+        <div class="empty-state">
+            Loading maintenance status...
+        </div>
+    `;
 
     try {
 
         const response =
             await adminFetch(
-                API + "/api/admin/maintenance",
-                {
-                    method: "PUT",
-                    body: JSON.stringify({
-                        status: status
-                    })
-                }
+                API + "/api/admin/maintenance"
             );
 
         if (!response) {
@@ -1982,16 +1995,187 @@ async function updateMaintenance(status) {
         const text =
             await response.text();
 
-        let result = {};
+        let data;
 
         try {
-            result = text
+
+            data =
+                text
                 ? JSON.parse(text)
                 : {};
-        } catch (jsonError) {
+
+        } catch (error) {
 
             console.log(
-                "Maintenance server response:",
+                "Invalid maintenance response:",
+                text
+            );
+
+            throw new Error(
+                "Server returned an invalid maintenance response."
+            );
+
+        }
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Failed to load maintenance"
+            );
+
+        }
+
+        displayMaintenance(data);
+
+    } catch (error) {
+
+        console.log(
+            "Maintenance loading error:",
+            error
+        );
+
+        container.innerHTML = `
+            <div class="empty-state">
+                Failed to load maintenance
+            </div>
+        `;
+
+    }
+
+}
+
+
+// =====================================
+// DISPLAY MAINTENANCE
+// =====================================
+
+function displayMaintenance(data) {
+
+    data =
+        data || {};
+
+    const status =
+        data.status || "active";
+
+    container.innerHTML = `
+
+        <div class="settings-card">
+
+            <h3>
+                Platform Maintenance
+            </h3>
+
+            <p>
+                Current Status:
+                <b id="maintenanceStatus">
+                    ${status}
+                </b>
+            </p>
+
+            <button id="activateMaintenance">
+                Enable Maintenance
+            </button>
+
+            <button id="disableMaintenance">
+                Disable Maintenance
+            </button>
+
+        </div>
+
+    `;
+
+
+    const activateButton =
+        document.getElementById(
+            "activateMaintenance"
+        );
+
+
+    const disableButton =
+        document.getElementById(
+            "disableMaintenance"
+        );
+
+
+    if (activateButton) {
+
+        activateButton.onclick =
+            function () {
+
+                updateMaintenance(
+                    "maintenance"
+                );
+
+            };
+
+    }
+
+
+    if (disableButton) {
+
+        disableButton.onclick =
+            function () {
+
+                updateMaintenance(
+                    "active"
+                );
+
+            };
+
+    }
+
+}
+
+
+// =====================================
+// UPDATE MAINTENANCE STATUS
+// ADMIN ONLY
+// =====================================
+
+async function updateMaintenance(status) {
+
+    try {
+
+        const response =
+            await adminFetch(
+                API + "/api/admin/maintenance",
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        status: status
+                    })
+                }
+            );
+
+
+        if (!response) {
+            return;
+        }
+
+
+        const text =
+            await response.text();
+
+
+        let result = {};
+
+
+        try {
+
+            result =
+                text
+                ? JSON.parse(text)
+                : {};
+
+        } catch (error) {
+
+            console.log(
+                "Invalid maintenance update response:",
                 text
             );
 
@@ -2000,6 +2184,7 @@ async function updateMaintenance(status) {
             );
 
         }
+
 
         if (!response.ok) {
 
@@ -2010,12 +2195,15 @@ async function updateMaintenance(status) {
 
         }
 
+
         alert(
             result.message ||
-            "Maintenance status updated"
+            "Maintenance status updated successfully"
         );
 
+
         await loadMaintenance();
+
 
     } catch (error) {
 
@@ -2032,5 +2220,6 @@ async function updateMaintenance(status) {
     }
 
 }
+
 
 });
