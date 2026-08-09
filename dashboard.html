@@ -976,19 +976,7 @@ alert(
 return;
 
 }
-// CHECK WALLET BALANCE BEFORE PURCHASE
 
-if(
-Number(user.walletBalance || 0) < Number(selectedInvestment.price)
-){
-
-alert(
-"Insufficient balance to purchase this product."
-);
-
-return;
-
-}
 
 
 
