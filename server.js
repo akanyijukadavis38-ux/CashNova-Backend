@@ -25,7 +25,7 @@ connectDB();
 app.use("/api/users", userRoutes);
 app.use("/api/deposits", depositRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
-app.use("/api/admin", adminAuth, adminRoutes);
+app.use("/api/admin", adminRoutes);
 // Test route
 app.get("/", function(req, res){
 
