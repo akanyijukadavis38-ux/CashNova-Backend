@@ -98,41 +98,25 @@ document.addEventListener("DOMContentLoaded", function () {
             return null;
 
         }
+/* =================================
+   CREATE REGISTRATION REFERRAL LINK
+================================= */
+
+function createReferralLink(code) {
+
+    if (!code) {
+
+        return "";
 
     }
 
+    return window.location.origin +
+        "/register.html?ref=" +
+        encodeURIComponent(code);
 
-    /* =================================
-       REFERRAL LINK
-    ================================= */
-
-    function createReferralLink(code) {
-
-        if (!code) {
-
-            return "";
-
-        }
-
-
-        const url =
-            new URL(
-                window.location.href
-            );
-
-
-        url.search = "";
-
-
-        url.searchParams.set(
-            "ref",
-            code
-        );
-
-
-        return url.toString();
-
+}
     }
+
 
 
     /* =================================
@@ -435,80 +419,82 @@ function displayStatistics(user) {
 
     }
 
+}/* =================================
+   COPY REFERRAL LINK
+================================= */
+
+function setupCopyButton() {
+
+    const button =
+        document.getElementById(
+            "copyReferral"
+        );
+
+    const input =
+        document.getElementById(
+            "referralLink"
+        );
+
+    if (!button || !input) {
+
+        return;
+
+    }
+
+    button.onclick =
+        async function() {
+
+            if (!input.value) {
+
+                return;
+
+            }
+
+            try {
+
+                await navigator.clipboard.writeText(
+                    input.value
+                );
+
+                button.innerHTML =
+                    '<i class="fa-solid fa-check"></i> Copied!';
+
+                setTimeout(
+                    function() {
+
+                        button.innerHTML =
+                            '<i class="fa-solid fa-copy"></i>';
+
+                    },
+                    2000
+                );
+
+            } catch(error) {
+
+                input.select();
+
+                document.execCommand("copy");
+
+                button.innerHTML =
+                    '<i class="fa-solid fa-check"></i> Copied!';
+
+                setTimeout(
+                    function() {
+
+                        button.innerHTML =
+                            '<i class="fa-solid fa-copy"></i>';
+
+                    },
+                    2000
+                );
+
+            }
+
+        };
+
 }
 
 
-    /* =================================
-       COPY REFERRAL LINK
-    ================================= */
-
-    function setupCopyButton() {
-
-        const button =
-            document.getElementById(
-                "copyReferral"
-            );
-
-
-        const input =
-            document.getElementById(
-                "referralLink"
-            );
-
-
-        if (!button || !input) {
-
-            return;
-
-        }
-
-
-        button.onclick =
-            async function() {
-
-                if (!input.value) {
-
-                    return;
-
-                }
-
-
-                try {
-
-                    await navigator.clipboard
-                        .writeText(
-                            input.value
-                        );
-
-
-                    button.innerHTML =
-                        '<i class="fa-solid fa-check"></i>';
-
-
-                    setTimeout(
-                        function() {
-
-                            button.innerHTML =
-                                '<i class="fa-solid fa-copy"></i>';
-
-                        },
-                        1500
-                    );
-
-
-                } catch(error) {
-
-                    input.select();
-
-                    document.execCommand(
-                        "copy"
-                    );
-
-                }
-
-            };
-
-    }
 
 
     /* =================================
