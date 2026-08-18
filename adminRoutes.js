@@ -6,7 +6,6 @@ const Withdrawal = require("./Withdrawal");
 const User = require("./User");
 const jwt = require("jsonwebtoken");
 const adminAuth = require("./adminAuth");
-
 // =====================================
 // ADMIN LOGIN
 // =====================================
@@ -21,9 +20,16 @@ router.post("/login", async function(req, res){
         const adminPassword =
             process.env.ADMIN_PASSWORD;
 
+        const jwtSecret =
+            process.env.JWT_SECRET;
+
+
+        // Check admin password configuration
         if(!adminPassword){
 
             return res.status(500).json({
+
+                success:false,
 
                 message:
                     "Admin password is not configured on the server."
@@ -32,9 +38,32 @@ router.post("/login", async function(req, res){
 
         }
 
+
+        // Check JWT configuration
+        if(!jwtSecret){
+
+            console.error(
+                "JWT_SECRET is missing from Railway environment variables."
+            );
+
+            return res.status(500).json({
+
+                success:false,
+
+                message:
+                    "JWT authentication is not configured on the server."
+
+            });
+
+        }
+
+
+        // Check password
         if(password !== adminPassword){
 
             return res.status(401).json({
+
+                success:false,
 
                 message:
                     "Wrong admin password"
@@ -43,6 +72,8 @@ router.post("/login", async function(req, res){
 
         }
 
+
+        // Create admin token
         const token =
             jwt.sign(
 
@@ -51,7 +82,7 @@ router.post("/login", async function(req, res){
                     role:"admin"
                 },
 
-                process.env.JWT_SECRET,
+                jwtSecret,
 
                 {
                     expiresIn:"24h"
@@ -59,7 +90,10 @@ router.post("/login", async function(req, res){
 
             );
 
-        res.json({
+
+        return res.status(200).json({
+
+            success:true,
 
             message:
                 "Admin login successful",
@@ -68,17 +102,23 @@ router.post("/login", async function(req, res){
 
         });
 
+
     }catch(error){
 
-        console.log(
+        console.error(
             "Admin login error:",
             error
         );
 
-        res.status(500).json({
+        return res.status(500).json({
+
+            success:false,
 
             message:
-                "Unable to complete admin login"
+                "Unable to complete admin login",
+
+            error:
+                error.message
 
         });
 
