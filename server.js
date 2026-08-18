@@ -14,7 +14,12 @@ app.use(cors());
 
 // Read JSON data
 app.use(express.json());
-
+app.get("/health", function(req, res) {
+    res.status(200).json({
+        status: "ok",
+        message: "CashNova Backend is healthy"
+    });
+});
 // Connect database
 connectDB();
 
