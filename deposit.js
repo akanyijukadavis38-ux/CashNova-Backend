@@ -258,7 +258,7 @@ let depositRequest = {
 // SEND DEPOSIT TO BACKEND
 
 fetch(
-"https://cashnova-backend-89lg.onrender.com/api/deposits",
+"https://cashnova-backend-production-2404.up.railway.app/api/deposits",
 {
 method:"POST",
 
