@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     const API =
-        "https://cashnova-backend-89lg.onrender.com/api/users";
+        "https://cashnova-backend-production-2404.up.railway.app/api/users";
 
 
     /* =================================
